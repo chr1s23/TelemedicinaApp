@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 
 import 'dashboard.dart';
@@ -18,7 +17,7 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   final _formKey = GlobalKey<FormState>();
   User user = User("", "", "");
-  String url = "http://localhost:8080/usuarios/login";
+  String url = "http://10.0.2.2:8080/usuarios/login";
 
   Future<void> save(BuildContext context) async {
     try {
@@ -35,7 +34,6 @@ class _LoginState extends State<Login> {
       );
 
       if (response.statusCode == 200) {
-        print(response.body);
         if (context.mounted) {
           Navigator.push(
               context,
@@ -44,10 +42,18 @@ class _LoginState extends State<Login> {
               ));
         }
       } else {
-        print('Error en la solicitud: ${response.statusCode}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No se pudo iniciar sesión'),
+          ),
+        );
       }
     } catch (e) {
-      print('Error en la solicitud: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Inicio de sesión fallido'),
+        ),
+      );
     }
   }
 
@@ -55,166 +61,193 @@ class _LoginState extends State<Login> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(
-        child: Form(
-            key: _formKey,
-            child: Column(
-              children: [
-                Container(
-                  height: 750,
-                  width: MediaQuery.of(context).size.width,
-                  decoration: BoxDecoration(
-                    color: Color.fromRGBO(233, 65, 82, 1),
-                    boxShadow: [
-                      BoxShadow(
-                          blurRadius: 10,
-                          color: Colors.black,
-                          offset: Offset(1, 5))
-                    ],
-                    borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(80),
-                        bottomRight: Radius.circular(20)),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      children: [
-                        SizedBox(
-                          height: 100,
-                        ),
-                        Text("Login",
-                            style: GoogleFonts.pacifico(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 50,
-                              color: Colors.white,
-                            )),
-                        SizedBox(
-                          height: 30,
-                        ),
-                        Align(
-                          alignment: Alignment.topLeft,
-                          child: Text(
-                            "Email",
-                            style: GoogleFonts.roboto(
-                              // fontWeight: FontWeight.bold,
-                              fontSize: 40,
-                              color: Color.fromRGBO(255, 255, 255, 0.8),
-                            ),
-                          ),
-                        ),
-                        TextFormField(
-                          controller: TextEditingController(text: user.correo),
-                          onChanged: (val) {
-                            user.correo = val;
-                          },
-                          validator: (value) {
-                            if (value?.isEmpty ?? false) {
-                              return 'El correo esta vacio';
-                            }
-                            return null;
-                          },
-                          style: TextStyle(fontSize: 30, color: Colors.white),
-                          decoration: InputDecoration(
-                              errorStyle:
-                                  TextStyle(fontSize: 20, color: Colors.black),
-                              border: OutlineInputBorder(
-                                  borderSide: BorderSide.none)),
-                        ),
-                        Container(
-                          height: 8,
-                          color: Color.fromRGBO(255, 255, 255, 0.4),
-                        ),
-                        SizedBox(
-                          height: 60,
-                        ),
-                        Align(
-                          alignment: Alignment.topLeft,
-                          child: Text(
-                            "Password",
-                            style: GoogleFonts.roboto(
-                              // fontWeight: FontWeight.bold,
-                              fontSize: 40,
-                              color: Color.fromRGBO(255, 255, 255, 0.8),
-                            ),
-                          ),
-                        ),
-                        TextFormField(
-                          obscureText: true,
-                          controller:
-                              TextEditingController(text: user.contrasena),
-                          onChanged: (val) {
-                            user.contrasena = val;
-                          },
-                          validator: (value) {
-                            if (value?.isEmpty ?? false) {
-                              return 'Correo esta vacio';
-                            }
-                            return null;
-                          },
-                          style: TextStyle(fontSize: 30, color: Colors.white),
-                          decoration: InputDecoration(
-                              errorStyle:
-                                  TextStyle(fontSize: 20, color: Colors.black),
-                              border: OutlineInputBorder(
-                                  borderSide: BorderSide.none)),
-                        ),
-                        Container(
-                          height: 8,
-                          color: Color.fromRGBO(255, 255, 255, 0.4),
-                        ),
-                        SizedBox(
-                          height: 60,
-                        ),
-                        Center(
-                          child: InkWell(
-                            onTap: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => Register()));
-                            },
-                            child: Text(
-                              "No tienes una cuenta ?",
-                              style: GoogleFonts.roboto(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 20,
-                                  color: Colors.white),
-                            ),
-                          ),
-                        )
-                      ],
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  AppBar(
+                    elevation: 0,
+                    centerTitle: true, // Asegura que la imagen esté centrada
+                    title: Image.asset(
+                      'assets/images/logo_ucuenca_top.png', // Ruta de la imagen en la carpeta assets
+                      height: 50, // Ajusta la altura según necesites
                     ),
                   ),
-                ),
-                SizedBox(
-                  height: 40,
-                ),
-                Container(
-                  height: 90,
-                  width: 90,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromRGBO(
-                          233, 65, 82, 1), // Color de fondo
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(50),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Text(
+                    "Hola, bienvenido de nuevo!",
+                    style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black),
+                  ),
+                  Text(
+                    "Ingresa a tu cuenta para continuar",
+                    style: TextStyle(fontSize: 13, color: Colors.black),
+                  ),
+                  SizedBox(
+                    height: 30,
+                  ),
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: Text("Número de teléfono*",
+                        style: TextStyle(
+                            fontSize: 12,
+                            color: Color.fromRGBO(111, 111, 111, 1))),
+                  ),
+                  TextFormField(
+                    controller: TextEditingController(text: user.nombreUsuario),
+                    onChanged: (val) {
+                      user.nombreUsuario = val;
+                    },
+                    validator: (value) {
+                      if (value?.isEmpty ?? false) {
+                        return 'El número de teléfono está vacio';
+                      }
+                      return null;
+                    },
+                    style: TextStyle(fontSize: 15, color: Colors.black),
+                    decoration: InputDecoration(
+                      hintText: 'Ingresa tu número de teléfono', // Placeholder
+                      hintStyle: TextStyle(
+                          color: Color.fromRGBO(111, 111, 111, 1),
+                          fontSize: 13), // Estilo del placeholder
+                      errorStyle: TextStyle(
+                          fontSize: 12, color: Color.fromRGBO(165, 16, 8, 1)),
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(
+                            color: Color.fromRGBO(111, 111, 111, 1),
+                            width: 1.0),
+                        borderRadius: BorderRadius.circular(
+                            30), // Borde redondeado opcional
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                            color: Color.fromRGBO(111, 111, 111, 1),
+                            width: 1.5),
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                            color: Color.fromRGBO(111, 111, 111, 1),
+                            width: 1.0),
+                        borderRadius: BorderRadius.circular(30),
                       ),
                     ),
-                    onPressed: () {
-                      if (_formKey.currentState?.validate() ?? false) {
-                        // Previene null-safety issues
-                        save(context);
-                      }
-                    },
-                    child: const Icon(
-                      Icons.arrow_forward,
-                      color: Colors.white,
-                      size: 30,
+                  ),
+                  SizedBox(
+                    height: 38,
+                  ),
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: Text(
+                      "Contraseña*",
+                      style: TextStyle(
+                          fontSize: 12,
+                          color: Color.fromRGBO(111, 111, 111, 1)),
                     ),
                   ),
-                )
-              ],
-            )),
+                  TextFormField(
+                    obscureText: true,
+                    controller: TextEditingController(text: user.contrasena),
+                    onChanged: (val) {
+                      user.contrasena = val;
+                    },
+                    validator: (value) {
+                      if (value?.isEmpty ?? false) {
+                        return 'Contraseña vacía';
+                      }
+                      return null;
+                    },
+                    style: TextStyle(fontSize: 15, color: Colors.black),
+                    decoration: InputDecoration(
+                      hintText: 'Ingresa tu contraseña', // Placeholder
+                      hintStyle: TextStyle(
+                          color: Color.fromRGBO(111, 111, 111, 1),
+                          fontSize: 13), // Estilo del placeholder
+                      errorStyle: TextStyle(
+                          fontSize: 12, color: Color.fromRGBO(165, 16, 8, 1)),
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(
+                            color: Color.fromRGBO(111, 111, 111, 1),
+                            width: 1.0),
+                        borderRadius: BorderRadius.circular(
+                            30), // Borde redondeado opcional
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                            color: Color.fromRGBO(111, 111, 111, 1),
+                            width: 1.5),
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                            color: Color.fromRGBO(111, 111, 111, 1),
+                            width: 1.0),
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  _buildButtons(),
+                ],
+              )),
+        ),
       ),
+    );
+  }
+
+  Widget _buildButtons() {
+    return Column(
+      children: [
+        SizedBox(
+          width: 300,
+          height: 50,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color.fromRGBO(0, 40, 86, 1),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30),
+              ),
+            ),
+            onPressed: () {
+              if (_formKey.currentState?.validate() ?? false) {
+                // Previene null-safety issues
+                //save(context);
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => Dashboard()));
+              }
+            },
+            child: Text(
+              "Iniciar Sesión",
+              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+            ),
+          ),
+        ),
+        const SizedBox(height: 15),
+        SizedBox(
+          width: 300,
+          height: 50,
+          child: Center(
+            child: InkWell(
+              onTap: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => Register()));
+              },
+              child: Text(
+                "Crear una cuenta",
+                style: TextStyle(fontWeight: FontWeight.bold, color: Color.fromRGBO(165, 16, 08, 1))
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

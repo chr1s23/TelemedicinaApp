@@ -1,211 +1,204 @@
-import 'dart:convert';
-
+import 'package:chatbot/personal_data_form.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:http/http.dart' as http;
-
-import 'user.dart';
+import 'login.dart'; // Para navegar a la pantalla de inicio de sesión
 
 class Register extends StatefulWidget {
   const Register({super.key});
 
   @override
-  State<Register> createState() => _RegisterState();
+  State<Register> createState() => _RegisterScreenState();
 }
 
-class _RegisterState extends State<Register> {
+class _RegisterScreenState extends State<Register> {
   final _formKey = GlobalKey<FormState>();
-  User user = User("", "", "");
-  String url = "http://localhost:8080/usuarios/registro";
 
-  Future<void> save(BuildContext context) async {
-    try {
-      final Uri uri = Uri.parse(url); // Convertir correctamente a Uri
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
-      final response = await http.post(
-        uri,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'correo': user.correo,
-          'contrasena': user.contrasena,
-          'nombreUsuario': user.nombreUsuario,
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        print(response.body);
-        if (context.mounted) {
-          Navigator.pop(context);
-        }
-      } else {
-        print('Error en la solicitud: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error en la solicitud: $e');
-    }
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _usernameController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Form(
-            key: _formKey,
-            child: Column(
-              children: [
-                Container(
-                  height: 750,
-                  width: MediaQuery.of(context).size.width,
-                  decoration: BoxDecoration(
-                    color: Color.fromRGBO(233, 65, 82, 1),
-                    boxShadow: [
-                      BoxShadow(
-                          blurRadius: 10,
-                          color: Colors.black,
-                          offset: Offset(1, 5))
-                    ],
-                    borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(80),
-                        bottomRight: Radius.circular(20)),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      children: [
-                        SizedBox(
-                          height: 100,
-                        ),
-                        Text("Register",
-                            style: GoogleFonts.pacifico(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 50,
-                              color: Colors.white,
-                            )),
-                        SizedBox(
-                          height: 30,
-                        ),
-                        Align(
-                          alignment: Alignment.topLeft,
-                          child: Text(
-                            "Email",
-                            style: GoogleFonts.roboto(
-                              // fontWeight: FontWeight.bold,
-                              fontSize: 40,
-                              color: Color.fromRGBO(255, 255, 255, 0.8),
-                            ),
-                          ),
-                        ),
-                        TextFormField(
-                          controller: TextEditingController(text: user.correo),
-                          onChanged: (val) {
-                            user.correo = val;
-                          },
-                          validator: (value) {
-                            if (value?.isEmpty ?? false) {
-                              return 'Email is Empty';
-                            }
-                            return null;
-                          },
-                          style: TextStyle(fontSize: 30, color: Colors.white),
-                          decoration: InputDecoration(
-                              errorStyle:
-                                  TextStyle(fontSize: 20, color: Colors.black),
-                              border: OutlineInputBorder(
-                                  borderSide: BorderSide.none)),
-                        ),
-                        Container(
-                          height: 8,
-                          color: Color.fromRGBO(255, 255, 255, 0.4),
-                        ),
-                        SizedBox(
-                          height: 60,
-                        ),
-                        Align(
-                          alignment: Alignment.topLeft,
-                          child: Text(
-                            "Password",
-                            style: GoogleFonts.roboto(
-                              // fontWeight: FontWeight.bold,
-                              fontSize: 40,
-                              color: Color.fromRGBO(255, 255, 255, 0.8),
-                            ),
-                          ),
-                        ),
-                        TextFormField(
-                          obscureText: true,
-                          controller:
-                              TextEditingController(text: user.contrasena),
-                          onChanged: (val) {
-                            user.contrasena = val;
-                          },
-                          validator: (value) {
-                            if (value?.isEmpty ?? false) {
-                              return 'Email is Empty';
-                            }
-                            return null;
-                          },
-                          style: TextStyle(fontSize: 30, color: Colors.white),
-                          decoration: InputDecoration(
-                              errorStyle:
-                                  TextStyle(fontSize: 20, color: Colors.black),
-                              border: OutlineInputBorder(
-                                  borderSide: BorderSide.none)),
-                        ),
-                        Container(
-                          height: 8,
-                          color: Color.fromRGBO(255, 255, 255, 0.4),
-                        ),
-                        SizedBox(
-                          height: 60,
-                        ),
-                        Center(
-                          child: InkWell(
-                            onTap: () {
-                              Navigator.pop(context);
-                            },
-                            child: Text(
-                              "Already have Account ?",
-                              style: GoogleFonts.roboto(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 20,
-                                  color: Colors.white),
-                            ),
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  height: 40,
-                ),
-                Container(
-                  height: 90,
-                  width: 90,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromRGBO(
-                          233, 65, 82, 1), // Color de fondo
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(50),
-                      ),
-                    ),
-                    onPressed: () {
-                      if (_formKey.currentState?.validate() ?? false) {
-                        // Previene null-safety issues
-                        save(context);
-                      }
-                    },
-                    child: const Icon(
-                      Icons.arrow_forward,
-                      color: Colors.white,
-                      size: 30,
-                    ),
-                  ),
-                )
-              ],
-            )),
+      appBar: AppBar(
+        elevation: 0,
+        centerTitle: true,
+        title: Image.asset(
+          'assets/images/logo_ucuenca_top.png',
+          height: 50,
+        ),
       ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              Text(
+                "Crea una cuenta",
+                style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black),
+              ),
+              const SizedBox(height: 30),
+
+              // Nombre
+              Align(
+                alignment: Alignment.topLeft,
+                child: Text(
+                  "Nombre*",
+                  style: TextStyle(
+                      fontSize: 12, color: Color.fromRGBO(111, 111, 111, 1)),
+                ),
+              ),
+              _buildTextField(_nameController, "Ingresa tu nombre"),
+              const SizedBox(height: 20),
+
+              // Nombre de usuario
+              Align(
+                alignment: Alignment.topLeft,
+                child: Text(
+                  "Número de teléfono*",
+                  style: TextStyle(
+                      fontSize: 12, color: Color.fromRGBO(111, 111, 111, 1)),
+                ),
+              ),
+              _buildTextField(
+                  _usernameController, "Ingresa tu número de teléfono"),
+              const SizedBox(height: 20),
+
+              // Contraseña
+              Align(
+                alignment: Alignment.topLeft,
+                child: Text(
+                  "Contraseña*",
+                  style: TextStyle(
+                      fontSize: 12, color: Color.fromRGBO(111, 111, 111, 1)),
+                ),
+              ),
+              _buildTextField(_passwordController, "Ingresa tu contraseña",
+                  obscureText: true),
+              const SizedBox(height: 20),
+
+              // Confirmar contraseña
+              Align(
+                alignment: Alignment.topLeft,
+                child: Text(
+                  "Confirmar contraseña*",
+                  style: TextStyle(
+                      fontSize: 12, color: Color.fromRGBO(111, 111, 111, 1)),
+                ),
+              ),
+              _buildTextField(
+                  _confirmPasswordController, "Repite tu contraseña",
+                  obscureText: true),
+              const SizedBox(height: 30),
+              _buildButtons()
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField(TextEditingController controller, String hint,
+      {bool obscureText = false}) {
+    return TextFormField(
+      controller: controller,
+      obscureText: obscureText,
+      validator: (value) {
+        if (value?.isEmpty ?? false) {
+          return 'Este campo no puede estar vacío';
+        }
+        return null;
+      },
+      style: TextStyle(fontSize: 15, color: Colors.black),
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle:
+            TextStyle(color: Color.fromRGBO(111, 111, 111, 1), fontSize: 13),
+        errorStyle:
+            TextStyle(fontSize: 13, color: Color.fromRGBO(165, 16, 8, 1)),
+        border: OutlineInputBorder(
+          borderSide:
+              BorderSide(color: Color.fromRGBO(111, 111, 111, 1), width: 1.0),
+          borderRadius: BorderRadius.circular(30),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide:
+              BorderSide(color: Color.fromRGBO(111, 111, 111, 1), width: 1.5),
+          borderRadius: BorderRadius.circular(30),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderSide:
+              BorderSide(color: Color.fromRGBO(111, 111, 111, 1), width: 1.0),
+          borderRadius: BorderRadius.circular(30),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildButtons() {
+    return Column(
+      children: [
+        SizedBox(
+          width: 300,
+          height: 50,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color.fromRGBO(0, 40, 86, 1),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30),
+              ),
+            ),
+            onPressed: () {
+              if (_formKey.currentState?.validate() ?? false) {
+                Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => PersonalDataForm()));
+              }
+            },
+            child: Text(
+              "Crear una cuenta",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 15),
+        SizedBox(
+          width: 300,
+          height: 50,
+          child: Center(
+            child: InkWell(
+              onTap: () {
+                Navigator.pushReplacement(
+                    context, MaterialPageRoute(builder: (context) => Login()));
+              },
+              child: Text(
+                "Iniciar Sesión",
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Color.fromRGBO(165, 16, 08, 1)),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
