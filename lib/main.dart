@@ -1,10 +1,10 @@
+import 'package:chatbot/presentation.dart';
 import 'package:flutter/material.dart';
-
-import 'login.dart';
 
 void main() {
   runApp(MaterialApp(
     debugShowCheckedModeBanner: false,
-    home: Login(),
+    theme: ThemeData(fontFamily: "ArialNarrow"),
+    home: Presentation(),
   ));
 }
