@@ -1,8 +1,8 @@
-import 'package:chatbot/about_us.dart';
-import 'package:chatbot/chat.dart';
-import 'package:chatbot/notifications.dart';
-import 'package:chatbot/personal_data_form.dart';
-import 'package:chatbot/resources.dart';
+import 'package:chatbot/view/screens/about_us.dart';
+import 'package:chatbot/view/screens/chat.dart';
+import 'package:chatbot/view/screens/notifications.dart';
+import 'package:chatbot/view/screens/personal_data_form.dart';
+import 'package:chatbot/view/screens/resources.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
@@ -46,8 +46,8 @@ class _AutoSamplingPageState extends State<Dashboard> {
     return AppBar(
       elevation: 0,
       leading: SizedBox(
-        width: 50,
-        height: 20,
+        width: 100,
+        height: 50,
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color.fromRGBO(165, 16, 08, 1),

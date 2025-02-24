@@ -1,4 +1,4 @@
-import 'package:chatbot/personal_data_form.dart';
+import 'package:chatbot/view/screens/personal_data_form.dart';
 import 'package:flutter/material.dart';
 import 'login.dart'; // Para navegar a la pantalla de inicio de sesión
 

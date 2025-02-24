@@ -1,5 +1,5 @@
-import 'package:chatbot/dashboard.dart';
-import 'package:chatbot/register.dart';
+import 'package:chatbot/view/screens/dashboard.dart';
+import 'package:chatbot/view/screens/register.dart';
 import 'package:flutter/material.dart';
 
 class TermsAndConditions extends StatefulWidget {

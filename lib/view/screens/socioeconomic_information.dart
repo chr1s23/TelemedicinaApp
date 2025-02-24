@@ -1,4 +1,4 @@
-import 'package:chatbot/terms_and_conditions.dart';
+import 'package:chatbot/view/screens/terms_and_conditions.dart';
 import 'package:flutter/material.dart';
 
 class SocioeconomicInformation extends StatefulWidget {
