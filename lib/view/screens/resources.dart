@@ -1,7 +1,7 @@
-import 'package:chatbot/chat.dart';
-import 'package:chatbot/dashboard.dart';
-import 'package:chatbot/notifications.dart';
-import 'package:chatbot/resource_detail.dart';
+import 'package:chatbot/view/screens/chat.dart';
+import 'package:chatbot/view/screens/dashboard.dart';
+import 'package:chatbot/view/screens/notifications.dart';
+import 'package:chatbot/view/screens/resource_detail.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 

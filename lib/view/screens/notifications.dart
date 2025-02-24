@@ -1,7 +1,7 @@
-import 'package:chatbot/chat.dart';
-import 'package:chatbot/dashboard.dart';
-import 'package:chatbot/resources.dart';
-import 'package:chatbot/result.dart';
+import 'package:chatbot/view/screens/chat.dart';
+import 'package:chatbot/view/screens/dashboard.dart';
+import 'package:chatbot/view/screens/resources.dart';
+import 'package:chatbot/view/screens/result.dart';
 import 'package:flutter/material.dart';
 
 class Notifications extends StatefulWidget {

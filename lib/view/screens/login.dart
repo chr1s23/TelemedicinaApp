@@ -1,11 +1,10 @@
-import 'dart:convert';
-
+import 'package:chatbot/model/responses/user_response.dart';
+import 'package:chatbot/service/auth_service.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 
 import 'dashboard.dart';
 import 'register.dart';
-import 'user.dart';
+import '../../model/requests/user.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -15,46 +14,27 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
+  bool _isLoading = false;
+  final AuthService authService = AuthService();
   final _formKey = GlobalKey<FormState>();
-  User user = User("", "", "");
-  String url = "http://10.0.2.2:8080/usuarios/login";
+  User user = User("", "");
 
-  Future<void> save(BuildContext context) async {
-    try {
-      final Uri uri = Uri.parse(url); // Convertir correctamente a Uri
+  void login() async {
+    if (_isLoading) return; // Evita múltiples clics
 
-      final response = await http.post(
-        uri,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'correo': user.correo,
-          'contrasena': user.contrasena,
-          'nombreUsuario': user.nombreUsuario,
-        }),
-      );
+    setState(() {
+      _isLoading = true;
+    });
 
-      if (response.statusCode == 200) {
-        if (context.mounted) {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => Dashboard(),
-              ));
-        }
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('No se pudo iniciar sesión'),
-          ),
-        );
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Inicio de sesión fallido'),
-        ),
-      );
+    UserResponse? userLogged = await authService.login(context, user);
+    if (userLogged != null) {
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => Dashboard()));
     }
+
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   @override
@@ -216,18 +196,28 @@ class _LoginState extends State<Login> {
                 borderRadius: BorderRadius.circular(30),
               ),
             ),
-            onPressed: () {
-              if (_formKey.currentState?.validate() ?? false) {
-                // Previene null-safety issues
-                //save(context);
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => Dashboard()));
-              }
-            },
-            child: Text(
-              "Iniciar Sesión",
-              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-            ),
+            onPressed: _isLoading
+                ? null
+                : () {
+                    if (_formKey.currentState?.validate() ?? false) {
+                      // Previene null-safety issues
+                      login();
+                    }
+                  },
+            child: _isLoading
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : Text(
+                    "Iniciar Sesión",
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
           ),
         ),
         const SizedBox(height: 15),
@@ -240,10 +230,10 @@ class _LoginState extends State<Login> {
                 Navigator.push(context,
                     MaterialPageRoute(builder: (context) => Register()));
               },
-              child: Text(
-                "Crear una cuenta",
-                style: TextStyle(fontWeight: FontWeight.bold, color: Color.fromRGBO(165, 16, 08, 1))
-              ),
+              child: Text("Crear una cuenta",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Color.fromRGBO(165, 16, 08, 1))),
             ),
           ),
         ),

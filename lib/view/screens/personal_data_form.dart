@@ -1,4 +1,4 @@
-import 'package:chatbot/socioeconomic_information.dart';
+import 'package:chatbot/view/screens/socioeconomic_information.dart';
 import 'package:flutter/material.dart';
 
 class PersonalDataForm extends StatefulWidget {

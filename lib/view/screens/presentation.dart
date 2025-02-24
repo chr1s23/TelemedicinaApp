@@ -6,12 +6,11 @@ class Presentation extends StatefulWidget {
   const Presentation({super.key});
 
   @override
-  State<Presentation> createState() => _Presentacion1State();
+  State<Presentation> createState() => _PresentacionState();
 }
 
-class _Presentacion1State extends State<Presentation> {
-  final PageController _pageController =
-      PageController(); // Controlador del carrusel
+class _PresentacionState extends State<Presentation> {
+  final PageController _pageController = PageController();
   int _currentIndex = 0;
 
   final List<Map<String, String>> _slides = [
@@ -133,11 +132,12 @@ class _Presentacion1State extends State<Presentation> {
             ),
             onPressed: () {
               Navigator.push(
-                  context, MaterialPageRoute(builder: (context) => Register()));
+                  context, MaterialPageRoute(builder: (context) => Login()));
             },
             child: Text(
-              "Crear una cuenta",
-              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+              "Iniciar Sesión",
+              style:
+                  TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
             ),
           ),
         ),
@@ -148,12 +148,14 @@ class _Presentacion1State extends State<Presentation> {
           child: Center(
             child: InkWell(
               onTap: () {
-                Navigator.push(
-                    context, MaterialPageRoute(builder: (context) => Login()));
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => Register()));
               },
               child: Text(
-                "Iniciar Sesión",
-                style: TextStyle(fontWeight: FontWeight.bold, color: Color.fromRGBO(165, 16, 08, 1)),
+                "Crear una cuenta",
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Color.fromRGBO(165, 16, 08, 1)),
               ),
             ),
           ),

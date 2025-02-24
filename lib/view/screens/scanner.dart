@@ -1,4 +1,4 @@
-import 'package:chatbot/dashboard.dart';
+import 'package:chatbot/view/screens/dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
