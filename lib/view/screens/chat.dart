@@ -1,8 +1,12 @@
 import 'dart:async';
 
+import 'package:chatbot/model/requests/message_request.dart';
+import 'package:chatbot/providers/auth_provider.dart';
+import 'package:chatbot/providers/chat_provider.dart';
 import 'package:chatbot/view/screens/scanner.dart';
 import 'package:chatbot/service/chat_service.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class Chat extends StatefulWidget {
   const Chat({super.key});
@@ -12,6 +16,7 @@ class Chat extends StatefulWidget {
 }
 
 class _ChatbotPageState extends State<Chat> {
+  final focusNode = FocusNode();
   final ChatService chatService = ChatService();
   final TextEditingController _messageController = TextEditingController();
   final List<Map<String, dynamic>> _messages = [
@@ -43,12 +48,12 @@ class _ChatbotPageState extends State<Chat> {
   }
 
   void _sendMessage() {
-    String message = _messageController.text.trim();
+    String message = _messageController.value.text.trim();
     if (message.isNotEmpty) {
       setState(() {
         _messages.add({"text": message, "isBot": false});
         _isLoading = true;
-        _messages.add({"isLoading": true});
+        _messages.add({"loading": true, "isBot": true});
         //_messages.add({
         //  "text": "Generando respuesta...",
         //  "isBot": true,
@@ -88,13 +93,34 @@ class _ChatbotPageState extends State<Chat> {
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = context.watch<AuthProvider>();
+    final chatProvider = context.watch<ChatProvider>();
     return Scaffold(
       appBar: _buildAppBar(),
-      body: Column(
-        children: [
-          Expanded(child: _buildChatMessages()),
-          _buildMessageInput(),
-        ],
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+                child: ListView.builder(
+                  //controller: chatProvider.chatScrollController,
+              reverse: true,
+              padding: const EdgeInsets.all(10),
+              itemCount: _messages.length,
+              itemBuilder: (context, index) {
+                //final message = chatProvider.messages[index];
+                final message = _messages[_messages.length - 1 - index];
+                final messageRequest = MessageRequest(
+                    text: message["text"],
+                    sender: message["isBot"] ? Sender.bot : Sender.user,
+                    loading: message["loading"] ?? false);
+
+                return _buildChatBubble(messageRequest);
+              },
+            )),
+            _buildMessageInput(),
+            //buildTextField(chatProvider.sendMessage)
+          ],
+        ),
       ),
     );
   }
@@ -131,19 +157,8 @@ class _ChatbotPageState extends State<Chat> {
     );
   }
 
-  Widget _buildChatMessages() {
-    return ListView.builder(
-      reverse: true,
-      padding: const EdgeInsets.all(10),
-      itemCount: _messages.length,
-      itemBuilder: (context, index) {
-        return _buildChatBubble(_messages[_messages.length - 1 - index]);
-      },
-    );
-  }
-
-  Widget _buildChatBubble(Map<String, dynamic> message) {
-    if (message.containsKey('isLoading') && message['isLoading'] == true) {
+  Widget _buildChatBubble(MessageRequest message) {
+    if (message.loading) {
       return Align(
         alignment: Alignment.centerLeft,
         child: Container(
@@ -154,14 +169,14 @@ class _ChatbotPageState extends State<Chat> {
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
-            "Escribiendo${'.' * _loadingIndex}",
-            style: const TextStyle(fontSize: 11, color: Colors.black),
+            '.' * _loadingIndex,
+            style: const TextStyle(fontSize: 12, color: Colors.black),
           ),
         ),
       );
     }
 
-    bool isBot = message["isBot"];
+    bool isBot = message.sender == Sender.bot;
     return Align(
       alignment: isBot ? Alignment.centerLeft : Alignment.centerRight,
       child: Container(
@@ -172,13 +187,16 @@ class _ChatbotPageState extends State<Chat> {
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(12),
             topRight: const Radius.circular(12),
-            bottomLeft: isBot ? const Radius.circular(0) : const Radius.circular(12),
-            bottomRight: isBot ? const Radius.circular(12) : const Radius.circular(0),
+            bottomLeft:
+                isBot ? const Radius.circular(0) : const Radius.circular(12),
+            bottomRight:
+                isBot ? const Radius.circular(12) : const Radius.circular(0),
           ),
         ),
         child: Text(
-          message["text"],
-          style: TextStyle(fontSize: 11, color: isBot ? Colors.black : Colors.white),
+          message.text,
+          style: TextStyle(
+              fontSize: 12, color: isBot ? Colors.black : Colors.white),
         ),
       ),
     );
@@ -237,5 +255,34 @@ class _ChatbotPageState extends State<Chat> {
         ],
       ),
     );
+  }
+
+  Widget buildTextField(ValueChanged<String> onValue) {
+    final outlineInputBorder = UnderlineInputBorder(
+        borderSide: const BorderSide(color: Colors.transparent),
+        borderRadius: BorderRadius.circular(30));
+
+    return TextFormField(
+        onTapOutside: (event) {
+          focusNode.unfocus();
+        },
+        focusNode: focusNode,
+        controller: _messageController,
+        onFieldSubmitted: (value) {
+          _messageController.clear();
+          focusNode.unfocus();
+          onValue(value);
+        },
+        decoration: InputDecoration(
+            filled: true,
+            hintText: "Escribe tu mensaje...",
+            enabledBorder: outlineInputBorder,
+            focusedBorder: outlineInputBorder,
+            suffixIcon: IconButton(
+                onPressed: () {
+                  final value = _messageController.value.text;
+                  onValue(value);
+                },
+                icon: const Icon(Icons.send_outlined))));
   }
 }

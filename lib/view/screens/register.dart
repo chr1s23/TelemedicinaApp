@@ -1,4 +1,7 @@
 import 'package:chatbot/view/screens/personal_data_form.dart';
+import 'package:chatbot/view/widgets/custom_button.dart';
+import 'package:chatbot/view/widgets/custom_ink_well.dart';
+import 'package:chatbot/view/widgets/custom_input_field.dart';
 import 'package:flutter/material.dart';
 import 'login.dart'; // Para navegar a la pantalla de inicio de sesión
 
@@ -32,10 +35,10 @@ class _RegisterScreenState extends State<Register> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        centerTitle: true,
+        centerTitle: true, // Asegura que la imagen esté centrada
         title: Image.asset(
-          'assets/images/logo_ucuenca_top.png',
-          height: 50,
+          'assets/images/logo_ucuenca_top.png', // Ruta de la imagen en la carpeta assets
+          height: 50, // Ajusta la altura según necesites
         ),
       ),
       body: SingleChildScrollView(
@@ -62,9 +65,14 @@ class _RegisterScreenState extends State<Register> {
                       fontSize: 12, color: Color.fromRGBO(111, 111, 111, 1)),
                 ),
               ),
-              _buildTextField(_nameController, "Ingresa tu nombre"),
+              CustomInputField(
+                controller: _nameController,
+                hint: "Ingresa tu nombre",
+                obscureText: false,
+                errorMessage: "Este campo es obligatorio",
+                isNumber: false,
+              ),
               const SizedBox(height: 20),
-
               // Nombre de usuario
               Align(
                 alignment: Alignment.topLeft,
@@ -74,8 +82,13 @@ class _RegisterScreenState extends State<Register> {
                       fontSize: 12, color: Color.fromRGBO(111, 111, 111, 1)),
                 ),
               ),
-              _buildTextField(
-                  _usernameController, "Ingresa tu número de teléfono"),
+              CustomInputField(
+                controller: _usernameController,
+                hint: "Ingresa tu número de teléfono",
+                obscureText: false,
+                errorMessage: "Este campo es obligatorio",
+                isNumber: true,
+              ),
               const SizedBox(height: 20),
 
               // Contraseña
@@ -87,8 +100,13 @@ class _RegisterScreenState extends State<Register> {
                       fontSize: 12, color: Color.fromRGBO(111, 111, 111, 1)),
                 ),
               ),
-              _buildTextField(_passwordController, "Ingresa tu contraseña",
-                  obscureText: true),
+              CustomInputField(
+                controller: _passwordController,
+                hint: "Ingresa tu contraseña",
+                obscureText: true,
+                errorMessage: "Este campo es obligatorio",
+                isNumber: false,
+              ),
               const SizedBox(height: 20),
 
               // Confirmar contraseña
@@ -100,105 +118,47 @@ class _RegisterScreenState extends State<Register> {
                       fontSize: 12, color: Color.fromRGBO(111, 111, 111, 1)),
                 ),
               ),
-              _buildTextField(
-                  _confirmPasswordController, "Repite tu contraseña",
-                  obscureText: true),
+              CustomInputField(
+                controller: _confirmPasswordController,
+                hint: "Repite tu contraseña",
+                obscureText: true,
+                errorMessage: "Este campo es obligatorio",
+                isNumber: false,
+              ),
               const SizedBox(height: 30),
-              _buildButtons()
+              Column(
+                children: [
+                  CustomButton(
+                      color: Color.fromRGBO(0, 40, 86, 1),
+                      label: "Crear una cuenta",
+                      onPressed: () {
+                        if (_formKey.currentState?.validate() ?? false) {
+                          if (_passwordController.text !=
+                              _confirmPasswordController.text) {
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                content: Text(
+                                    "Las contraseñas no coinciden. Por favor, inténtalo de nuevo.")));
+                          } else {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => PersonalDataForm()));
+                          }
+                        }
+                      }),
+                  const SizedBox(height: 15),
+                  CustomInkWell(
+                      label: "Iniciar Sesión",
+                      onTap: () {
+                        Navigator.pushReplacement(context,
+                            MaterialPageRoute(builder: (context) => Login()));
+                      })
+                ],
+              )
             ],
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildTextField(TextEditingController controller, String hint,
-      {bool obscureText = false}) {
-    return TextFormField(
-      controller: controller,
-      obscureText: obscureText,
-      validator: (value) {
-        if (value?.isEmpty ?? false) {
-          return 'Este campo no puede estar vacío';
-        }
-        return null;
-      },
-      style: TextStyle(fontSize: 15, color: Colors.black),
-      decoration: InputDecoration(
-        hintText: hint,
-        hintStyle:
-            TextStyle(color: Color.fromRGBO(111, 111, 111, 1), fontSize: 13),
-        errorStyle:
-            TextStyle(fontSize: 13, color: Color.fromRGBO(165, 16, 8, 1)),
-        border: OutlineInputBorder(
-          borderSide:
-              BorderSide(color: Color.fromRGBO(111, 111, 111, 1), width: 1.0),
-          borderRadius: BorderRadius.circular(30),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderSide:
-              BorderSide(color: Color.fromRGBO(111, 111, 111, 1), width: 1.5),
-          borderRadius: BorderRadius.circular(30),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderSide:
-              BorderSide(color: Color.fromRGBO(111, 111, 111, 1), width: 1.0),
-          borderRadius: BorderRadius.circular(30),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildButtons() {
-    return Column(
-      children: [
-        SizedBox(
-          width: 300,
-          height: 50,
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color.fromRGBO(0, 40, 86, 1),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30),
-              ),
-            ),
-            onPressed: () {
-              if (_formKey.currentState?.validate() ?? false) {
-                Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => PersonalDataForm()));
-              }
-            },
-            child: Text(
-              "Crear una cuenta",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 15),
-        SizedBox(
-          width: 300,
-          height: 50,
-          child: Center(
-            child: InkWell(
-              onTap: () {
-                Navigator.pushReplacement(
-                    context, MaterialPageRoute(builder: (context) => Login()));
-              },
-              child: Text(
-                "Iniciar Sesión",
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Color.fromRGBO(165, 16, 08, 1)),
-              ),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

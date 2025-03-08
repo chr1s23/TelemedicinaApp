@@ -1,3 +1,5 @@
+import 'package:chatbot/view/widgets/custom_button.dart';
+import 'package:chatbot/view/widgets/custom_ink_well.dart';
 import 'package:flutter/material.dart';
 import 'login.dart';
 import 'register.dart';
@@ -58,7 +60,24 @@ class _PresentacionState extends State<Presentation> {
           ),
           _buildIndicators(), // Indicadores del carrusel
           const SizedBox(height: 20),
-          _buildButtons(), // Botones de "Crear cuenta" e "Iniciar sesión"
+          Column(
+            children: [
+              CustomButton(
+                  color: Color.fromRGBO(0, 40, 86, 1),
+                  label: "Iniciar Sesión",
+                  onPressed: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => Login()));
+                  }),
+              const SizedBox(height: 15),
+              CustomInkWell(
+                  label: "Crear una cuenta",
+                  onTap: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => Register()));
+                  }),
+            ],
+          ),
           const SizedBox(height: 30),
         ],
       ),
@@ -114,53 +133,6 @@ class _PresentacionState extends State<Presentation> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildButtons() {
-    return Column(
-      children: [
-        SizedBox(
-          width: 300,
-          height: 50,
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color.fromRGBO(0, 40, 86, 1),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30),
-              ),
-            ),
-            onPressed: () {
-              Navigator.push(
-                  context, MaterialPageRoute(builder: (context) => Login()));
-            },
-            child: Text(
-              "Iniciar Sesión",
-              style:
-                  TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-            ),
-          ),
-        ),
-        const SizedBox(height: 15),
-        SizedBox(
-          width: 300,
-          height: 50,
-          child: Center(
-            child: InkWell(
-              onTap: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => Register()));
-              },
-              child: Text(
-                "Crear una cuenta",
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Color.fromRGBO(165, 16, 08, 1)),
-              ),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }
