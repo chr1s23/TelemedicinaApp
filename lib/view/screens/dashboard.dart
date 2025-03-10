@@ -19,10 +19,13 @@ class _AutoSamplingPageState extends State<Dashboard> {
   @override
   void initState() {
     super.initState();
-    _videoController = VideoPlayerController.asset('assets/videos/sample.mp4')
-      ..initialize().then((_) {
-        setState(() {});
-      });
+    _videoController =
+        VideoPlayerController.asset('assets/videos/automuestreo.mp4')
+          ..initialize().then((_) {
+            _videoController.play();
+            _videoController.setLooping(false);
+            setState(() {});
+          });
   }
 
   @override
@@ -58,8 +61,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
           onPressed: () {
             _showHelpDialog();
           },
-          child: Text("Ayuda",
-              style: TextStyle(fontSize: 12, color: Colors.white)),
+          child: Text("H", style: TextStyle(fontSize: 12, color: Colors.white)),
         ),
       ),
       title: Text(
@@ -212,6 +214,18 @@ class _AutoSamplingPageState extends State<Dashboard> {
           ),
           const SizedBox(height: 15),
           _buildVideoPlayer(),
+          FloatingActionButton(
+            onPressed: () {
+              setState(() {
+                _videoController.value.isPlaying
+                    ? _videoController.pause()
+                    : _videoController.play();
+              });
+            },
+            child: Icon(
+              _videoController.value.isPlaying ? Icons.pause : Icons.play_arrow,
+            ),
+          ),
           const SizedBox(height: 20),
           _buildStartProcessButton(),
           const SizedBox(height: 15),
@@ -230,7 +244,16 @@ class _AutoSamplingPageState extends State<Dashboard> {
           ? _videoController.value.aspectRatio
           : 16 / 9,
       child: _videoController.value.isInitialized
-          ? VideoPlayer(_videoController)
+          ? InkWell(
+              child: VideoPlayer(_videoController),
+              onTap: () {
+                setState(() {
+                  _videoController.value.isPlaying
+                      ? _videoController.pause()
+                      : _videoController.play();
+                });
+              },
+            )
           : Center(child: CircularProgressIndicator()),
     );
   }

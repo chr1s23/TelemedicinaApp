@@ -1,40 +1,56 @@
+import 'dart:io';
+
 import 'package:chatbot/model/requests/user.dart';
 import 'package:chatbot/model/requests/user_request.dart';
 import 'package:chatbot/model/responses/user_response.dart';
+import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 
 class AuthService {
-  String serviceUrl = "https://2c86-179-49-41-121.ngrok-free.app";
-  
-  Future<UserResponse?> login(BuildContext context, User user) async {
-    try {
-      final Uri uri = Uri.parse("$serviceUrl/usuarios/autenticar");
+  final dio = Dio(BaseOptions(
+    baseUrl: "https://clias.ucuenca.edu.ec",
+    headers: {'Content-Type': 'application/json'},
+  ));
 
-      final response = await http.post(
-        uri,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'contrasena': user.contrasena,
-          'nombreUsuario': user.nombreUsuario,
-        }),
-      );
+  void configureDio() {
+    (dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
+      final client = HttpClient();
+      client.badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
+      return client;
+    };
+  }
+
+  Future<UserResponse?> login(BuildContext context, User user) async {
+    configureDio();
+    try {
+      final response = await dio.post("/usuarios/autenticar", data: {
+        "nombreUsuario": user.nombreUsuario,
+        "contrasena": user.contrasena,
+      });
 
       if (response.statusCode == 200) {
-        UserResponse user = json.decode(response.body);
-        return user;
+        return UserResponse.fromJsonMap(response.data);
       } else {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('No se pudo iniciar sesión'),
-            ),
+            SnackBar(content: Text('Usuario o contraseña incorrectos')),
           );
         }
-        return null;
+      }
+    } on DioException catch (e) {
+      print("Error de Dio: ${e.message}");
+      print("Código de error: ${e.response?.statusCode}");
+      print("Respuesta del servidor: ${e.response?.data}");
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error de conexión con el servidor')),
+        );
       }
     } catch (e) {
+      print(e);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -48,38 +64,10 @@ class AuthService {
 
   Future<UserResponse?> signUp(BuildContext context, UserRequest user) async {
     try {
-      final Uri uri = Uri.parse("$serviceUrl/usuarios/registro");
-
-      final response = await http.post(
-        uri,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          "nombreUsuario": user.nombreUsuario,
-          "contrasena": user.contrasena,
-          "rol": user.rol,
-          "aceptaConsentimiento": user.aceptaConsentimiento,
-          "paciente": {
-            "nombre": user.paciente.nombre,
-            "fechaNacimiento": user.paciente.fechaNacimiento,
-            "pais": user.paciente.pais,
-            "lenguaMaterna": user.paciente.lenguaMaterna,
-            "estadoCivil": user.paciente.estadoCivil,
-            "sexo": user.paciente.sexo,
-            "infoSocioeconomica": {
-              //opcional puede ser nulo
-              "instruccion": user.paciente.infoSocioeconomica?.instruccion,
-              "ingresos": user.paciente.infoSocioeconomica?.ingresos,
-              "trabajoRemunerado":
-                  user.paciente.infoSocioeconomica?.trabajoRemunerado,
-              "ocupacion": user.paciente.infoSocioeconomica?.ocupacion,
-              "recibeBono": user.paciente.infoSocioeconomica?.recibeBono
-            }
-          }
-        }),
-      );
+      final response = await dio.post("/usuarios/registro", data: user);
 
       if (response.statusCode == 200) {
-        UserResponse user = json.decode(response.body);
+        UserResponse user = UserResponse.fromJsonMap(response.data);
         return user;
       } else {
         if (context.mounted) {

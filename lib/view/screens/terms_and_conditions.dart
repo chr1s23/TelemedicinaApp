@@ -54,7 +54,6 @@ class _TermsAndConditionsPageState extends State<TermsAndConditions> {
             Expanded(
               child: SingleChildScrollView(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       "Términos y Condiciones",
@@ -66,7 +65,7 @@ class _TermsAndConditionsPageState extends State<TermsAndConditions> {
                     ),
                     const SizedBox(height: 20),
                     Container(
-                      height: 400, // Espacio grande para los términos
+                      height: 500, // Espacio grande para los términos
                       decoration: BoxDecoration(
                         border: Border.all(
                             color: Color.fromRGBO(111, 111, 111, 1), width: 1),

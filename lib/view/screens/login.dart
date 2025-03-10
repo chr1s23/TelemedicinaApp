@@ -1,5 +1,9 @@
 import 'package:chatbot/model/responses/user_response.dart';
 import 'package:chatbot/service/auth_service.dart';
+import 'package:chatbot/view/widgets/custom_app_bar.dart';
+import 'package:chatbot/view/widgets/custom_ink_well.dart';
+import 'package:chatbot/view/widgets/custom_input_decoration.dart';
+import 'package:chatbot/view/widgets/custom_loading_button.dart';
 import 'package:flutter/material.dart';
 
 import 'dashboard.dart';
@@ -20,6 +24,7 @@ class _LoginState extends State<Login> {
   User user = User("", "");
 
   void login() async {
+    FocusScope.of(context).unfocus();
     if (_isLoading) return; // Evita múltiples clics
 
     setState(() {
@@ -28,8 +33,10 @@ class _LoginState extends State<Login> {
 
     UserResponse? userLogged = await authService.login(context, user);
     if (userLogged != null) {
-      Navigator.push(
-          context, MaterialPageRoute(builder: (context) => Dashboard()));
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => Dashboard()),
+          (route) => false);
     }
 
     setState(() {
@@ -47,19 +54,12 @@ class _LoginState extends State<Login> {
               key: _formKey,
               child: Column(
                 children: [
-                  AppBar(
-                    elevation: 0,
-                    centerTitle: true, // Asegura que la imagen esté centrada
-                    title: Image.asset(
-                      'assets/images/logo_ucuenca_top.png', // Ruta de la imagen en la carpeta assets
-                      height: 50, // Ajusta la altura según necesites
-                    ),
-                  ),
+                  CustomAppBar(),
                   SizedBox(
                     height: 20,
                   ),
                   Text(
-                    "Hola, bienvenido de nuevo!",
+                    "Hola, ¡Bienvenido de nuevo!",
                     style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
@@ -80,45 +80,21 @@ class _LoginState extends State<Login> {
                             color: Color.fromRGBO(111, 111, 111, 1))),
                   ),
                   TextFormField(
-                    controller: TextEditingController(text: user.nombreUsuario),
-                    onChanged: (val) {
-                      user.nombreUsuario = val;
-                    },
-                    validator: (value) {
-                      if (value?.isEmpty ?? false) {
-                        return 'El número de teléfono está vacio';
-                      }
-                      return null;
-                    },
-                    style: TextStyle(fontSize: 15, color: Colors.black),
-                    decoration: InputDecoration(
-                      hintText: 'Ingresa tu número de teléfono', // Placeholder
-                      hintStyle: TextStyle(
-                          color: Color.fromRGBO(111, 111, 111, 1),
-                          fontSize: 13), // Estilo del placeholder
-                      errorStyle: TextStyle(
-                          fontSize: 12, color: Color.fromRGBO(165, 16, 8, 1)),
-                      border: OutlineInputBorder(
-                        borderSide: BorderSide(
-                            color: Color.fromRGBO(111, 111, 111, 1),
-                            width: 1.0),
-                        borderRadius: BorderRadius.circular(
-                            30), // Borde redondeado opcional
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                            color: Color.fromRGBO(111, 111, 111, 1),
-                            width: 1.5),
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                            color: Color.fromRGBO(111, 111, 111, 1),
-                            width: 1.0),
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                  ),
+                      
+                      controller:
+                          TextEditingController(text: user.nombreUsuario),
+                      onChanged: (val) {
+                        user.nombreUsuario = val;
+                      },
+                      validator: (value) {
+                        if (value?.isEmpty ?? false) {
+                          return 'El número de teléfono está vacío';
+                        }
+                        return null;
+                      },
+                      style: TextStyle(fontSize: 15, color: Colors.black),
+                      decoration: CustomInputDecoration()
+                          .getDecoration('Ingresa tu número de teléfono')),
                   SizedBox(
                     height: 38,
                   ),
@@ -132,112 +108,52 @@ class _LoginState extends State<Login> {
                     ),
                   ),
                   TextFormField(
-                    obscureText: true,
-                    controller: TextEditingController(text: user.contrasena),
-                    onChanged: (val) {
-                      user.contrasena = val;
-                    },
-                    validator: (value) {
-                      if (value?.isEmpty ?? false) {
-                        return 'Contraseña vacía';
-                      }
-                      return null;
-                    },
-                    style: TextStyle(fontSize: 15, color: Colors.black),
-                    decoration: InputDecoration(
-                      hintText: 'Ingresa tu contraseña', // Placeholder
-                      hintStyle: TextStyle(
-                          color: Color.fromRGBO(111, 111, 111, 1),
-                          fontSize: 13), // Estilo del placeholder
-                      errorStyle: TextStyle(
-                          fontSize: 12, color: Color.fromRGBO(165, 16, 8, 1)),
-                      border: OutlineInputBorder(
-                        borderSide: BorderSide(
-                            color: Color.fromRGBO(111, 111, 111, 1),
-                            width: 1.0),
-                        borderRadius: BorderRadius.circular(
-                            30), // Borde redondeado opcional
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                            color: Color.fromRGBO(111, 111, 111, 1),
-                            width: 1.5),
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                            color: Color.fromRGBO(111, 111, 111, 1),
-                            width: 1.0),
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                  ),
+                      obscureText: true,
+                      controller: TextEditingController(text: user.contrasena),
+                      onChanged: (val) {
+                        user.contrasena = val;
+                      },
+                      validator: (value) {
+                        if (value?.isEmpty ?? false) {
+                          return 'Contraseña vacía';
+                        }
+                        return null;
+                      },
+                      style: TextStyle(fontSize: 15, color: Colors.black),
+                      decoration: CustomInputDecoration()
+                          .getDecoration('Ingresa tu contraseña')),
                   SizedBox(
                     height: 20,
                   ),
-                  _buildButtons(),
+                  Column(
+                    children: [
+                      CustomLoadingButton(
+                          color: Color.fromRGBO(0, 40, 86, 1),
+                          label: "Iniciar Sesión",
+                          loading: _isLoading,
+                          onPressed: _isLoading
+                              ? null
+                              : () {
+                                  if (_formKey.currentState?.validate() ??
+                                      false) {
+                                    login();
+                                  }
+                                }),
+                      const SizedBox(height: 15),
+                      CustomInkWell(
+                          label: "Crear una cuenta",
+                          onTap: () {
+                            Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => Register()));
+                          })
+                    ],
+                  )
                 ],
               )),
         ),
       ),
-    );
-  }
-
-  Widget _buildButtons() {
-    return Column(
-      children: [
-        SizedBox(
-          width: 300,
-          height: 50,
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color.fromRGBO(0, 40, 86, 1),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30),
-              ),
-            ),
-            onPressed: _isLoading
-                ? null
-                : () {
-                    if (_formKey.currentState?.validate() ?? false) {
-                      // Previene null-safety issues
-                      login();
-                    }
-                  },
-            child: _isLoading
-                ? const SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
-                  )
-                : Text(
-                    "Iniciar Sesión",
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold, color: Colors.white),
-                  ),
-          ),
-        ),
-        const SizedBox(height: 15),
-        SizedBox(
-          width: 300,
-          height: 50,
-          child: Center(
-            child: InkWell(
-              onTap: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => Register()));
-              },
-              child: Text("Crear una cuenta",
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Color.fromRGBO(165, 16, 08, 1))),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

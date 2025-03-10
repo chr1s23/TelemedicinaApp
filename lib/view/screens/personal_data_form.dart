@@ -12,15 +12,15 @@ class _PersonalDataFormState extends State<PersonalDataForm> {
   final _formKey = GlobalKey<FormState>();
 
   final List<String> _countries = [
-    "Ecuador",
-    "Venezuela"
-        "Colombia",
-    "Perú",
-    "Chile",
-    "Argentina",
-    "Uruguay",
-    "Brasil",
-    "México",
+    "ECUADOR",
+    "VENEZUELA",
+    "COLOMBIA",
+    "PERÚ",
+    "CHILE",
+    "ARGENTINA",
+    "URUGUAY",
+    "BRASIL",
+    "MÉXICO",
   ];
   final List<String> _languages = ["ESPAÑOL", "INGLÉS", "OTRO"];
   final List<String> _maritalStatusOptions = [
@@ -32,22 +32,34 @@ class _PersonalDataFormState extends State<PersonalDataForm> {
   ];
   final List<String> _genders = ["MASCULINO", "FEMENINO", "OTRO"];
 
+  final TextEditingController dateController = TextEditingController();
+
   DateTime? _selectedDate;
   String? _selectedCountry;
   String? _selectedLanguage;
   String? _selectedMaritalStatus;
   String? _selectedGender;
 
+  @override
+  void initState() {
+    super.initState();
+    setState(() {
+      _selectedCountry = _countries[0];
+      _selectedLanguage = _languages[0];
+      _selectedMaritalStatus = _maritalStatusOptions[0];
+      _selectedGender = _genders[1];
+    });
+  }
+
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
       firstDate: DateTime(1900),
-      lastDate: DateTime.now(),
+      lastDate: DateTime(2017),
     );
     if (picked != null && picked != _selectedDate) {
       setState(() {
-        _selectedDate = picked;
+        dateController.text = picked.toIso8601String().split("T")[0].split("-").reversed.join("/");
       });
     }
   }
@@ -78,7 +90,6 @@ class _PersonalDataFormState extends State<PersonalDataForm> {
         child: Form(
           key: _formKey,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 "Datos Personales",
@@ -98,18 +109,21 @@ class _PersonalDataFormState extends State<PersonalDataForm> {
 
               // Fecha de nacimiento
               _buildLabel("Fecha de nacimiento*"),
-              InkWell(
-                onTap: () => _selectDate(context),
-                child: InputDecorator(
-                  decoration: _inputDecoration('Ingrese su fecha de nacimiento'),
-                  child: Text(
-                    _selectedDate == null
-                        ? "dd/MM/yyyy"
-                        : "${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}",
-                    style: TextStyle(fontSize: 15, color: Colors.black),
-                  ),
-                ),
-              ),
+              TextFormField(
+                controller: dateController,
+                  validator: (value) {
+                    if (value?.isEmpty ?? false) {
+                      return 'Campo obligatorio';
+                    }
+                    return null;
+                  },
+                  style: TextStyle(fontSize: 15, color: Colors.black),
+                  decoration: _inputDecoration('dd/MM/yyyy', isCalendar: true),
+                  readOnly: true,
+                  onTap: () {
+                    _selectDate(context);
+                  },),
+              
               const SizedBox(height: 20),
 
               // País
@@ -188,11 +202,14 @@ class _PersonalDataFormState extends State<PersonalDataForm> {
   }
 
   Widget _buildLabel(String text) {
-    return Text(
-      text,
-      style: TextStyle(
-        fontSize: 12,
-        color: const Color.fromRGBO(111, 111, 111, 1),
+    return Align(
+      alignment: Alignment.topLeft,
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 12,
+          color: const Color.fromRGBO(111, 111, 111, 1),
+        ),
       ),
     );
   }
@@ -214,8 +231,9 @@ class _PersonalDataFormState extends State<PersonalDataForm> {
     );
   }
 
-  InputDecoration _inputDecoration(hint) {
+  InputDecoration _inputDecoration(hint, {isCalendar = false}) {
     return InputDecoration(
+      prefixIcon: isCalendar ? Icon(Icons.calendar_today) : null,
       hintText: hint, // Placeholder
       hintStyle: TextStyle(
           color: Color.fromRGBO(111, 111, 111, 1),

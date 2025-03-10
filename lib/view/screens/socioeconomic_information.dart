@@ -19,7 +19,7 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
   final TextEditingController _occupationController = TextEditingController();
 
   final List<String> _educationLevels = [
-    "NINGUNO"
+    "NINGUNO",
     "PRIMARIA",
     "SECUNDARIA",
     "UNIVERSITARIA",
@@ -61,7 +61,6 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
         child: Form(
           key: _formKey,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 "Información Socioeconómica",
@@ -111,7 +110,7 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
                 controller: _occupationController,
                 style: TextStyle(fontSize: 15, color: Colors.black),
                 decoration: _inputDecoration(
-                    "Ejemplo: Docente, Ingeniero, Comerciante"),
+                    "Ejemplo: Profesor, Comerciante"),
               ),
 
               const SizedBox(height: 20),
@@ -133,11 +132,14 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
   }
 
   Widget _buildLabel(String text) {
-    return Text(
-      text,
-      style: TextStyle(
-        fontSize: 12,
-        color: const Color.fromRGBO(111, 111, 111, 1),
+    return Align(
+      alignment: Alignment.topLeft,
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 12,
+          color: const Color.fromRGBO(111, 111, 111, 1),
+        ),
       ),
     );
   }
