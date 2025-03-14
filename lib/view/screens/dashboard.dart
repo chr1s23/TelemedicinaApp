@@ -22,10 +22,10 @@ class _AutoSamplingPageState extends State<Dashboard> {
     _videoController =
         VideoPlayerController.asset('assets/videos/automuestreo.mp4')
           ..initialize().then((_) {
-            _videoController.play();
-            _videoController.setLooping(false);
             setState(() {});
           });
+    _videoController.play();
+    _videoController.setLooping(false);
   }
 
   @override
