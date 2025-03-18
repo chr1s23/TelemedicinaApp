@@ -1,4 +1,5 @@
 import 'package:chatbot/view/screens/terms_and_conditions.dart';
+import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
 
 class SocioeconomicInformation extends StatefulWidget {
@@ -49,7 +50,12 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
         actions: [
           TextButton(
               onPressed: () {
-                Navigator.pop(context);
+                modalYesNoDialog(
+                  context: context, 
+                  title: "¿Cancelar?", 
+                  message: "¿Desea cancelar la creación de su cuenta? Se perderán todos los datos ingresados.", 
+                  onYes: () => Navigator.of(context)..pop()..pop()..pop(),
+                );
               },
               child: Text("Cancelar",
                   style: TextStyle(
@@ -73,8 +79,8 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
               const SizedBox(height: 20),
 
               // Nivel de instrucción
-              _buildLabel("Nivel de instrucción"),
-              _buildDropdown(_educationLevels, _selectedEducationLevel,
+              buildLabel("Nivel de instrucción"),
+              buildDropdown(_educationLevels, _selectedEducationLevel,
                   (newValue) {
                 setState(() {
                   _selectedEducationLevel = newValue;
@@ -84,8 +90,8 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
               const SizedBox(height: 20),
 
               // Ingresos mensuales
-              _buildLabel("Ingresos mensuales"),
-              _buildDropdown(_incomeLevels, _selectedIncome, (newValue) {
+              buildLabel("Ingresos mensuales"),
+              buildDropdown(_incomeLevels, _selectedIncome, (newValue) {
                 setState(() {
                   _selectedIncome = newValue;
                 });
@@ -94,8 +100,8 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
               const SizedBox(height: 20),
 
               // Trabajo remunerado
-              _buildLabel("¿Tiene trabajo remunerado?"),
-              _buildDropdown(_workStatusOptions, _selectedWorkStatus,
+              buildLabel("¿Tiene trabajo remunerado?"),
+              buildDropdown(_workStatusOptions, _selectedWorkStatus,
                   (newValue) {
                 setState(() {
                   _selectedWorkStatus = newValue;
@@ -105,19 +111,19 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
               const SizedBox(height: 20),
 
               // Ocupación principal
-              _buildLabel("Ocupación principal"),
+              buildLabel("Ocupación principal"),
               TextFormField(
                 controller: _occupationController,
                 style: TextStyle(fontSize: 15, color: Colors.black),
-                decoration: _inputDecoration(
+                decoration: inputDecoration(
                     "Ejemplo: Profesor, Comerciante"),
               ),
 
               const SizedBox(height: 20),
 
               // Recibe bono
-              _buildLabel("¿Recibe bono?"),
-              _buildDropdown(_bonusOptions, _selectedBonus, (newValue) {
+              buildLabel("¿Recibe bono?"),
+              buildDropdown(_bonusOptions, _selectedBonus, (newValue) {
                 setState(() {
                   _selectedBonus = newValue;
                 });
@@ -127,58 +133,6 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildLabel(String text) {
-    return Align(
-      alignment: Alignment.topLeft,
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: 12,
-          color: const Color.fromRGBO(111, 111, 111, 1),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDropdown(List<String> items, String? selectedItem,
-      ValueChanged<String?> onChanged, String hint) {
-    return DropdownButtonFormField<String>(
-      value: selectedItem,
-      decoration: _inputDecoration(hint),
-      style: TextStyle(fontSize: 15, color: Colors.black),
-      onChanged: onChanged,
-      items: items.map((String value) {
-        return DropdownMenuItem<String>(
-          value: value,
-          child: Text(value),
-        );
-      }).toList(),
-    );
-  }
-
-  InputDecoration _inputDecoration(hintText) {
-    return InputDecoration(
-      hintText: hintText,
-      hintStyle: TextStyle(fontSize: 13, color: Colors.grey),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(30),
-        borderSide: const BorderSide(
-            color: Color.fromRGBO(111, 111, 111, 1), width: 1.0),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(30),
-        borderSide: const BorderSide(
-            color: Color.fromRGBO(111, 111, 111, 1), width: 1.5),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(30),
-        borderSide: const BorderSide(
-            color: Color.fromRGBO(111, 111, 111, 1), width: 1.0),
       ),
     );
   }

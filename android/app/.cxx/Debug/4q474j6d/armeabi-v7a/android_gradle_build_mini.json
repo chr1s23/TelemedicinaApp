@@ -1,0 +1,20 @@
+{
+  "buildFiles": [
+    "C:\\Users\\maxal\\flutter\\packages\\flutter_tools\\gradle\\src\\main\\groovy\\CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "C:\\Users\\maxal\\AppData\\Local\\Android\\sdk\\cmake\\3.22.1\\bin\\ninja.exe",
+      "-C",
+      "C:\\Users\\maxal\\VSC Projects\\Flutter\\chatbot\\android\\app\\.cxx\\Debug\\4q474j6d\\armeabi-v7a",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "C:\\Users\\maxal\\AppData\\Local\\Android\\sdk\\cmake\\3.22.1\\bin\\ninja.exe",
+    "-C",
+    "C:\\Users\\maxal\\VSC Projects\\Flutter\\chatbot\\android\\app\\.cxx\\Debug\\4q474j6d\\armeabi-v7a",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {}
+}
