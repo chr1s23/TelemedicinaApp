@@ -1,4 +1,5 @@
 import 'package:chatbot/view/screens/socioeconomic_information.dart';
+import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
 
 class PersonalDataForm extends StatefulWidget {
@@ -77,12 +78,18 @@ class _PersonalDataFormState extends State<PersonalDataForm> {
         ),
         actions: [
           TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text("Cancelar",
-                  style: TextStyle(
-                      color: Color.fromRGBO(165, 16, 8, 1), fontSize: 12))),
+            onPressed: () {
+              modalYesNoDialog(
+                context: context, 
+                title: "¿Cancelar?", 
+                message: "¿Desea cancelar la creación de su cuenta? Se perderán todos los datos ingresados.", 
+                onYes: () => Navigator.of(context)..pop()..pop(),
+              );
+            },
+            child: Text("Cancelar",
+              style: TextStyle(color: Color.fromRGBO(165, 16, 8, 1), fontSize: 12)
+            )
+          ),
         ],
       ),
       body: SingleChildScrollView(
@@ -108,7 +115,7 @@ class _PersonalDataFormState extends State<PersonalDataForm> {
               const SizedBox(height: 20),
 
               // Fecha de nacimiento
-              _buildLabel("Fecha de nacimiento*"),
+              buildLabel("Fecha de nacimiento*"),
               TextFormField(
                 controller: dateController,
                   validator: (value) {
@@ -118,7 +125,7 @@ class _PersonalDataFormState extends State<PersonalDataForm> {
                     return null;
                   },
                   style: TextStyle(fontSize: 15, color: Colors.black),
-                  decoration: _inputDecoration('dd/MM/yyyy', isCalendar: true),
+                  decoration: inputDecoration('dd/MM/yyyy', isCalendar: true),
                   readOnly: true,
                   onTap: () {
                     _selectDate(context);
@@ -127,43 +134,43 @@ class _PersonalDataFormState extends State<PersonalDataForm> {
               const SizedBox(height: 20),
 
               // País
-              _buildLabel("País*"),
-              _buildDropdown(_countries, _selectedCountry, (newValue) {
+              buildLabel("País*"),
+              buildDropdown(_countries, _selectedCountry, (newValue) {
                 setState(() {
                   _selectedCountry = newValue;
                 });
-              }, 'Seleccione su país de origen'),
+              }, 'Seleccione su país de origen', requiredInput: true),
 
               const SizedBox(height: 20),
 
               // Lengua materna
-              _buildLabel("Lengua Materna*"),
-              _buildDropdown(_languages, _selectedLanguage, (newValue) {
+              buildLabel("Lengua Materna*"),
+              buildDropdown(_languages, _selectedLanguage, (newValue) {
                 setState(() {
                   _selectedLanguage = newValue;
                 });
-              }, 'Elija una opción'),
+              }, 'Elija una opción', requiredInput: true),
 
               const SizedBox(height: 20),
 
               // Estado civil
-              _buildLabel("Estado Civil*"),
-              _buildDropdown(_maritalStatusOptions, _selectedMaritalStatus,
+              buildLabel("Estado Civil*"),
+              buildDropdown(_maritalStatusOptions, _selectedMaritalStatus,
                   (newValue) {
                 setState(() {
                   _selectedMaritalStatus = newValue;
                 });
-              }, 'Elija una opción'),
+              }, 'Elija una opción', requiredInput: true),
 
               const SizedBox(height: 20),
 
               // Sexo
-              _buildLabel("Sexo*"),
-              _buildDropdown(_genders, _selectedGender, (newValue) {
+              buildLabel("Sexo*"),
+              buildDropdown(_genders, _selectedGender, (newValue) {
                 setState(() {
                   _selectedGender = newValue;
                 });
-              }, 'Elija una opción'),
+              }, 'Elija una opción', requiredInput: true),
 
               const SizedBox(height: 30),
 
@@ -197,62 +204,6 @@ class _PersonalDataFormState extends State<PersonalDataForm> {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildLabel(String text) {
-    return Align(
-      alignment: Alignment.topLeft,
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: 12,
-          color: const Color.fromRGBO(111, 111, 111, 1),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDropdown(List<String> items, String? selectedItem,
-      ValueChanged<String?> onChanged, String hint) {
-    return DropdownButtonFormField<String>(
-      value: selectedItem,
-      decoration: _inputDecoration(hint),
-      style: TextStyle(fontSize: 15, color: Colors.black),
-      onChanged: onChanged,
-      items: items.map((String value) {
-        return DropdownMenuItem<String>(
-          value: value,
-          child: Text(value),
-        );
-      }).toList(),
-      validator: (value) => value == null ? "Campo obligatorio" : null,
-    );
-  }
-
-  InputDecoration _inputDecoration(hint, {isCalendar = false}) {
-    return InputDecoration(
-      prefixIcon: isCalendar ? Icon(Icons.calendar_today) : null,
-      hintText: hint, // Placeholder
-      hintStyle: TextStyle(
-          color: Color.fromRGBO(111, 111, 111, 1),
-          fontSize: 13), // Estilo del placeholder
-      errorStyle: TextStyle(fontSize: 12, color: Color.fromRGBO(165, 16, 8, 1)),
-      border: OutlineInputBorder(
-        borderSide:
-            BorderSide(color: Color.fromRGBO(111, 111, 111, 1), width: 1.0),
-        borderRadius: BorderRadius.circular(30), // Borde redondeado opcional
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderSide:
-            BorderSide(color: Color.fromRGBO(111, 111, 111, 1), width: 1.5),
-        borderRadius: BorderRadius.circular(30),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderSide:
-            BorderSide(color: Color.fromRGBO(111, 111, 111, 1), width: 1.0),
-        borderRadius: BorderRadius.circular(30),
       ),
     );
   }
