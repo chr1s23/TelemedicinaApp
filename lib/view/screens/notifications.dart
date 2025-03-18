@@ -1,6 +1,3 @@
-import 'package:chatbot/view/screens/chat.dart';
-import 'package:chatbot/view/screens/dashboard.dart';
-import 'package:chatbot/view/screens/resources.dart';
 import 'package:chatbot/view/screens/result.dart';
 import 'package:flutter/material.dart';
 
@@ -62,36 +59,12 @@ class _NotificationsPageState extends State<Notifications>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _buildAppBar(),
       body: Column(
         children: [
           _buildTabBar(),
           Expanded(child: _buildNotificationList()),
         ],
       ),
-      bottomNavigationBar: _buildBottomNavigationBar(),
-    );
-  }
-
-  AppBar _buildAppBar() {
-    return AppBar(
-      backgroundColor: Colors.white,
-      elevation: 0,
-      title: Text("HELPY",
-          style: TextStyle(
-              fontSize: 15, fontWeight: FontWeight.bold, color: Colors.black)),
-      centerTitle: true,
-      actions: [
-        IconButton(
-          icon: CircleAvatar(
-            backgroundImage: AssetImage('assets/images/avatar.png'),
-            radius: 18,
-          ),
-          onPressed: () {
-            // Acción del perfil
-          },
-        ),
-      ],
     );
   }
 
@@ -214,63 +187,6 @@ class _NotificationsPageState extends State<Notifications>
           ],
         );
       }).toList(),
-    );
-  }
-
-  Widget _buildBottomNavigationBar() {
-    return BottomAppBar(
-      shape: const CircularNotchedRectangle(),
-      notchMargin: 10.0,
-      child: Container(
-        height: 60,
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _buildNavItem(Icons.home, false,
-                MaterialPageRoute(builder: (context) => Dashboard())),
-            _buildNavItem(Icons.folder, false,
-                MaterialPageRoute(builder: (context) => Resources())),
-            _buildFloatingButton(),
-            _buildNavItem(Icons.map, false, null),
-            _buildNavItem(Icons.notifications, false, null),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNavItem(IconData icon, bool marked, MaterialPageRoute? nav) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        IconButton(
-            onPressed: () {
-              if (nav != null) {
-                Navigator.push(context, nav);
-              }
-            },
-            icon: Icon(icon,
-                color: marked
-                    ? Color.fromRGBO(0, 40, 86, 1)
-                    : Color.fromRGBO(111, 111, 111, 1),
-                size: 28))
-      ],
-    );
-  }
-
-  Widget _buildFloatingButton() {
-    return Transform.translate(
-      offset: const Offset(0, -10),
-      child: FloatingActionButton(
-        backgroundColor: Color.fromRGBO(0, 40, 86, 1),
-        onPressed: () {
-          // Acción del asistente virtual
-          Navigator.push(
-              context, MaterialPageRoute(builder: (context) => Chat()));
-        },
-        child: const Icon(Icons.smart_toy, size: 28, color: Colors.white),
-      ),
     );
   }
 }

@@ -3,6 +3,7 @@ import 'package:chatbot/view/screens/chat.dart';
 import 'package:chatbot/view/screens/notifications.dart';
 import 'package:chatbot/view/screens/personal_data_form.dart';
 import 'package:chatbot/view/screens/resources.dart';
+import 'package:chatbot/view/screens/wip.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
@@ -15,6 +16,7 @@ class Dashboard extends StatefulWidget {
 
 class _AutoSamplingPageState extends State<Dashboard> {
   late VideoPlayerController _videoController;
+  int _currentIndex = 0;
 
   @override
   void initState() {
@@ -40,8 +42,14 @@ class _AutoSamplingPageState extends State<Dashboard> {
       appBar: _buildAppBar(),
       endDrawer:
           _buildProfileDrawer(), // Drawer que se desliza desde la derecha
-      body: SingleChildScrollView(child: _buildBody()),
-      bottomNavigationBar: _buildBottomNavigationBar(),
+      body: <Widget?>[
+        SingleChildScrollView(child: _buildBody()),
+        Resources(),
+        Chat(),
+        WIPScreen(),
+        Notifications(),
+      ][_currentIndex],
+      bottomNavigationBar: _buildBottomNavigationBar((index) => _currentIndex = index, () => _currentIndex),
     );
   }
 
@@ -283,62 +291,56 @@ class _AutoSamplingPageState extends State<Dashboard> {
     );
   }
 
-  Widget _buildBottomNavigationBar() {
-    return BottomAppBar(
-      shape: const CircularNotchedRectangle(),
-      notchMargin: 10.0,
-      child: Container(
-        height: 60,
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _buildNavItem(Icons.home, true, null),
-            _buildNavItem(Icons.folder, false,
-                MaterialPageRoute(builder: (context) => Resources())),
-            _buildFloatingButton(), // Botón central del chatbot
-            _buildNavItem(Icons.map, false, null),
-            _buildNavItem(Icons.notifications, false,
-                MaterialPageRoute(builder: (context) => Notifications())),
-          ],
+  Widget _buildBottomNavigationBar(void Function(int) setIndex, int Function() currentIndex) {
+    return NavigationBar(
+      onDestinationSelected: (int index) {
+        setState(() {
+          setIndex(index);
+        });
+      },
+      indicatorShape: CircleBorder(),
+      labelBehavior: NavigationDestinationLabelBehavior.alwaysHide, // Ocultar labels
+      selectedIndex: currentIndex(),
+      destinations: const [
+        NavigationDestination(
+          icon: Icon(Icons.home),
+          label: 'Inicio',
         ),
-      ),
-    );
-  }
-
-  Widget _buildNavItem(IconData icon, bool marked, MaterialPageRoute? nav) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        IconButton(
-            onPressed: () {
-              if (nav != null) {
-                Navigator.push(context, nav);
-              }
-            },
-            icon: Icon(icon,
-                color: marked
-                    ? Color.fromRGBO(0, 40, 86, 1)
-                    : Color.fromRGBO(111, 111, 111, 1),
-                size: 28))
+        NavigationDestination(
+          icon: Icon(Icons.folder),
+          label: 'Recursos',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.smart_toy),
+          label: '',
+        ),
+        NavigationDestination(
+          icon: Icon(Icons.map),
+          label: 'Mapa',
+        ),
+        NavigationDestination(
+          icon: Badge(child: Icon(Icons.notifications)),
+          label: 'Notificaciones',
+        ),
       ],
+      
     );
   }
 
-  Widget _buildFloatingButton() {
-    return Transform.translate(
-      offset: const Offset(0, -10),
-      child: FloatingActionButton(
-        backgroundColor: Color.fromRGBO(0, 40, 86, 1),
-        onPressed: () {
-          // Acción del asistente virtual
-          Navigator.push(
-              context, MaterialPageRoute(builder: (context) => Chat()));
-        },
-        child: const Icon(Icons.smart_toy, size: 28, color: Colors.white),
-      ),
-    );
-  }
+  // Widget _buildFloatingButton() {
+  //   return Transform.translate(
+  //     offset: const Offset(0, -10),
+  //     child: FloatingActionButton(
+  //       backgroundColor: Color.fromRGBO(0, 40, 86, 1),
+  //       onPressed: () {
+  //         // Acción del asistente virtual
+  //         Navigator.push(
+  //             context, MaterialPageRoute(builder: (context) => Chat()));
+  //       },
+  //       child: const Icon(Icons.smart_toy, size: 28, color: Colors.white),
+  //     ),
+  //   );
+  // }
 
   Widget _buildProfileDrawer() {
     return Drawer(
