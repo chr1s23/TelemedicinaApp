@@ -1,4 +1,5 @@
 import 'package:chatbot/view/screens/resource_detail.dart';
+import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
@@ -71,7 +72,7 @@ class _ResourcesPageState extends State<Resources> {
           style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.bold,
-            color: Colors.black,
+            color: AllowedColors.black,
           ),
         ),
         TextButton(
@@ -83,7 +84,7 @@ class _ResourcesPageState extends State<Resources> {
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.bold,
-              color: const Color.fromRGBO(165, 16, 08, 1),
+              color: AllowedColors.red,
             ),
           ),
         ),
@@ -109,14 +110,14 @@ class _ResourcesPageState extends State<Resources> {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.bold,
-                color: Colors.black,
+                color: AllowedColors.black,
               ),
             ),
             const SizedBox(height: 5),
             Text(
               video["description"],
               style: TextStyle(
-                  fontSize: 12, color: Color.fromRGBO(111, 111, 111, 1)),
+                  fontSize: 12, color: AllowedColors.gray),
             ),
             const SizedBox(height: 10),
             Row(
@@ -138,7 +139,7 @@ class _ResourcesPageState extends State<Resources> {
                     video["liked"] ? Icons.favorite : Icons.favorite_border,
                     color: video["liked"]
                         ? Colors.red
-                        : Color.fromRGBO(111, 111, 111, 1),
+                        : AllowedColors.gray,
                     size: 24,
                   ),
                   onPressed: () => _toggleLike(index),
@@ -184,12 +185,12 @@ class _ResourcesPageState extends State<Resources> {
             },
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.black,
+                color: AllowedColors.black,
                 shape: BoxShape.circle,
               ),
               padding: const EdgeInsets.all(15),
               child:
-                  const Icon(Icons.play_arrow, color: Colors.white, size: 50),
+                  const Icon(Icons.play_arrow, color: AllowedColors.white, size: 50),
             ),
           ),
         ),

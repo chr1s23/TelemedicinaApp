@@ -1,5 +1,7 @@
 import 'package:chatbot/model/requests/paciente_request.dart';
 
+UserRequest? _userRequest;
+
 class UserRequest {
   String nombreUsuario;
   String contrasena;
@@ -8,4 +10,7 @@ class UserRequest {
   PacienteRequest paciente;
 
   UserRequest(this.nombreUsuario, this.contrasena, this.rol, this.aceptaConsentimiento, this.paciente);
+
+  static UserRequest? getUserRequest() => _userRequest;
+  static setUserRequest(UserRequest userRequest) => _userRequest = userRequest;
 }

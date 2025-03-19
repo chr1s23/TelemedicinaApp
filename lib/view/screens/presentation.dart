@@ -1,5 +1,6 @@
 import 'package:chatbot/view/widgets/custom_button.dart';
 import 'package:chatbot/view/widgets/custom_ink_well.dart';
+import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
 import 'login.dart';
 import 'register.dart';
@@ -63,7 +64,7 @@ class _PresentacionState extends State<Presentation> {
           Column(
             children: [
               CustomButton(
-                  color: Color.fromRGBO(0, 40, 86, 1),
+                  color: AllowedColors.blue,
                   label: "Iniciar Sesión",
                   onPressed: () {
                     Navigator.push(context,
@@ -91,7 +92,7 @@ class _PresentacionState extends State<Presentation> {
         Text(
           title,
           style: TextStyle(
-              fontSize: 15, fontWeight: FontWeight.bold, color: Colors.black),
+              fontSize: 15, fontWeight: FontWeight.bold, color: AllowedColors.black),
           textAlign: TextAlign.center,
         ),
         if (subtitle.isNotEmpty)
@@ -102,7 +103,7 @@ class _PresentacionState extends State<Presentation> {
               style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black),
+                  color: AllowedColors.black),
               textAlign: TextAlign.center,
             ),
           ),
@@ -128,8 +129,8 @@ class _PresentacionState extends State<Presentation> {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: _currentIndex == index
-                ? const Color.fromRGBO(0, 40, 86, 1)
-                : Color.fromRGBO(111, 111, 111, 1),
+                ? AllowedColors.blue
+                : AllowedColors.gray,
           ),
         ),
       ),

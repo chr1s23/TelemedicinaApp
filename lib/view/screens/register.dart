@@ -1,7 +1,9 @@
+import 'package:chatbot/model/requests/user.dart';
 import 'package:chatbot/view/screens/personal_data_form.dart';
 import 'package:chatbot/view/widgets/custom_button.dart';
 import 'package:chatbot/view/widgets/custom_ink_well.dart';
 import 'package:chatbot/view/widgets/custom_input_field.dart';
+import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
 import 'login.dart'; // Para navegar a la pantalla de inicio de sesión
 
@@ -52,7 +54,7 @@ class _RegisterScreenState extends State<Register> {
                 style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black),
+                    color: AllowedColors.black),
               ),
               const SizedBox(height: 30),
 
@@ -62,7 +64,7 @@ class _RegisterScreenState extends State<Register> {
                 child: Text(
                   "Nombre*",
                   style: TextStyle(
-                      fontSize: 12, color: Color.fromRGBO(111, 111, 111, 1)),
+                      fontSize: 12, color: AllowedColors.gray),
                 ),
               ),
               CustomInputField(
@@ -79,7 +81,7 @@ class _RegisterScreenState extends State<Register> {
                 child: Text(
                   "Número de teléfono*",
                   style: TextStyle(
-                      fontSize: 12, color: Color.fromRGBO(111, 111, 111, 1)),
+                      fontSize: 12, color: AllowedColors.gray),
                 ),
               ),
               CustomInputField(
@@ -97,7 +99,7 @@ class _RegisterScreenState extends State<Register> {
                 child: Text(
                   "Contraseña*",
                   style: TextStyle(
-                      fontSize: 12, color: Color.fromRGBO(111, 111, 111, 1)),
+                      fontSize: 12, color: AllowedColors.gray),
                 ),
               ),
               CustomInputField(
@@ -115,7 +117,7 @@ class _RegisterScreenState extends State<Register> {
                 child: Text(
                   "Confirmar contraseña*",
                   style: TextStyle(
-                      fontSize: 12, color: Color.fromRGBO(111, 111, 111, 1)),
+                      fontSize: 12, color: AllowedColors.gray),
                 ),
               ),
               CustomInputField(
@@ -129,7 +131,7 @@ class _RegisterScreenState extends State<Register> {
               Column(
                 children: [
                   CustomButton(
-                      color: Color.fromRGBO(0, 40, 86, 1),
+                      color: AllowedColors.blue,
                       label: "Crear una cuenta",
                       onPressed: () {
                         if (_formKey.currentState?.validate() ?? false) {
@@ -139,10 +141,14 @@ class _RegisterScreenState extends State<Register> {
                                 content: Text(
                                     "Las contraseñas no coinciden. Por favor, inténtalo de nuevo.")));
                           } else {
+                            User.setCurrentUser(User(_nameController.text, _usernameController.text, _passwordController.text));
+
                             Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => PersonalDataForm()));
+                              context,
+                              MaterialPageRoute(builder: (context) => 
+                                PersonalDataForm()
+                              )
+                            );
                           }
                         }
                       }),
