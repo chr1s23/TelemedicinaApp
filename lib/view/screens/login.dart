@@ -22,7 +22,6 @@ class _LoginState extends State<Login> {
   final TextEditingController passwordController = TextEditingController();
   bool _isLoading = false;
   final _formKey = GlobalKey<FormState>();
-  User user = User("", "", "");
 
   @override
   void dispose() {
@@ -39,10 +38,7 @@ class _LoginState extends State<Login> {
       _isLoading = true;
     });
 
-    User user =
-        User(usernameController.value.text, passwordController.value.text);
-
-    UserResponse? userLogged = await authService.login(context, user);
+    User user = User("",usernameController.value.text, passwordController.value.text);
     UserResponse? userLogged = await AuthService.login(context, user);
     if (userLogged != null) {
       Navigator.pushAndRemoveUntil(
