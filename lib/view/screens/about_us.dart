@@ -1,3 +1,4 @@
+import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
 
 class AboutUs extends StatefulWidget {
@@ -13,7 +14,7 @@ class _AboutUsPageState extends State<AboutUs> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: AllowedColors.white,
         centerTitle: true,
         title: Image.asset(
           'assets/images/logo_ucuenca_top.png',
@@ -43,13 +44,13 @@ class _AboutUsPageState extends State<AboutUs> {
                   children: [
                     Text(
                       "Acerca de",
-                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.black),
+                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AllowedColors.black),
                     ),
                     const SizedBox(height: 20),
                     Container(
                       height: 400, // Espacio grande para los términos
                       decoration: BoxDecoration(
-                        border: Border.all(color: Color.fromRGBO(111, 111, 111, 1), width: 1),
+                        border: Border.all(color: AllowedColors.gray, width: 1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       padding: const EdgeInsets.all(12),
@@ -65,7 +66,7 @@ class _AboutUsPageState extends State<AboutUs> {
                           "7. Contacto y soporte.\n\n"
                           "Al aceptar estos términos, confirma que ha leído y entendido "
                           "las políticas de uso de la aplicación.",
-                          style: TextStyle(fontSize: 12, color: Colors.black)
+                          style: TextStyle(fontSize: 12, color: AllowedColors.black)
                         ),
                       ),
                     ),
@@ -79,7 +80,7 @@ class _AboutUsPageState extends State<AboutUs> {
               height: 50,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromRGBO(0, 40, 86, 1),
+                  backgroundColor: AllowedColors.blue,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),
@@ -89,7 +90,7 @@ class _AboutUsPageState extends State<AboutUs> {
                 },
                 child: Text(
                   "Entendido",
-                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)
+                  style: TextStyle(fontWeight: FontWeight.bold, color: AllowedColors.white)
                 ),
               ),
             ),

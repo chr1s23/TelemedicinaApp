@@ -7,25 +7,34 @@ import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 import 'package:flutter/material.dart';
 
-class AuthService {
-  final dio = Dio(BaseOptions(
-    baseUrl: "https://clias.ucuenca.edu.ec",
-    headers: {'Content-Type': 'application/json'},
-  ));
+Dio? _dio;
 
-  void configureDio() {
-    (dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
-      final client = HttpClient();
-      client.badCertificateCallback =
-          (X509Certificate cert, String host, int port) => true;
-      return client;
-    };
+void configureDio(Dio dio) {
+  (dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
+    final client = HttpClient();
+    client.badCertificateCallback =
+        (X509Certificate cert, String host, int port) => true;
+    return client;
+  };
+}
+
+Dio getDio() {
+  if (_dio == null) {
+    _dio = Dio(BaseOptions(
+      baseUrl: "https://clias.ucuenca.edu.ec",
+      headers: {'Content-Type': 'application/json'},
+    ));
+
+    configureDio(_dio!);
   }
 
-  Future<UserResponse?> login(BuildContext context, User user) async {
-    configureDio();
+  return _dio!;
+}
+
+sealed class AuthService {
+  static Future<UserResponse?> login(BuildContext context, User user) async {
     try {
-      final response = await dio.post("/usuarios/autenticar", data: {
+      final response = await getDio().post("/usuarios/autenticar", data: {
         "nombreUsuario": user.nombreUsuario,
         "contrasena": user.contrasena,
       });
@@ -57,9 +66,9 @@ class AuthService {
     return null;
   }
 
-  Future<UserResponse?> signUp(BuildContext context, UserRequest user) async {
+  static Future<UserResponse?> signUp(BuildContext context, UserRequest user) async {
     try {
-      final response = await dio.post("/usuarios/registro", data: user);
+      final response = await getDio().post("/usuarios/registro", data: user);
 
       if (response.statusCode == 200) {
         UserResponse user = UserResponse.fromJsonMap(response.data);

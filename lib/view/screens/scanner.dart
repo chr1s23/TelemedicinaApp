@@ -1,4 +1,5 @@
 import 'package:chatbot/view/screens/dashboard.dart';
+import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
@@ -74,7 +75,7 @@ class _QRScannerPageState extends State<Scanner> {
         style: TextStyle(
           fontSize: 15,
           fontWeight: FontWeight.bold,
-          color: Color.fromRGBO(165, 16, 08, 1),
+          color: AllowedColors.red,
         ),
       ),
       centerTitle: true,

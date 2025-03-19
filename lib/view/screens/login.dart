@@ -3,6 +3,7 @@ import 'package:chatbot/service/auth_service.dart';
 import 'package:chatbot/view/widgets/custom_ink_well.dart';
 import 'package:chatbot/view/widgets/custom_input_field.dart';
 import 'package:chatbot/view/widgets/custom_loading_button.dart';
+import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
 
 import 'dashboard.dart';
@@ -20,8 +21,8 @@ class _LoginState extends State<Login> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   bool _isLoading = false;
-  final AuthService authService = AuthService();
   final _formKey = GlobalKey<FormState>();
+  User user = User("", "", "");
 
   @override
   void dispose() {
@@ -42,6 +43,7 @@ class _LoginState extends State<Login> {
         User(usernameController.value.text, passwordController.value.text);
 
     UserResponse? userLogged = await authService.login(context, user);
+    UserResponse? userLogged = await AuthService.login(context, user);
     if (userLogged != null) {
       Navigator.pushAndRemoveUntil(
           context,
@@ -77,11 +79,11 @@ class _LoginState extends State<Login> {
                     style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black),
+                        color: AllowedColors.black),
                   ),
                   Text(
                     "Ingresa a tu cuenta para continuar",
-                    style: TextStyle(fontSize: 13, color: Colors.black),
+                    style: TextStyle(fontSize: 13, color: AllowedColors.black),
                   ),
                   SizedBox(
                     height: 30,
@@ -91,7 +93,7 @@ class _LoginState extends State<Login> {
                     child: Text("Número de teléfono*",
                         style: TextStyle(
                             fontSize: 12,
-                            color: Color.fromRGBO(111, 111, 111, 1))),
+                            color: AllowedColors.gray)),
                   ),
                   CustomInputField(
                       controller: usernameController,
@@ -108,7 +110,7 @@ class _LoginState extends State<Login> {
                       "Contraseña*",
                       style: TextStyle(
                           fontSize: 12,
-                          color: Color.fromRGBO(111, 111, 111, 1)),
+                          color: AllowedColors.gray),
                     ),
                   ),
                   CustomInputField(
@@ -123,7 +125,7 @@ class _LoginState extends State<Login> {
                   Column(
                     children: [
                       CustomLoadingButton(
-                          color: Color.fromRGBO(0, 40, 86, 1),
+                          color: AllowedColors.blue,
                           label: "Iniciar Sesión",
                           loading: _isLoading,
                           onPressed: _isLoading

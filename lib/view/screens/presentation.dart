@@ -1,5 +1,6 @@
 import 'package:chatbot/view/widgets/custom_button.dart';
 import 'package:chatbot/view/widgets/custom_ink_well.dart';
+import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
 import 'login.dart';
 import 'register.dart';
@@ -47,7 +48,7 @@ class Presentation extends StatelessWidget {
           Column(
             children: [
               CustomButton(
-                  color: Color.fromRGBO(0, 40, 86, 1),
+                  color: AllowedColors.blue,
                   label: "Iniciar Sesión",
                   onPressed: () {
                     Navigator.push(context,

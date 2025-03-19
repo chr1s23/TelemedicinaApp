@@ -2,6 +2,7 @@ import 'package:chatbot/view/screens/chat.dart';
 import 'package:chatbot/view/screens/dashboard.dart';
 import 'package:chatbot/view/screens/notifications.dart';
 import 'package:chatbot/view/screens/resources.dart';
+import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
@@ -70,7 +71,7 @@ class _VideoPlayerPageState extends State<ResourceDetail> {
         style: TextStyle(
           fontSize: 15,
           fontWeight: FontWeight.bold,
-          color: Color.fromRGBO(165, 16, 08, 1),
+          color: AllowedColors.red,
         ),
       ),
       centerTitle: true,
@@ -120,13 +121,13 @@ class _VideoPlayerPageState extends State<ResourceDetail> {
       children: [
         IconButton(
           icon: const Icon(Icons.arrow_back,
-              size: 40, color: Color.fromRGBO(0, 40, 86, 1)),
+              size: 40, color: AllowedColors.blue),
           onPressed:
               _currentIndex > 0 ? () => _changeVideo(_currentIndex - 1) : null,
         ),
         IconButton(
           icon: const Icon(Icons.arrow_forward,
-              size: 40, color: Color.fromRGBO(0, 40, 86, 1)),
+              size: 40, color: AllowedColors.blue),
           onPressed: _currentIndex < widget.videos.length - 1
               ? () => _changeVideo(_currentIndex + 1)
               : null,
@@ -143,14 +144,14 @@ class _VideoPlayerPageState extends State<ResourceDetail> {
           widget.videos[_currentIndex]["title"]!,
           style: TextStyle(
             fontSize: 15,
-            color: Colors.black,
+            color: AllowedColors.black,
           ),
         ),
         const SizedBox(height: 5),
         Text(
           widget.videos[_currentIndex]["description"]!,
           style:
-              TextStyle(fontSize: 13, color: Color.fromRGBO(111, 111, 111, 1)),
+              TextStyle(fontSize: 13, color: AllowedColors.gray),
         ),
       ],
     );
@@ -192,8 +193,8 @@ class _VideoPlayerPageState extends State<ResourceDetail> {
             },
             icon: Icon(icon,
                 color: marked
-                    ? Color.fromRGBO(0, 40, 86, 1)
-                    : Color.fromRGBO(111, 111, 111, 1),
+                    ? AllowedColors.blue
+                    : AllowedColors.gray,
                 size: 28))
       ],
     );
@@ -203,13 +204,13 @@ class _VideoPlayerPageState extends State<ResourceDetail> {
     return Transform.translate(
       offset: const Offset(0, -10),
       child: FloatingActionButton(
-        backgroundColor: Color.fromRGBO(0, 40, 86, 1),
+        backgroundColor: AllowedColors.blue,
         onPressed: () {
           // Acción del asistente virtual
           Navigator.push(
               context, MaterialPageRoute(builder: (context) => Chat()));
         },
-        child: const Icon(Icons.smart_toy, size: 28, color: Colors.white),
+        child: const Icon(Icons.smart_toy, size: 28, color: AllowedColors.white),
       ),
     );
   }

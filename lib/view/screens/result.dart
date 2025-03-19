@@ -2,6 +2,7 @@ import 'package:chatbot/view/screens/chat.dart';
 import 'package:chatbot/view/screens/dashboard.dart';
 import 'package:chatbot/view/screens/notifications.dart';
 import 'package:chatbot/view/screens/resources.dart';
+import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'dart:io';
@@ -67,7 +68,7 @@ class _ResultPageState extends State<Result> {
         style: TextStyle(
           fontSize: 15,
           fontWeight: FontWeight.bold,
-          color: Color.fromRGBO(165, 16, 08, 1),
+          color: AllowedColors.red,
         ),
       ),
       centerTitle: true,
@@ -80,7 +81,7 @@ class _ResultPageState extends State<Result> {
       style: TextStyle(
         fontSize: 15,
         fontWeight: FontWeight.bold,
-        color: Colors.black,
+        color: AllowedColors.black,
       ),
     );
   }
@@ -108,7 +109,7 @@ class _ResultPageState extends State<Result> {
                   child: Text(
                     "No se encontró el PDF",
                     style: TextStyle(
-                        fontSize: 12, color: Color.fromRGBO(165, 16, 08, 1)),
+                        fontSize: 12, color: AllowedColors.red),
                   ),
                 ),
     );
@@ -133,15 +134,15 @@ class _ResultPageState extends State<Result> {
       decoration: InputDecoration(
         labelText: label,
         labelStyle:
-            TextStyle(fontSize: 12, color: Color.fromRGBO(111, 111, 111, 1)),
+            TextStyle(fontSize: 12, color: AllowedColors.gray),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(30),
           borderSide: const BorderSide(color: Colors.grey),
         ),
         filled: true,
-        fillColor: Color.fromRGBO(111, 111, 111, 1),
+        fillColor: AllowedColors.gray,
       ),
-      style: TextStyle(fontSize: 15, color: Colors.black),
+      style: TextStyle(fontSize: 15, color: AllowedColors.black),
     );
   }
 
@@ -181,8 +182,8 @@ class _ResultPageState extends State<Result> {
             },
             icon: Icon(icon,
                 color: marked
-                    ? Color.fromRGBO(0, 40, 86, 1)
-                    : Color.fromRGBO(111, 111, 111, 1),
+                    ? AllowedColors.blue
+                    : AllowedColors.gray,
                 size: 28))
       ],
     );
@@ -192,13 +193,13 @@ class _ResultPageState extends State<Result> {
     return Transform.translate(
       offset: const Offset(0, -10),
       child: FloatingActionButton(
-        backgroundColor: Color.fromRGBO(0, 40, 86, 1),
+        backgroundColor: AllowedColors.blue,
         onPressed: () {
           // Acción del asistente virtual
           Navigator.push(
               context, MaterialPageRoute(builder: (context) => Chat()));
         },
-        child: const Icon(Icons.smart_toy, size: 28, color: Colors.white),
+        child: const Icon(Icons.smart_toy, size: 28, color: AllowedColors.white),
       ),
     );
   }

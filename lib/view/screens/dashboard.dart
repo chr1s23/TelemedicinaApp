@@ -5,6 +5,7 @@ import 'package:chatbot/view/screens/personal_data_form.dart';
 import 'package:chatbot/view/screens/resources.dart';
 import 'package:chatbot/view/screens/scanner.dart';
 import 'package:chatbot/view/screens/wip.dart';
+import 'package:chatbot/view/widgets/utils.dart';
 import 'package:chatbot/view/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
@@ -64,7 +65,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
         height: 50,
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color.fromRGBO(165, 16, 08, 1),
+            backgroundColor: AllowedColors.red,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(30),
             ),
@@ -72,7 +73,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
           onPressed: () {
             _showHelpDialog();
           },
-          child: Text("H", style: TextStyle(fontSize: 12, color: Colors.white)),
+          child: Text("H", style: TextStyle(fontSize: 12, color: AllowedColors.white)),
         ),
       ),
       title: Text(
@@ -80,7 +81,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
         style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.bold,
-            color: Color.fromRGBO(165, 16, 8, 1)),
+            color: AllowedColors.red),
       ),
       centerTitle: true,
       actions: [
@@ -128,7 +129,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
                     alignment: Alignment.topLeft,
                     child: IconButton(
                       icon: const Icon(Icons.close,
-                          color: Colors.black, size: 24),
+                          color: AllowedColors.black, size: 24),
                       onPressed: () {
                         helpVideoController.pause();
                         helpVideoController.dispose();
@@ -157,8 +158,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
                         height: 50,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                const Color.fromRGBO(165, 16, 08, 1),
+                            backgroundColor: AllowedColors.red,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(30),
                             ),
@@ -172,7 +172,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
                             "Entendido",
                             style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                color: Colors.white),
+                                color: AllowedColors.white),
                           ),
                         ),
                       ),
@@ -182,7 +182,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
                         height: 50,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color.fromRGBO(0, 40, 86, 1),
+                            backgroundColor: AllowedColors.blue,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(30),
                             ),
@@ -197,7 +197,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
                             "Acerca de",
                             style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                color: Colors.white),
+                                color: AllowedColors.white),
                           ),
                         ),
                       ),
@@ -221,7 +221,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
           Text(
             "Automuestreo",
             style: TextStyle(
-                fontSize: 15, fontWeight: FontWeight.bold, color: Colors.black),
+                fontSize: 15, fontWeight: FontWeight.bold, color: AllowedColors.black),
           ),
           const SizedBox(height: 15),
           _buildVideoPlayer(),
@@ -260,7 +260,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
           Text(
               "Este video explica el proceso de automuestreo. Sigue los pasos descritos para completar el procedimiento correctamente.",
               style: TextStyle(
-                  fontSize: 12, color: Color.fromRGBO(111, 111, 111, 1))),
+                  fontSize: 12, color: AllowedColors.gray)),
         ],
       ),
     );
@@ -327,13 +327,13 @@ class _AutoSamplingPageState extends State<Dashboard> {
   //   return Transform.translate(
   //     offset: const Offset(0, -10),
   //     child: FloatingActionButton(
-  //       backgroundColor: Color.fromRGBO(0, 40, 86, 1),
+  //       backgroundColor: AllowedColors.blue,
   //       onPressed: () {
   //         // Acción del asistente virtual
   //         Navigator.push(
   //             context, MaterialPageRoute(builder: (context) => Chat()));
   //       },
-  //       child: const Icon(Icons.smart_toy, size: 28, color: Colors.white),
+  //       child: const Icon(Icons.smart_toy, size: 28, color: AllowedColors.white),
   //     ),
   //   );
   // }
@@ -357,7 +357,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
           Text(
             "Juan Pérez",
             style: TextStyle(
-                fontSize: 15, fontWeight: FontWeight.bold, color: Colors.black),
+                fontSize: 15, fontWeight: FontWeight.bold, color: AllowedColors.black),
           ),
           const SizedBox(height: 30),
 
@@ -366,7 +366,10 @@ class _AutoSamplingPageState extends State<Dashboard> {
             Navigator.pop(context); // Cierra el Drawer
             // Navegar a la pantalla de perfil
             Navigator.pushReplacement(context,
-                MaterialPageRoute(builder: (context) => PersonalDataForm()));
+              MaterialPageRoute(
+                builder: (context) => PersonalDataForm()
+              )
+            );
           }),
           _buildDrawerButton(Icons.info, "Acerca de", () {
             Navigator.pop(context); // Cierra el Drawer
@@ -384,7 +387,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
               width: double.infinity,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color.fromRGBO(165, 16, 08, 1),
+                  backgroundColor: AllowedColors.red,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),
@@ -397,7 +400,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
                   "Cerrar sesión",
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: AllowedColors.white,
                   ),
                 ),
               ),
@@ -411,7 +414,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
 
   Widget _buildDrawerButton(IconData icon, String label, VoidCallback onTap) {
     return ListTile(
-      leading: Icon(icon, color: Color.fromRGBO(0, 40, 86, 1)),
+      leading: Icon(icon, color: AllowedColors.blue),
       title: Text(
         label,
         style: TextStyle(fontSize: 13),

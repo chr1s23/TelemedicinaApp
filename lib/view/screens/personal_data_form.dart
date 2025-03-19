@@ -1,3 +1,6 @@
+import 'package:chatbot/model/requests/paciente_request.dart';
+import 'package:chatbot/model/requests/user.dart';
+import 'package:chatbot/model/requests/user_request.dart';
 import 'package:chatbot/view/screens/socioeconomic_information.dart';
 import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
@@ -86,7 +89,7 @@ class _PersonalDataFormState extends State<PersonalDataForm> {
               );
             },
             child: Text("Cancelar",
-              style: TextStyle(color: Color.fromRGBO(165, 16, 8, 1), fontSize: 12)
+              style: TextStyle(color: AllowedColors.red, fontSize: 12)
             )
           ),
         ],
@@ -102,14 +105,14 @@ class _PersonalDataFormState extends State<PersonalDataForm> {
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 15,
-                  color: Colors.black,
+                  color: AllowedColors.black,
                 ),
               ),
               Text(
                   "Por favor, completa los siguientes campos con información válida",
                   style: TextStyle(
                     fontSize: 13,
-                    color: Colors.black,
+                    color: AllowedColors.black,
                   )),
               const SizedBox(height: 20),
 
@@ -123,7 +126,7 @@ class _PersonalDataFormState extends State<PersonalDataForm> {
                     }
                     return null;
                   },
-                  style: TextStyle(fontSize: 15, color: Colors.black),
+                  style: TextStyle(fontSize: 15, color: AllowedColors.black),
                   decoration: inputDecoration('dd/MM/yyyy', isCalendar: true),
                   readOnly: true,
                   onTap: () {
@@ -179,24 +182,44 @@ class _PersonalDataFormState extends State<PersonalDataForm> {
                 height: 50,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromRGBO(0, 40, 86, 1),
+                    backgroundColor: AllowedColors.blue,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
                     ),
                   ),
                   onPressed: () {
                     if (_formKey.currentState?.validate() ?? false) {
+                      User user = User.getCurrentUser();
+                      //TODO: Handle edit
+                      UserRequest.setUserRequest(
+                        UserRequest(
+                          user.nombreUsuario, 
+                          user.contrasena, 
+                          "USER", 
+                          false,
+                          PacienteRequest(
+                            user.nombre, 
+                            dateController.text, 
+                            _selectedCountry!, 
+                            _selectedLanguage!, 
+                            _selectedMaritalStatus!, 
+                            _selectedGender!, 
+                            null
+                          )
+                        )
+                      );
                       Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  SocioeconomicInformation()));
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SocioeconomicInformation()
+                        )
+                      );
                     }
                   },
                   child: Text(
                     "Continuar",
                     style: TextStyle(
-                        fontWeight: FontWeight.bold, color: Colors.white),
+                        fontWeight: FontWeight.bold, color: AllowedColors.white),
                   ),
                 ),
               ),
