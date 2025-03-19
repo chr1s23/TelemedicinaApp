@@ -3,7 +3,9 @@ import 'package:chatbot/view/screens/chat.dart';
 import 'package:chatbot/view/screens/notifications.dart';
 import 'package:chatbot/view/screens/personal_data_form.dart';
 import 'package:chatbot/view/screens/resources.dart';
+import 'package:chatbot/view/screens/scanner.dart';
 import 'package:chatbot/view/screens/wip.dart';
+import 'package:chatbot/view/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
@@ -49,7 +51,8 @@ class _AutoSamplingPageState extends State<Dashboard> {
         WIPScreen(),
         Notifications(),
       ][_currentIndex],
-      bottomNavigationBar: _buildBottomNavigationBar((index) => _currentIndex = index, () => _currentIndex),
+      bottomNavigationBar: _buildBottomNavigationBar(
+          (index) => _currentIndex = index, () => _currentIndex),
     );
   }
 
@@ -235,7 +238,24 @@ class _AutoSamplingPageState extends State<Dashboard> {
             ),
           ),
           const SizedBox(height: 20),
-          _buildStartProcessButton(),
+          CustomButton(
+              color: Color.fromRGBO(0, 40, 86, 1),
+              label: "Iniciar proceso",
+              onPressed: () {
+                // funciona para ir a la ventana del chat, automaticamente se conecta mediante sockets
+                // por defecto cuando se inicia enviar un mensaje al chatbot para iniciar el proceso, por ejmplo "comenzar proceso"
+                Navigator.push(
+                    context, MaterialPageRoute(builder: (context) => Chat()));
+              }),
+          const SizedBox(height: 20),
+          CustomButton(
+              color: Color.fromRGBO(0, 40, 86, 1),
+              label: "Registrar Dispositivo",
+              onPressed: () {
+                // Acción de registrar el dispositivo, llevar a la pagina de escanear el dispositivo y guardar la ifnormacion en el servidor
+                Navigator.push(
+                    context, MaterialPageRoute(builder: (context) => Scanner()));
+              }),
           const SizedBox(height: 15),
           Text(
               "Este video explica el proceso de automuestreo. Sigue los pasos descritos para completar el procedimiento correctamente.",
@@ -266,32 +286,8 @@ class _AutoSamplingPageState extends State<Dashboard> {
     );
   }
 
-  Widget _buildStartProcessButton() {
-    return SizedBox(
-      width: 300,
-      height: 50,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color.fromRGBO(0, 40, 86, 1),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
-          ),
-        ),
-        onPressed: () {
-          // Acción de iniciar proceso, agregar desde aqui los criterios de inclusion
-          //para el chatbot cuando este listo
-          Navigator.push(
-              context, MaterialPageRoute(builder: (context) => Chat()));
-        },
-        child: Text(
-          "Iniciar proceso",
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBottomNavigationBar(void Function(int) setIndex, int Function() currentIndex) {
+  Widget _buildBottomNavigationBar(
+      void Function(int) setIndex, int Function() currentIndex) {
     return NavigationBar(
       onDestinationSelected: (int index) {
         setState(() {
@@ -299,7 +295,8 @@ class _AutoSamplingPageState extends State<Dashboard> {
         });
       },
       indicatorShape: CircleBorder(),
-      labelBehavior: NavigationDestinationLabelBehavior.alwaysHide, // Ocultar labels
+      labelBehavior:
+          NavigationDestinationLabelBehavior.alwaysHide, // Ocultar labels
       selectedIndex: currentIndex(),
       destinations: const [
         NavigationDestination(
@@ -323,7 +320,6 @@ class _AutoSamplingPageState extends State<Dashboard> {
           label: 'Notificaciones',
         ),
       ],
-      
     );
   }
 

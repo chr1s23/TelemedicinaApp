@@ -70,11 +70,10 @@ class _PersonalDataFormState extends State<PersonalDataForm> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.white,
         centerTitle: true,
         title: Image.asset(
           'assets/images/logo_ucuenca_top.png',
-          height: 60,
+          height: 50,
         ),
         actions: [
           TextButton(

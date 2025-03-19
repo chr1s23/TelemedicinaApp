@@ -1,5 +1,6 @@
 import 'package:chatbot/view/screens/dashboard.dart';
 import 'package:chatbot/view/screens/register.dart';
+import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
 
 class TermsAndConditions extends StatefulWidget {
@@ -37,10 +38,17 @@ class _TermsAndConditionsPageState extends State<TermsAndConditions> {
         actions: [
           TextButton(
               onPressed: () {
-                //agregar la logica para borrar todo el formulario y regresar a la pagina de registro
-                Navigator.pop(context);
-                Navigator.pushReplacement(context,
-                    MaterialPageRoute(builder: (context) => Register()));
+                modalYesNoDialog(
+                  context: context,
+                  title: "¿Cancelar?",
+                  message:
+                      "¿Desea cancelar la creación de su cuenta? Se perderán todos los datos ingresados.",
+                  onYes: () => Navigator.of(context)
+                    ..pop()
+                    ..pop()
+                    ..pop()
+                    ..pop(),
+                );
               },
               child: Text("Cancelar",
                   style: TextStyle(

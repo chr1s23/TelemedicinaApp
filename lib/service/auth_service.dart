@@ -39,18 +39,13 @@ class AuthService {
           );
         }
       }
-    } on DioException catch (e) {
-      print("Error de Dio: ${e.message}");
-      print("Código de error: ${e.response?.statusCode}");
-      print("Respuesta del servidor: ${e.response?.data}");
-
+    } on DioException {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error de conexión con el servidor')),
         );
       }
     } catch (e) {
-      print(e);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

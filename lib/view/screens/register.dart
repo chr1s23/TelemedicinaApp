@@ -54,8 +54,11 @@ class _RegisterScreenState extends State<Register> {
                     fontWeight: FontWeight.bold,
                     color: Colors.black),
               ),
+              Text(
+                "Bienvenido, ingresa tus datos para comenzar a aprender!",
+                style: TextStyle(fontSize: 13, color: Colors.black),
+              ),
               const SizedBox(height: 30),
-
               // Nombre
               Align(
                 alignment: Alignment.topLeft,
@@ -102,7 +105,7 @@ class _RegisterScreenState extends State<Register> {
               ),
               CustomInputField(
                 controller: _passwordController,
-                hint: "Ingresa tu contraseña",
+                hint: "Ingresa tu contraseña, min. 6 caracteres",
                 obscureText: true,
                 errorMessage: "Este campo es obligatorio",
                 isNumber: false,
@@ -133,6 +136,11 @@ class _RegisterScreenState extends State<Register> {
                       label: "Crear una cuenta",
                       onPressed: () {
                         if (_formKey.currentState?.validate() ?? false) {
+                          if (_passwordController.text.length < 6) {
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                content: Text(
+                                    "La contraseña debe tener al menos 6 caracteres.")));
+                          }
                           if (_passwordController.text !=
                               _confirmPasswordController.text) {
                             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
