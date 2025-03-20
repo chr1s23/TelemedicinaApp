@@ -1,3 +1,5 @@
+import 'package:chatbot/model/requests/inf_socioeconomica_request.dart';
+import 'package:chatbot/model/requests/user_request.dart';
 import 'package:chatbot/view/screens/terms_and_conditions.dart';
 import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
@@ -59,7 +61,7 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
               },
               child: Text("Cancelar",
                   style: TextStyle(
-                      color: Color.fromRGBO(165, 16, 8, 1), fontSize: 12))),
+                      color: AllowedColors.red, fontSize: 12))),
         ],
       ),
       body: SingleChildScrollView(
@@ -73,7 +75,7 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 15,
-                  color: Colors.black,
+                  color: AllowedColors.black,
                 ),
               ),
               const SizedBox(height: 20),
@@ -114,7 +116,7 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
               buildLabel("Ocupación principal"),
               TextFormField(
                 controller: _occupationController,
-                style: TextStyle(fontSize: 15, color: Colors.black),
+                style: TextStyle(fontSize: 15, color: AllowedColors.black),
                 decoration: inputDecoration(
                     "Ejemplo: Profesor, Comerciante"),
               ),
@@ -145,22 +147,34 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
           height: 50,
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color.fromRGBO(0, 40, 86, 1),
+              backgroundColor: AllowedColors.blue,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(30),
               ),
             ),
             onPressed: () {
               //agregar la logica para guardar los campos que si estan llenos de informacion
-              //add the form aggregation acept terms and conditions here
-              Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => TermsAndConditions()));
+              UserRequest? user = UserRequest.getUserRequest();
+
+              if (user != null) {
+                InfSocioeconomicaRequest socioeconomica = InfSocioeconomicaRequest(
+                  _selectedEducationLevel,
+                  _selectedIncome,
+                  _selectedWorkStatus,
+                  _occupationController.text,
+                  _selectedBonus,
+                );
+
+                user.paciente.infoSocioeconomica = socioeconomica;
+              }
+              
+              Navigator.push(context, MaterialPageRoute(builder: (context) => TermsAndConditions()));
             },
             child: Text(
               "Continuar",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: AllowedColors.white,
               ),
             ),
           ),
@@ -179,7 +193,7 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
                 "En otro momento",
                 style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: Color.fromRGBO(165, 16, 08, 1)),
+                    color: AllowedColors.red),
               ),
             ),
           ),

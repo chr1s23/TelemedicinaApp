@@ -1,4 +1,5 @@
 import 'package:chatbot/view/screens/result.dart';
+import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
 
 class Notifications extends StatefulWidget {
@@ -71,9 +72,9 @@ class _NotificationsPageState extends State<Notifications>
   Widget _buildTabBar() {
     return TabBar(
       controller: _tabController,
-      indicatorColor: Color.fromRGBO(0, 40, 86, 1),
-      labelColor: Color.fromRGBO(0, 40, 86, 1),
-      unselectedLabelColor: Color.fromRGBO(111, 111, 111, 1),
+      indicatorColor: AllowedColors.blue,
+      labelColor: AllowedColors.blue,
+      unselectedLabelColor: AllowedColors.gray,
       tabs: [
         Tab(text: "Todas"),
         Tab(text: "Leídas"),
@@ -114,7 +115,7 @@ class _NotificationsPageState extends State<Notifications>
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       child: ListTile(
         leading: Icon(notification["icon"],
-            color: Color.fromRGBO(0, 40, 86, 1), size: 30),
+            color: AllowedColors.blue, size: 30),
         title: Text(
           notification["description"],
           style: TextStyle(
@@ -136,11 +137,11 @@ class _NotificationsPageState extends State<Notifications>
             Text(
               notification["date"],
               style: TextStyle(
-                  fontSize: 10, color: Color.fromRGBO(111, 111, 111, 1)),
+                  fontSize: 10, color: AllowedColors.gray),
             ),
             PopupMenuButton<String>(
               icon: const Icon(Icons.more_vert,
-                  size: 20, color: Color.fromRGBO(111, 111, 111, 1)),
+                  size: 20, color: AllowedColors.gray),
               onSelected: (value) {
                 // Acción según opción seleccionada
               },
@@ -164,7 +165,7 @@ class _NotificationsPageState extends State<Notifications>
           children: [
             Icon(
               attachment["type"] == "pdf" ? Icons.picture_as_pdf : Icons.link,
-              color: Color.fromRGBO(111, 111, 111, 1),
+              color: AllowedColors.gray,
               size: 16,
             ),
             const SizedBox(width: 5),
@@ -181,7 +182,7 @@ class _NotificationsPageState extends State<Notifications>
               child: Text(
                 attachment["name"],
                 style: TextStyle(
-                    fontSize: 11, color: Color.fromRGBO(0, 40, 86, 1)),
+                    fontSize: 11, color: AllowedColors.blue),
               ),
             )
           ],

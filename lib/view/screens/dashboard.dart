@@ -3,7 +3,10 @@ import 'package:chatbot/view/screens/chat.dart';
 import 'package:chatbot/view/screens/notifications.dart';
 import 'package:chatbot/view/screens/personal_data_form.dart';
 import 'package:chatbot/view/screens/resources.dart';
+import 'package:chatbot/view/screens/scanner.dart';
 import 'package:chatbot/view/screens/wip.dart';
+import 'package:chatbot/view/widgets/utils.dart';
+import 'package:chatbot/view/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
@@ -16,6 +19,7 @@ class Dashboard extends StatefulWidget {
 
 class _AutoSamplingPageState extends State<Dashboard> {
   late VideoPlayerController _videoController;
+  late VideoPlayerController helpVideoController;
   int _currentIndex = 0;
 
   @override
@@ -28,11 +32,16 @@ class _AutoSamplingPageState extends State<Dashboard> {
           });
     _videoController.play();
     _videoController.setLooping(false);
+    helpVideoController = VideoPlayerController.asset('assets/videos/sample.mp4')
+      ..initialize().then((_) {
+        setState(() {});
+      });
   }
 
   @override
   void dispose() {
     _videoController.dispose();
+    helpVideoController.dispose();
     super.dispose();
   }
 
@@ -49,7 +58,8 @@ class _AutoSamplingPageState extends State<Dashboard> {
         WIPScreen(),
         Notifications(),
       ][_currentIndex],
-      bottomNavigationBar: _buildBottomNavigationBar((index) => _currentIndex = index, () => _currentIndex),
+      bottomNavigationBar: _buildBottomNavigationBar(
+          (index) => _currentIndex = index, () => _currentIndex),
     );
   }
 
@@ -61,7 +71,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
         height: 50,
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color.fromRGBO(165, 16, 08, 1),
+            backgroundColor: AllowedColors.red,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(30),
             ),
@@ -69,15 +79,16 @@ class _AutoSamplingPageState extends State<Dashboard> {
           onPressed: () {
             _showHelpDialog();
           },
-          child: Text("H", style: TextStyle(fontSize: 12, color: Colors.white)),
+          child: Text("Ayuda",
+              style: TextStyle(fontSize: 12, color: AllowedColors.white)),
         ),
       ),
       title: Text(
-        "HELPY",
+        "SISA",
         style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.bold,
-            color: Color.fromRGBO(165, 16, 8, 1)),
+            color: AllowedColors.red),
       ),
       centerTitle: true,
       actions: [
@@ -105,14 +116,6 @@ class _AutoSamplingPageState extends State<Dashboard> {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setState) {
-            final helpVideoController =
-                VideoPlayerController.asset('assets/videos/sample.mp4');
-
-            helpVideoController.initialize().then((_) {
-              setState(() {});
-              helpVideoController.play(); // Reproduce automáticamente
-            });
-
             return Dialog(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(15),
@@ -125,7 +128,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
                     alignment: Alignment.topLeft,
                     child: IconButton(
                       icon: const Icon(Icons.close,
-                          color: Colors.black, size: 24),
+                          color: AllowedColors.black, size: 24),
                       onPressed: () {
                         helpVideoController.pause();
                         helpVideoController.dispose();
@@ -140,8 +143,17 @@ class _AutoSamplingPageState extends State<Dashboard> {
                         ? helpVideoController.value.aspectRatio
                         : 16 / 9,
                     child: helpVideoController.value.isInitialized
-                        ? VideoPlayer(helpVideoController)
-                        : const Center(child: CircularProgressIndicator()),
+                        ? InkWell(
+                            child: VideoPlayer(helpVideoController),
+                            onTap: () {
+                              setState(() {
+                                helpVideoController.value.isPlaying
+                                    ? helpVideoController.pause()
+                                    : helpVideoController.play();
+                              });
+                            },
+                          )
+                        : Center(child: CircularProgressIndicator()),
                   ),
 
                   const SizedBox(height: 15),
@@ -154,8 +166,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
                         height: 50,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                const Color.fromRGBO(165, 16, 08, 1),
+                            backgroundColor: AllowedColors.red,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(30),
                             ),
@@ -169,7 +180,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
                             "Entendido",
                             style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                color: Colors.white),
+                                color: AllowedColors.white),
                           ),
                         ),
                       ),
@@ -179,13 +190,13 @@ class _AutoSamplingPageState extends State<Dashboard> {
                         height: 50,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color.fromRGBO(0, 40, 86, 1),
+                            backgroundColor: AllowedColors.blue,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(30),
                             ),
                           ),
                           onPressed: () {
-                            Navigator.pushReplacement(
+                            Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) => AboutUs()));
@@ -194,7 +205,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
                             "Acerca de",
                             style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                color: Colors.white),
+                                color: AllowedColors.white),
                           ),
                         ),
                       ),
@@ -218,7 +229,9 @@ class _AutoSamplingPageState extends State<Dashboard> {
           Text(
             "Automuestreo",
             style: TextStyle(
-                fontSize: 15, fontWeight: FontWeight.bold, color: Colors.black),
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: AllowedColors.black),
           ),
           const SizedBox(height: 15),
           _buildVideoPlayer(),
@@ -235,12 +248,28 @@ class _AutoSamplingPageState extends State<Dashboard> {
             ),
           ),
           const SizedBox(height: 20),
-          _buildStartProcessButton(),
+          CustomButton(
+              color: Color.fromRGBO(0, 40, 86, 1),
+              label: "Iniciar proceso",
+              onPressed: () {
+                // funciona para ir a la ventana del chat, automaticamente se conecta mediante sockets
+                // por defecto cuando se inicia enviar un mensaje al chatbot para iniciar el proceso, por ejmplo "comenzar proceso"
+                Navigator.push(
+                    context, MaterialPageRoute(builder: (context) => Chat()));
+              }),
+          const SizedBox(height: 20),
+          CustomButton(
+              color: Color.fromRGBO(0, 40, 86, 1),
+              label: "Registrar Dispositivo",
+              onPressed: () {
+                // Acción de registrar el dispositivo, llevar a la pagina de escanear el dispositivo y guardar la ifnormacion en el servidor
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => Scanner()));
+              }),
           const SizedBox(height: 15),
           Text(
               "Este video explica el proceso de automuestreo. Sigue los pasos descritos para completar el procedimiento correctamente.",
-              style: TextStyle(
-                  fontSize: 12, color: Color.fromRGBO(111, 111, 111, 1))),
+              style: TextStyle(fontSize: 12, color: AllowedColors.gray)),
         ],
       ),
     );
@@ -266,32 +295,8 @@ class _AutoSamplingPageState extends State<Dashboard> {
     );
   }
 
-  Widget _buildStartProcessButton() {
-    return SizedBox(
-      width: 300,
-      height: 50,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color.fromRGBO(0, 40, 86, 1),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
-          ),
-        ),
-        onPressed: () {
-          // Acción de iniciar proceso, agregar desde aqui los criterios de inclusion
-          //para el chatbot cuando este listo
-          Navigator.push(
-              context, MaterialPageRoute(builder: (context) => Chat()));
-        },
-        child: Text(
-          "Iniciar proceso",
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBottomNavigationBar(void Function(int) setIndex, int Function() currentIndex) {
+  Widget _buildBottomNavigationBar(
+      void Function(int) setIndex, int Function() currentIndex) {
     return NavigationBar(
       onDestinationSelected: (int index) {
         setState(() {
@@ -299,7 +304,8 @@ class _AutoSamplingPageState extends State<Dashboard> {
         });
       },
       indicatorShape: CircleBorder(),
-      labelBehavior: NavigationDestinationLabelBehavior.alwaysHide, // Ocultar labels
+      labelBehavior:
+          NavigationDestinationLabelBehavior.alwaysHide, // Ocultar labels
       selectedIndex: currentIndex(),
       destinations: const [
         NavigationDestination(
@@ -323,7 +329,6 @@ class _AutoSamplingPageState extends State<Dashboard> {
           label: 'Notificaciones',
         ),
       ],
-      
     );
   }
 
@@ -331,13 +336,13 @@ class _AutoSamplingPageState extends State<Dashboard> {
   //   return Transform.translate(
   //     offset: const Offset(0, -10),
   //     child: FloatingActionButton(
-  //       backgroundColor: Color.fromRGBO(0, 40, 86, 1),
+  //       backgroundColor: AllowedColors.blue,
   //       onPressed: () {
   //         // Acción del asistente virtual
   //         Navigator.push(
   //             context, MaterialPageRoute(builder: (context) => Chat()));
   //       },
-  //       child: const Icon(Icons.smart_toy, size: 28, color: Colors.white),
+  //       child: const Icon(Icons.smart_toy, size: 28, color: AllowedColors.white),
   //     ),
   //   );
   // }
@@ -361,7 +366,9 @@ class _AutoSamplingPageState extends State<Dashboard> {
           Text(
             "Juan Pérez",
             style: TextStyle(
-                fontSize: 15, fontWeight: FontWeight.bold, color: Colors.black),
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: AllowedColors.black),
           ),
           const SizedBox(height: 30),
 
@@ -388,7 +395,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
               width: double.infinity,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color.fromRGBO(165, 16, 08, 1),
+                  backgroundColor: AllowedColors.red,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),
@@ -401,7 +408,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
                   "Cerrar sesión",
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: AllowedColors.white,
                   ),
                 ),
               ),
@@ -415,7 +422,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
 
   Widget _buildDrawerButton(IconData icon, String label, VoidCallback onTap) {
     return ListTile(
-      leading: Icon(icon, color: Color.fromRGBO(0, 40, 86, 1)),
+      leading: Icon(icon, color: AllowedColors.blue),
       title: Text(
         label,
         style: TextStyle(fontSize: 13),

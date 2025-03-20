@@ -1,3 +1,4 @@
+import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
 
 class CustomButton extends StatelessWidget {
@@ -23,7 +24,7 @@ class CustomButton extends StatelessWidget {
         onPressed: onPressed,
         child: Text(
           label,
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          style: TextStyle(fontWeight: FontWeight.bold, color: AllowedColors.white),
         ),
       ),
     );

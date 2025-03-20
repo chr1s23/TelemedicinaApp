@@ -5,6 +5,7 @@ import 'package:chatbot/providers/auth_provider.dart';
 import 'package:chatbot/providers/chat_provider.dart';
 import 'package:chatbot/view/screens/scanner.dart';
 import 'package:chatbot/service/chat_service.dart';
+import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -21,7 +22,7 @@ class _ChatbotPageState extends State<Chat> {
   final TextEditingController _messageController = TextEditingController();
   final List<Map<String, dynamic>> _messages = [
     {
-      "text": "¡Hola! Soy HelpyChat. ¿En qué puedo ayudarte hoy?",
+      "text": "¡Hola! Soy SisaChat. ¿En qué puedo ayudarte hoy?",
       "isBot": true
     },
   ];
@@ -134,11 +135,11 @@ class _ChatbotPageState extends State<Chat> {
               height: 30), // Ícono del chatbot
           const SizedBox(width: 10),
           Text(
-            "HELPYCHAT",
+            "SISA CHAT",
             style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.bold,
-                color: Color.fromRGBO(165, 16, 08, 1)),
+                color: AllowedColors.red),
           ),
         ],
       ),
@@ -165,12 +166,12 @@ class _ChatbotPageState extends State<Chat> {
           margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AllowedColors.white,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
             '.' * _loadingIndex,
-            style: const TextStyle(fontSize: 12, color: Colors.black),
+            style: const TextStyle(fontSize: 12, color: AllowedColors.black),
           ),
         ),
       );
@@ -183,7 +184,7 @@ class _ChatbotPageState extends State<Chat> {
         margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: isBot ? Colors.white : const Color.fromRGBO(0, 40, 86, 1),
+          color: isBot ? AllowedColors.white : AllowedColors.blue,
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(12),
             topRight: const Radius.circular(12),
@@ -196,7 +197,7 @@ class _ChatbotPageState extends State<Chat> {
         child: Text(
           message.text,
           style: TextStyle(
-              fontSize: 12, color: isBot ? Colors.black : Colors.white),
+              fontSize: 12, color: isBot ? AllowedColors.black : AllowedColors.white),
         ),
       ),
     );
@@ -231,13 +232,13 @@ class _ChatbotPageState extends State<Chat> {
               decoration: InputDecoration(
                 hintText: "Escribe un mensaje...",
                 hintStyle: TextStyle(
-                    color: Color.fromRGBO(111, 111, 111, 1), fontSize: 13),
+                    color: AllowedColors.gray, fontSize: 13),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(30),
                   borderSide: BorderSide.none,
                 ),
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: AllowedColors.white,
                 contentPadding:
                     const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
               ),
@@ -245,10 +246,10 @@ class _ChatbotPageState extends State<Chat> {
           ),
           const SizedBox(width: 10),
           CircleAvatar(
-            backgroundColor: Color.fromRGBO(0, 40, 86, 1),
+            backgroundColor: AllowedColors.blue,
             radius: 25,
             child: IconButton(
-              icon: const Icon(Icons.send, color: Colors.white),
+              icon: const Icon(Icons.send, color: AllowedColors.white),
               onPressed: _sendMessage,
             ),
           ),

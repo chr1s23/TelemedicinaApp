@@ -1,5 +1,8 @@
+import 'package:chatbot/model/requests/user_request.dart';
+import 'package:chatbot/model/responses/user_response.dart';
+import 'package:chatbot/service/auth_service.dart';
 import 'package:chatbot/view/screens/dashboard.dart';
-import 'package:chatbot/view/screens/register.dart';
+import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
 
 class TermsAndConditions extends StatefulWidget {
@@ -12,11 +15,30 @@ class TermsAndConditions extends StatefulWidget {
 class _TermsAndConditionsPageState extends State<TermsAndConditions> {
   bool _acceptedTerms = false;
 
-  void _submit() {
+  void _submit() async {
     if (_acceptedTerms) {
-      //agregar la logica para guardar toda la informacion en el servidor en la base de datos
-      Navigator.push(
-          context, MaterialPageRoute(builder: (context) => Dashboard()));
+      UserRequest? user = UserRequest.getUserRequest();
+
+      if (user != null) {
+        user.aceptaConsentimiento = true;
+
+        final doneLoading = modalLoadingDialog(context: context);
+
+        UserResponse? userLogged = await AuthService.signUp(context, user);
+
+        if (userLogged != null) {
+          doneLoading();
+
+          Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => Dashboard()),
+              (route) => false);
+        } else {
+          doneLoading();
+        }
+      } else {
+        // TODO: Handle null case
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Debes aceptar los términos y condiciones")),
@@ -37,14 +59,20 @@ class _TermsAndConditionsPageState extends State<TermsAndConditions> {
         actions: [
           TextButton(
               onPressed: () {
-                //agregar la logica para borrar todo el formulario y regresar a la pagina de registro
-                Navigator.pop(context);
-                Navigator.pushReplacement(context,
-                    MaterialPageRoute(builder: (context) => Register()));
+                modalYesNoDialog(
+                  context: context,
+                  title: "¿Cancelar?",
+                  message:
+                      "¿Desea cancelar la creación de su cuenta? Se perderán todos los datos ingresados.",
+                  onYes: () => Navigator.of(context)
+                    ..pop()
+                    ..pop()
+                    ..pop()
+                    ..pop(),
+                );
               },
               child: Text("Cancelar",
-                  style: TextStyle(
-                      color: Color.fromRGBO(165, 16, 8, 1), fontSize: 12))),
+                  style: TextStyle(color: AllowedColors.red, fontSize: 12))),
         ],
       ),
       body: Padding(
@@ -60,15 +88,14 @@ class _TermsAndConditionsPageState extends State<TermsAndConditions> {
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 15,
-                        color: Colors.black,
+                        color: AllowedColors.black,
                       ),
                     ),
                     const SizedBox(height: 20),
                     Container(
                       height: 500, // Espacio grande para los términos
                       decoration: BoxDecoration(
-                        border: Border.all(
-                            color: Color.fromRGBO(111, 111, 111, 1), width: 1),
+                        border: Border.all(color: AllowedColors.gray, width: 1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       padding: const EdgeInsets.all(12),
@@ -110,14 +137,14 @@ class _TermsAndConditionsPageState extends State<TermsAndConditions> {
                         _acceptedTerms = value ?? false;
                       });
                     },
-                    activeColor: const Color.fromRGBO(0, 40, 86, 1),
+                    activeColor: AllowedColors.blue,
                   ),
                   Expanded(
                     child: Text(
                       "He leído y acepto los términos",
                       style: TextStyle(
                         fontSize: 11,
-                        color: Colors.black,
+                        color: AllowedColors.black,
                       ),
                     ),
                   ),
@@ -130,9 +157,8 @@ class _TermsAndConditionsPageState extends State<TermsAndConditions> {
               height: 50,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _acceptedTerms
-                      ? const Color.fromRGBO(0, 40, 86, 1)
-                      : Color.fromRGBO(111, 111, 111, 1),
+                  backgroundColor:
+                      _acceptedTerms ? AllowedColors.blue : AllowedColors.gray,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),
@@ -141,7 +167,7 @@ class _TermsAndConditionsPageState extends State<TermsAndConditions> {
                 child: Text(
                   "Aceptar",
                   style: TextStyle(
-                      fontWeight: FontWeight.bold, color: Colors.white),
+                      fontWeight: FontWeight.bold, color: AllowedColors.white),
                 ),
               ),
             ),

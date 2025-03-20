@@ -1,3 +1,4 @@
+import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
 
 class CustomLoadingButton extends StatelessWidget {
@@ -31,13 +32,13 @@ class CustomLoadingButton extends StatelessWidget {
                 height: 24,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  color: Colors.white,
+                  color: AllowedColors.white,
                 ),
               )
             : Text(
                 label,
                 style:
-                    TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                    TextStyle(fontWeight: FontWeight.bold, color: AllowedColors.white),
               ),
       ),
     );

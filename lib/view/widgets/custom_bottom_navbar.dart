@@ -1,3 +1,4 @@
+import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
 
 class CustomBottomNavBar extends StatelessWidget {
@@ -16,8 +17,8 @@ class CustomBottomNavBar extends StatelessWidget {
       currentIndex: currentIndex,
       onTap: onTap,
       type: BottomNavigationBarType.fixed,
-      selectedItemColor: Color.fromRGBO(0, 40, 86, 1),
-      unselectedItemColor: Color.fromRGBO(111, 111, 111, 1),
+      selectedItemColor: AllowedColors.blue,
+      unselectedItemColor: AllowedColors.gray,
       showSelectedLabels: true,
       showUnselectedLabels: false,
       items: const [

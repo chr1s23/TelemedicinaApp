@@ -1,3 +1,4 @@
+import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
 
 class CustomInkWell extends StatelessWidget {
@@ -18,7 +19,7 @@ class CustomInkWell extends StatelessWidget {
             label,
             style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: Color.fromRGBO(165, 16, 08, 1)),
+                color: AllowedColors.red),
           ),
         ),
       ),

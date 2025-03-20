@@ -7,25 +7,30 @@ import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 import 'package:flutter/material.dart';
 
-class AuthService {
-  final dio = Dio(BaseOptions(
-    baseUrl: "https://clias.ucuenca.edu.ec",
-    headers: {'Content-Type': 'application/json'},
-  ));
+Dio? _dio;
 
-  void configureDio() {
-    (dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
-      final client = HttpClient();
-      client.badCertificateCallback =
-          (X509Certificate cert, String host, int port) => true;
-      return client;
-    };
-  }
+void configureDio(Dio dio) {
+  (dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
+    final client = HttpClient();
+    client.badCertificateCallback =
+        (X509Certificate cert, String host, int port) => true;
+    return client;
+  };
+}
 
-  Future<UserResponse?> login(BuildContext context, User user) async {
-    configureDio();
+Dio getDio() {
+  _dio ??= Dio(BaseOptions(
+      baseUrl: "https://clias.ucuenca.edu.ec",
+      headers: {'Content-Type': 'application/json'},
+    ));
+
+  return _dio!;
+}
+
+sealed class AuthService {
+  static Future<UserResponse?> login(BuildContext context, User user) async {
     try {
-      final response = await dio.post("/usuarios/autenticar", data: {
+      final response = await getDio().post("/usuarios/autenticar", data: {
         "nombreUsuario": user.nombreUsuario,
         "contrasena": user.contrasena,
       });
@@ -39,18 +44,13 @@ class AuthService {
           );
         }
       }
-    } on DioException catch (e) {
-      print("Error de Dio: ${e.message}");
-      print("Código de error: ${e.response?.statusCode}");
-      print("Respuesta del servidor: ${e.response?.data}");
-
+    } on DioException {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error de conexión con el servidor')),
         );
       }
     } catch (e) {
-      print(e);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -62,10 +62,12 @@ class AuthService {
     return null;
   }
 
-  Future<UserResponse?> signUp(BuildContext context, UserRequest user) async {
+  static Future<UserResponse?> signUp(BuildContext context, UserRequest user) async {
     try {
-      final response = await dio.post("/usuarios/registro", data: user);
-
+      var request = user.toJson();
+      print(request);
+      final response = await getDio().post("/usuarios/registro", data: request);
+      print(response);
       if (response.statusCode == 200) {
         UserResponse user = UserResponse.fromJsonMap(response.data);
         return user;
@@ -79,6 +81,7 @@ class AuthService {
         }
       }
     } catch (e) {
+      print(e);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
