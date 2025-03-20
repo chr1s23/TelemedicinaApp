@@ -71,7 +71,7 @@ class _QRScannerPageState extends State<Scanner> {
     return AppBar(
       elevation: 0,
       title: Text(
-        "HELPY",
+        "SISA",
         style: TextStyle(
           fontSize: 15,
           fontWeight: FontWeight.bold,

@@ -7,7 +7,7 @@ class ChatProvider extends ChangeNotifier {
   final ChatService chatService = ChatService();
   final List<MessageRequest> messages = [
     MessageRequest(
-        text: "¡Hola! Soy HelpyChat. ¿En qué puedo ayudarte hoy?",
+        text: "¡Hola! Soy SisaChat. ¿En qué puedo ayudarte hoy?",
         sender: Sender.bot,
         loading: false)
   ];

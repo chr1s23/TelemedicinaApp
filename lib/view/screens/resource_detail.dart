@@ -67,7 +67,7 @@ class _VideoPlayerPageState extends State<ResourceDetail> {
     return AppBar(
       elevation: 0,
       title: Text(
-        "HELPY",
+        "SISA",
         style: TextStyle(
           fontSize: 15,
           fontWeight: FontWeight.bold,

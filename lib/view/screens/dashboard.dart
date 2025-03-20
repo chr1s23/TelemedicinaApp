@@ -19,6 +19,7 @@ class Dashboard extends StatefulWidget {
 
 class _AutoSamplingPageState extends State<Dashboard> {
   late VideoPlayerController _videoController;
+  late VideoPlayerController helpVideoController;
   int _currentIndex = 0;
 
   @override
@@ -31,11 +32,16 @@ class _AutoSamplingPageState extends State<Dashboard> {
           });
     _videoController.play();
     _videoController.setLooping(false);
+    helpVideoController = VideoPlayerController.asset('assets/videos/sample.mp4')
+      ..initialize().then((_) {
+        setState(() {});
+      });
   }
 
   @override
   void dispose() {
     _videoController.dispose();
+    helpVideoController.dispose();
     super.dispose();
   }
 
@@ -73,11 +79,12 @@ class _AutoSamplingPageState extends State<Dashboard> {
           onPressed: () {
             _showHelpDialog();
           },
-          child: Text("H", style: TextStyle(fontSize: 12, color: AllowedColors.white)),
+          child: Text("Ayuda",
+              style: TextStyle(fontSize: 12, color: AllowedColors.white)),
         ),
       ),
       title: Text(
-        "HELPY",
+        "SISA",
         style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.bold,
@@ -109,14 +116,6 @@ class _AutoSamplingPageState extends State<Dashboard> {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setState) {
-            final helpVideoController =
-                VideoPlayerController.asset('assets/videos/sample.mp4');
-
-            helpVideoController.initialize().then((_) {
-              setState(() {});
-              helpVideoController.play(); // Reproduce automáticamente
-            });
-
             return Dialog(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(15),
@@ -144,8 +143,17 @@ class _AutoSamplingPageState extends State<Dashboard> {
                         ? helpVideoController.value.aspectRatio
                         : 16 / 9,
                     child: helpVideoController.value.isInitialized
-                        ? VideoPlayer(helpVideoController)
-                        : const Center(child: CircularProgressIndicator()),
+                        ? InkWell(
+                            child: VideoPlayer(helpVideoController),
+                            onTap: () {
+                              setState(() {
+                                helpVideoController.value.isPlaying
+                                    ? helpVideoController.pause()
+                                    : helpVideoController.play();
+                              });
+                            },
+                          )
+                        : Center(child: CircularProgressIndicator()),
                   ),
 
                   const SizedBox(height: 15),
@@ -188,7 +196,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
                             ),
                           ),
                           onPressed: () {
-                            Navigator.pushReplacement(
+                            Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) => AboutUs()));
@@ -221,7 +229,9 @@ class _AutoSamplingPageState extends State<Dashboard> {
           Text(
             "Automuestreo",
             style: TextStyle(
-                fontSize: 15, fontWeight: FontWeight.bold, color: AllowedColors.black),
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: AllowedColors.black),
           ),
           const SizedBox(height: 15),
           _buildVideoPlayer(),
@@ -253,14 +263,13 @@ class _AutoSamplingPageState extends State<Dashboard> {
               label: "Registrar Dispositivo",
               onPressed: () {
                 // Acción de registrar el dispositivo, llevar a la pagina de escanear el dispositivo y guardar la ifnormacion en el servidor
-                Navigator.push(
-                    context, MaterialPageRoute(builder: (context) => Scanner()));
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => Scanner()));
               }),
           const SizedBox(height: 15),
           Text(
               "Este video explica el proceso de automuestreo. Sigue los pasos descritos para completar el procedimiento correctamente.",
-              style: TextStyle(
-                  fontSize: 12, color: AllowedColors.gray)),
+              style: TextStyle(fontSize: 12, color: AllowedColors.gray)),
         ],
       ),
     );
@@ -357,7 +366,9 @@ class _AutoSamplingPageState extends State<Dashboard> {
           Text(
             "Juan Pérez",
             style: TextStyle(
-                fontSize: 15, fontWeight: FontWeight.bold, color: AllowedColors.black),
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: AllowedColors.black),
           ),
           const SizedBox(height: 30),
 
@@ -366,10 +377,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
             Navigator.pop(context); // Cierra el Drawer
             // Navegar a la pantalla de perfil
             Navigator.pushReplacement(context,
-              MaterialPageRoute(
-                builder: (context) => PersonalDataForm()
-              )
-            );
+                MaterialPageRoute(builder: (context) => PersonalDataForm()));
           }),
           _buildDrawerButton(Icons.info, "Acerca de", () {
             Navigator.pop(context); // Cierra el Drawer

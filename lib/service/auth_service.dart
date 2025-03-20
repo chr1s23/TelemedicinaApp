@@ -19,14 +19,10 @@ void configureDio(Dio dio) {
 }
 
 Dio getDio() {
-  if (_dio == null) {
-    _dio = Dio(BaseOptions(
+  _dio ??= Dio(BaseOptions(
       baseUrl: "https://clias.ucuenca.edu.ec",
       headers: {'Content-Type': 'application/json'},
     ));
-
-    configureDio(_dio!);
-  }
 
   return _dio!;
 }
@@ -68,8 +64,10 @@ sealed class AuthService {
 
   static Future<UserResponse?> signUp(BuildContext context, UserRequest user) async {
     try {
-      final response = await getDio().post("/usuarios/registro", data: user);
-
+      var request = user.toJson();
+      print(request);
+      final response = await getDio().post("/usuarios/registro", data: request);
+      print(response);
       if (response.statusCode == 200) {
         UserResponse user = UserResponse.fromJsonMap(response.data);
         return user;
@@ -83,6 +81,7 @@ sealed class AuthService {
         }
       }
     } catch (e) {
+      print(e);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
