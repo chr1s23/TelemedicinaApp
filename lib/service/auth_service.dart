@@ -57,15 +57,20 @@ sealed class AuthService {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Inicio de sesión fallido'),
+          ),
+        );
+      }
+    }
+    
     return null;
   }
 
   static Future<UserResponse?> signUp(BuildContext context, UserRequest user) async {
     try {
       var request = user.toJson();
-      print(request);
+      _log.fine(request);
       final response = await getDio().post("/usuarios/registro", data: request);
-      print(response);
+      _log.fine(response);
       if (response.statusCode == 200) {
         UserResponse userResponse = UserResponse.fromJsonMap(response.data);
         return userResponse;
@@ -79,7 +84,7 @@ sealed class AuthService {
         }
       }
     } catch (e) {
-      print(e);
+      _log.severe(e);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
