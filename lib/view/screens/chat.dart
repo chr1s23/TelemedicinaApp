@@ -22,7 +22,7 @@ class _ChatbotPageState extends State<Chat> {
   final TextEditingController _messageController = TextEditingController();
   final List<Map<String, dynamic>> _messages = [
     {
-      "text": "¡Hola! Soy HelpyChat. ¿En qué puedo ayudarte hoy?",
+      "text": "¡Hola! Soy SisaChat. ¿En qué puedo ayudarte hoy?",
       "isBot": true
     },
   ];
@@ -135,7 +135,7 @@ class _ChatbotPageState extends State<Chat> {
               height: 30), // Ícono del chatbot
           const SizedBox(width: 10),
           Text(
-            "HELPYCHAT",
+            "SISA CHAT",
             style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.bold,

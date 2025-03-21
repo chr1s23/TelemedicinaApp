@@ -1,4 +1,5 @@
 import 'package:chatbot/model/requests/user_request.dart';
+import 'package:chatbot/model/responses/user_response.dart';
 import 'package:chatbot/service/auth_service.dart';
 import 'package:chatbot/view/screens/dashboard.dart';
 import 'package:chatbot/view/widgets/utils.dart';
@@ -23,12 +24,17 @@ class _TermsAndConditionsPageState extends State<TermsAndConditions> {
 
         final doneLoading = modalLoadingDialog(context: context);
 
-        var userLogged = await AuthService.signUp(context, user);
-
-        doneLoading();
+        UserResponse? userLogged = await AuthService.signUp(context, user);
 
         if (userLogged != null) {
-          Navigator.push(context, MaterialPageRoute(builder: (context) => Dashboard()));
+          doneLoading();
+
+          Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => Dashboard()),
+              (route) => false);
+        } else {
+          doneLoading();
         }
       } else {
         // TODO: Handle null case
@@ -56,13 +62,17 @@ class _TermsAndConditionsPageState extends State<TermsAndConditions> {
                 modalYesNoDialog(
                   context: context,
                   title: "¿Cancelar?",
-                  message: "¿Desea cancelar la creación de su cuenta? Se perderán todos los datos ingresados.",
-                  onYes: () => Navigator.of(context)..pop()..pop()..pop()..pop(),
+                  message:
+                      "¿Desea cancelar la creación de su cuenta? Se perderán todos los datos ingresados.",
+                  onYes: () => Navigator.of(context)
+                    ..pop()
+                    ..pop()
+                    ..pop()
+                    ..pop(),
                 );
               },
               child: Text("Cancelar",
-                  style: TextStyle(
-                      color: AllowedColors.red, fontSize: 12))),
+                  style: TextStyle(color: AllowedColors.red, fontSize: 12))),
         ],
       ),
       body: Padding(
@@ -85,8 +95,7 @@ class _TermsAndConditionsPageState extends State<TermsAndConditions> {
                     Container(
                       height: 500, // Espacio grande para los términos
                       decoration: BoxDecoration(
-                        border: Border.all(
-                            color: AllowedColors.gray, width: 1),
+                        border: Border.all(color: AllowedColors.gray, width: 1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       padding: const EdgeInsets.all(12),
@@ -148,9 +157,8 @@ class _TermsAndConditionsPageState extends State<TermsAndConditions> {
               height: 50,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _acceptedTerms
-                      ? AllowedColors.blue
-                      : AllowedColors.gray,
+                  backgroundColor:
+                      _acceptedTerms ? AllowedColors.blue : AllowedColors.gray,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),

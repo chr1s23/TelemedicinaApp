@@ -13,4 +13,14 @@ class UserRequest {
 
   static UserRequest? getUserRequest() => _userRequest;
   static setUserRequest(UserRequest userRequest) => _userRequest = userRequest;
+
+  Map<String, dynamic> toJson() {
+    return {
+      "nombreUsuario": nombreUsuario,
+      "contrasena": contrasena,
+      "rol": rol,
+      "aceptaConsentimiento": aceptaConsentimiento,
+      "paciente": paciente.toJson()
+    };
+  }
 }

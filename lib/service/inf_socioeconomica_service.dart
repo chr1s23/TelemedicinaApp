@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 
 class InfSocioeconomicaService {
   final dio = Dio(BaseOptions(
-      baseUrl: "https://2c86-179-49-41-121.ngrok-free.app",
+      baseUrl: "https://clias.ucuenca.edu.ec",
       headers: {'Content-Type': 'application/json'}));
 
   Future<InfoSocioeconomicaResponse?> getInformacion(BuildContext context, String publicId) async {

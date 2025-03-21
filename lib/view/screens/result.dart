@@ -67,7 +67,7 @@ class _ResultPageState extends State<Result> {
     return AppBar(
       elevation: 0,
       title: Text(
-        "HELPY",
+        "SISA",
         style: TextStyle(
           fontSize: 15,
           fontWeight: FontWeight.bold,

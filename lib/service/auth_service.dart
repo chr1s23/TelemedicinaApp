@@ -21,14 +21,10 @@ void configureDio(Dio dio) {
 }
 
 Dio getDio() {
-  if (_dio == null) {
-    _dio = Dio(BaseOptions(
+  _dio ??= Dio(BaseOptions(
       baseUrl: "https://clias.ucuenca.edu.ec",
       headers: {'Content-Type': 'application/json'},
     ));
-
-    configureDio(_dio!);
-  }
 
   return _dio!;
 }
@@ -50,33 +46,26 @@ sealed class AuthService {
           );
         }
       }
-    } on DioException catch (e) {
-      _log.severe("Error de Dio: ${e.message}");
-      _log.severe("Código de error: ${e.response?.statusCode}");
-      _log.severe("Respuesta del servidor: ${e.response?.data}");
-
+    } on DioException {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error de conexión con el servidor')),
         );
       }
     } catch (e) {
-      _log.severe(e);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Inicio de sesión fallido'),
-          ),
-        );
-      }
-    }
     return null;
   }
 
   static Future<UserResponse?> signUp(BuildContext context, UserRequest user) async {
     try {
-      final response = await getDio().post("/usuarios/registro", data: user);
-
+      var request = user.toJson();
+      print(request);
+      final response = await getDio().post("/usuarios/registro", data: request);
+      print(response);
       if (response.statusCode == 200) {
         UserResponse userResponse = UserResponse.fromJsonMap(response.data);
         return userResponse;
@@ -89,8 +78,8 @@ sealed class AuthService {
           );
         }
       }
-    } on DioException catch (e) {
-      _log.severe(e.message);
+    } catch (e) {
+      print(e);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
