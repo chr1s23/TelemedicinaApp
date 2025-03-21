@@ -4,8 +4,11 @@ import 'package:chatbot/view/screens/presentation.dart';
 import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'log_utils.dart';
 
 void main() {
+  initializeLogger();
+
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (_) => ChatProvider()),

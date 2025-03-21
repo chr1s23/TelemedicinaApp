@@ -23,11 +23,13 @@ class _TermsAndConditionsPageState extends State<TermsAndConditions> {
 
         final doneLoading = modalLoadingDialog(context: context);
 
-        await AuthService.signUp(context, user);
+        var userLogged = await AuthService.signUp(context, user);
 
         doneLoading();
 
-        Navigator.push(context, MaterialPageRoute(builder: (context) => Dashboard()));
+        if (userLogged != null) {
+          Navigator.push(context, MaterialPageRoute(builder: (context) => Dashboard()));
+        }
       } else {
         // TODO: Handle null case
       }

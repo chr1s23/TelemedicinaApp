@@ -6,7 +6,9 @@ import 'package:chatbot/model/responses/user_response.dart';
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 
+final _log = Logger('AuthService');
 Dio? _dio;
 
 void configureDio(Dio dio) {
@@ -49,9 +51,9 @@ sealed class AuthService {
         }
       }
     } on DioException catch (e) {
-      print("Error de Dio: ${e.message}");
-      print("Código de error: ${e.response?.statusCode}");
-      print("Respuesta del servidor: ${e.response?.data}");
+      _log.severe("Error de Dio: ${e.message}");
+      _log.severe("Código de error: ${e.response?.statusCode}");
+      _log.severe("Respuesta del servidor: ${e.response?.data}");
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -59,7 +61,7 @@ sealed class AuthService {
         );
       }
     } catch (e) {
-      print(e);
+      _log.severe(e);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -76,8 +78,8 @@ sealed class AuthService {
       final response = await getDio().post("/usuarios/registro", data: user);
 
       if (response.statusCode == 200) {
-        UserResponse user = UserResponse.fromJsonMap(response.data);
-        return user;
+        UserResponse userResponse = UserResponse.fromJsonMap(response.data);
+        return userResponse;
       } else {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -87,7 +89,8 @@ sealed class AuthService {
           );
         }
       }
-    } catch (e) {
+    } on DioException catch (e) {
+      _log.severe(e.message);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

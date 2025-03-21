@@ -7,6 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'dart:io';
 import 'dart:async';
+import 'package:logging/logging.dart';
+
+final _log = Logger('Result');
 
 class Result extends StatefulWidget {
   final String pdfPath; // Ruta del PDF
@@ -99,7 +102,7 @@ class _ResultPageState extends State<Result> {
                   pageSnap: true,
                   fitPolicy: FitPolicy.BOTH,
                   onError: (error) {
-                    print("Error al cargar PDF: $error");
+                    _log.severe("Error al cargar PDF: $error");
                   },
                   onRender: (_) {
                     setState(() {});
