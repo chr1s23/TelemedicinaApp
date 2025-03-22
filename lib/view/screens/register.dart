@@ -142,6 +142,7 @@ class _RegisterScreenState extends State<Register> {
                             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                                 content: Text(
                                     "La contraseña debe tener al menos 6 caracteres.")));
+                            return;
                           }
                           if (_passwordController.text !=
                               _confirmPasswordController.text) {

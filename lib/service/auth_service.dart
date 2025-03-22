@@ -1,22 +1,12 @@
-import 'dart:io';
-
 import 'package:chatbot/model/requests/user.dart';
 import 'package:chatbot/model/requests/user_request.dart';
 import 'package:chatbot/model/responses/user_response.dart';
 import 'package:dio/dio.dart';
-import 'package:dio/io.dart';
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 
+final _log = Logger('AuthService');
 Dio? _dio;
-
-void configureDio(Dio dio) {
-  (dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
-    final client = HttpClient();
-    client.badCertificateCallback =
-        (X509Certificate cert, String host, int port) => true;
-    return client;
-  };
-}
 
 Dio getDio() {
   _dio ??= Dio(BaseOptions(
@@ -59,18 +49,19 @@ sealed class AuthService {
         );
       }
     }
+    
     return null;
   }
 
   static Future<UserResponse?> signUp(BuildContext context, UserRequest user) async {
     try {
       var request = user.toJson();
-      print(request);
+      _log.fine(request);
       final response = await getDio().post("/usuarios/registro", data: request);
-      print(response);
+      _log.fine(response);
       if (response.statusCode == 200) {
-        UserResponse user = UserResponse.fromJsonMap(response.data);
-        return user;
+        UserResponse userResponse = UserResponse.fromJsonMap(response.data);
+        return userResponse;
       } else {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -81,7 +72,7 @@ sealed class AuthService {
         }
       }
     } catch (e) {
-      print(e);
+      _log.severe(e);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

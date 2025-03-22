@@ -1,4 +1,7 @@
 import 'package:socket_io_client/socket_io_client.dart' as socket_io;
+import 'package:logging/logging.dart';
+
+final _log = Logger('ChatService');
 
 class ChatService {
   late socket_io.Socket socket;
@@ -21,7 +24,7 @@ class ChatService {
     });
 
     socket.onDisconnect((_) {
-      print('Desconectado de Rasa');
+      _log.info("Desconectado de Rasa");
     });
   }
 

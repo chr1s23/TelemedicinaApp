@@ -25,16 +25,14 @@ class _TermsAndConditionsPageState extends State<TermsAndConditions> {
         final doneLoading = modalLoadingDialog(context: context);
 
         UserResponse? userLogged = await AuthService.signUp(context, user);
+        
+        doneLoading();
 
         if (userLogged != null) {
-          doneLoading();
-
           Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(builder: (context) => Dashboard()),
               (route) => false);
-        } else {
-          doneLoading();
         }
       } else {
         // TODO: Handle null case
