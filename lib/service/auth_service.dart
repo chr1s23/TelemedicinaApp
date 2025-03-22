@@ -1,22 +1,10 @@
-import 'dart:io';
-
 import 'package:chatbot/model/requests/user.dart';
 import 'package:chatbot/model/requests/user_request.dart';
 import 'package:chatbot/model/responses/user_response.dart';
 import 'package:dio/dio.dart';
-import 'package:dio/io.dart';
 import 'package:flutter/material.dart';
 
 Dio? _dio;
-
-void configureDio(Dio dio) {
-  (dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
-    final client = HttpClient();
-    client.badCertificateCallback =
-        (X509Certificate cert, String host, int port) => true;
-    return client;
-  };
-}
 
 Dio getDio() {
   _dio ??= Dio(BaseOptions(
