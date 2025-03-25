@@ -8,6 +8,27 @@ import 'package:chatbot/service/chat_service.dart';
 import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:chatbot/model/storage/storage.dart';
+import 'package:logging/logging.dart';
+
+Logger _log = Logger('Chat');
+
+String? userId;
+
+Future<String> getUserId() async {
+  if (userId == null) {
+    userId = await secureStorage.read(key: "user_id");
+
+    if (userId != null) {
+      userId = userId!.replaceAll('-', '');
+      _log.fine("Clean user ID: $userId");
+    } else {
+      _log.severe("User ID not found in secure storage.");
+    }
+  }
+
+  return userId!;
+}
 
 class Chat extends StatefulWidget {
   const Chat({super.key});
@@ -48,13 +69,13 @@ class _ChatbotPageState extends State<Chat> {
     });
   }
 
-  void _sendMessage() {
+  void _sendMessage() async {
     String message = _messageController.value.text.trim();
     if (message.isNotEmpty) {
       setState(() {
         _messages.add({"text": message, "isBot": false});
         _isLoading = true;
-        _messages.add({"loading": true, "isBot": true});
+        _messages.add({"text": '', "loading": true, "isBot": true});
         //_messages.add({
         //  "text": "Generando respuesta...",
         //  "isBot": true,
@@ -66,8 +87,7 @@ class _ChatbotPageState extends State<Chat> {
 
       _startLoadingAnimation(); // Iniciar animación de puntos
 
-      chatService.sendMessage(message,
-          "a689c9c374a744efa19d498c68f54172"); //cambiar el identificador por el publicId del usuario
+      chatService.sendMessage(message, await getUserId());
       _messageController.clear();
     }
   }

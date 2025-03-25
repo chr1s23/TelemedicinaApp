@@ -69,8 +69,8 @@ class _AutoSamplingPageState extends State<Dashboard> {
       leading: SizedBox(
         width: 100,
         height: 50,
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
+        child: IconButton(
+          style: IconButton.styleFrom(
             backgroundColor: AllowedColors.red,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(30),
@@ -79,8 +79,8 @@ class _AutoSamplingPageState extends State<Dashboard> {
           onPressed: () {
             _showHelpDialog();
           },
-          child: Text("Ayuda",
-              style: TextStyle(fontSize: 12, color: AllowedColors.white)),
+          icon: const Icon(Icons.help_outline, color: AllowedColors.white),
+          iconSize: 40,
         ),
       ),
       title: Text(
