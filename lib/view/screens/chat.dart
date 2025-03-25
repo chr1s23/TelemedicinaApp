@@ -116,31 +116,50 @@ class _ChatbotPageState extends State<Chat> {
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
     final chatProvider = context.watch<ChatProvider>();
-    return Scaffold(
-      appBar: _buildAppBar(),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-                child: ListView.builder(
-                  //controller: chatProvider.chatScrollController,
-              reverse: true,
-              padding: const EdgeInsets.all(10),
-              itemCount: _messages.length,
-              itemBuilder: (context, index) {
-                //final message = chatProvider.messages[index];
-                final message = _messages[_messages.length - 1 - index];
-                final messageRequest = MessageRequest(
-                    text: message["text"],
-                    sender: message["isBot"] ? Sender.bot : Sender.user,
-                    loading: message["loading"] ?? false);
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (bool didPop, Object? result) async {
+        if (didPop) {
+          return;
+        }
 
-                return _buildChatBubble(messageRequest);
-              },
-            )),
-            _buildMessageInput(),
-            //buildTextField(chatProvider.sendMessage)
-          ],
+        final bool shouldPop = await modalYesNoDialog(
+          context: context, 
+          title: "¿Salir del chat?", 
+          message: "¿Seguro que desea salir? Se perderá todo el contenido del chat.", 
+          onYes: (){}
+        ) ?? false;
+
+        if (context.mounted && shouldPop) {
+          Navigator.pop(context);
+        }
+      },
+      child: Scaffold(
+        appBar: _buildAppBar(),
+        body: SafeArea(
+          child: Column(
+            children: [
+              Expanded(
+                  child: ListView.builder(
+                    //controller: chatProvider.chatScrollController,
+                reverse: true,
+                padding: const EdgeInsets.all(10),
+                itemCount: _messages.length,
+                itemBuilder: (context, index) {
+                  //final message = chatProvider.messages[index];
+                  final message = _messages[_messages.length - 1 - index];
+                  final messageRequest = MessageRequest(
+                      text: message["text"],
+                      sender: message["isBot"] ? Sender.bot : Sender.user,
+                      loading: message["loading"] ?? false);
+      
+                  return _buildChatBubble(messageRequest);
+                },
+              )),
+              _buildMessageInput(),
+              //buildTextField(chatProvider.sendMessage)
+            ],
+          ),
         ),
       ),
     );
@@ -148,6 +167,7 @@ class _ChatbotPageState extends State<Chat> {
 
   AppBar _buildAppBar() {
     return AppBar(
+      iconTheme: IconThemeData(color: AllowedColors.gray),
       elevation: 0,
       title: Row(
         children: [
