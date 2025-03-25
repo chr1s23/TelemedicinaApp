@@ -4,6 +4,7 @@ import 'package:chatbot/model/responses/user_response.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import 'package:chatbot/model/storage/storage.dart';
 
 final _log = Logger('AuthService');
 Dio? _dio;
@@ -26,7 +27,14 @@ sealed class AuthService {
       });
 
       if (response.statusCode == 200) {
-        return UserResponse.fromJsonMap(response.data);
+        final userResponse = UserResponse.fromJsonMap(response.data);
+
+        secureStorage.write(key: "user_id", value: userResponse.publicId);
+        secureStorage.write(key: "user_token", value: userResponse.token);
+
+        _log.fine("Saved to storage: ID - ${userResponse.publicId} | Token - ${userResponse.token}");
+
+        return userResponse;
       } else {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -34,13 +42,17 @@ sealed class AuthService {
           );
         }
       }
-    } on DioException {
+    } on DioException catch(e) {
+      _log.severe('Server connection error: $e');
+
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error de conexión con el servidor')),
         );
       }
     } catch (e) {
+      _log.severe("Login failed: $e");
+
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -61,8 +73,14 @@ sealed class AuthService {
       _log.fine(response);
       if (response.statusCode == 200) {
         UserResponse userResponse = UserResponse.fromJsonMap(response.data);
+
+        secureStorage.write(key: "user_id", value: userResponse.publicId);
+        secureStorage.write(key: "user_token", value: userResponse.token);
+
         return userResponse;
       } else {
+        _log.severe("Unexpected server response during signup: ${response.data}");
+
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -72,7 +90,7 @@ sealed class AuthService {
         }
       }
     } catch (e) {
-      _log.severe(e);
+      _log.severe("Signup failed: $e");
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
