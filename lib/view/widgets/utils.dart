@@ -12,15 +12,15 @@ void Function() modalLoadingDialog({required BuildContext context}) {
   showDialog(
     context: context,
     barrierDismissible: false,
-    builder: (context) => Center(child: CircularProgressIndicator(value: null))
+    builder: (context) => PopScope(canPop: false, child: Center(child: CircularProgressIndicator(value: null)))
   );
 
   return Navigator.of(context).pop;
 }
 
-Future<void> modalYesNoDialog({required BuildContext context, required String title, required String message, 
+Future<bool?> modalYesNoDialog({required BuildContext context, required String title, required String message, 
   required void Function() onYes, void Function()? onNo}) {
-  return showDialog<void>(
+  return showDialog<bool?>(
     context: context,
     barrierDismissible: false,
     builder: (BuildContext context) {
@@ -35,7 +35,7 @@ Future<void> modalYesNoDialog({required BuildContext context, required String ti
             child: const Text('Sí'),
             onPressed: () {
               onYes();
-              Navigator.of(context).pop();
+              Navigator.of(context).pop(true);
             },
           ),
           TextButton(
@@ -46,7 +46,7 @@ Future<void> modalYesNoDialog({required BuildContext context, required String ti
                 onNo();
               }
 
-              Navigator.of(context).pop();
+              Navigator.of(context).pop(false);
             },
           ),
         ],

@@ -9,6 +9,7 @@ import 'package:chatbot/view/widgets/utils.dart';
 import 'package:chatbot/view/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
@@ -48,13 +49,26 @@ class _AutoSamplingPageState extends State<Dashboard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButton: Container(
+        width: 80,
+        height: 80,
+        child: FloatingActionButton(
+          backgroundColor: AllowedColors.blue,
+          shape: const CircleBorder(),
+          elevation: 0,
+          heroTag: "chatbot",
+          child: SvgPicture.asset("assets/icons/chatbot.svg", height: 50, width: 50),
+          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => Chat())),
+        ),
+      ),
       appBar: _buildAppBar(),
       endDrawer:
           _buildProfileDrawer(), // Drawer que se desliza desde la derecha
       body: <Widget?>[
         SingleChildScrollView(child: _buildBody()),
         Resources(),
-        Chat(),
         WIPScreen(),
         Notifications(),
       ][_currentIndex],
@@ -69,18 +83,19 @@ class _AutoSamplingPageState extends State<Dashboard> {
       leading: SizedBox(
         width: 100,
         height: 50,
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AllowedColors.red,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(30),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(5.0, 0, 0, 0),
+          child: IconButton(
+            style: IconButton.styleFrom(
+              backgroundColor: AllowedColors.red,
+              shape: CircleBorder(),
             ),
+            onPressed: () {
+              _showHelpDialog();
+            },
+            icon: const Icon(Icons.help_outline, color: AllowedColors.white),
+            iconSize: 35,
           ),
-          onPressed: () {
-            _showHelpDialog();
-          },
-          child: Text("Ayuda",
-              style: TextStyle(fontSize: 12, color: AllowedColors.white)),
         ),
       ),
       title: Text(
@@ -243,6 +258,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
                     : _videoController.play();
               });
             },
+            heroTag: "player",
             child: Icon(
               _videoController.value.isPlaying ? Icons.pause : Icons.play_arrow,
             ),
@@ -255,7 +271,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
                 // funciona para ir a la ventana del chat, automaticamente se conecta mediante sockets
                 // por defecto cuando se inicia enviar un mensaje al chatbot para iniciar el proceso, por ejmplo "comenzar proceso"
                 Navigator.push(
-                    context, MaterialPageRoute(builder: (context) => Chat()));
+                    context, MaterialPageRoute(builder: (context) => Chat(autoStart: true)));
               }),
           const SizedBox(height: 20),
           CustomButton(
@@ -297,55 +313,58 @@ class _AutoSamplingPageState extends State<Dashboard> {
 
   Widget _buildBottomNavigationBar(
       void Function(int) setIndex, int Function() currentIndex) {
-    return NavigationBar(
-      onDestinationSelected: (int index) {
-        setState(() {
-          setIndex(index);
-        });
-      },
-      indicatorShape: CircleBorder(),
-      labelBehavior:
-          NavigationDestinationLabelBehavior.alwaysHide, // Ocultar labels
-      selectedIndex: currentIndex(),
-      destinations: const [
-        NavigationDestination(
-          icon: Icon(Icons.home),
-          label: 'Inicio',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.folder),
-          label: 'Recursos',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.smart_toy),
-          label: '',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.map),
-          label: 'Mapa',
-        ),
-        NavigationDestination(
-          icon: Badge(child: Icon(Icons.notifications)),
-          label: 'Notificaciones',
-        ),
-      ],
+
+    const homeIndex = 0;
+    const resourcesIndex = 1;
+    const mapIndex = 2;
+    const notificationsIndex = 3;
+
+    changePage(int index) => setState(() {
+      setIndex(index);
+    });
+
+    return BottomAppBar(
+      shape: CircularNotchedRectangle(),
+      color: AllowedColors.blue,
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          IconButton(
+            icon: Icon(currentIndex() == homeIndex ? Icons.home : Icons.home_outlined),
+            color: AllowedColors.white,
+            onPressed: () {
+              currentIndex() != homeIndex ? changePage(homeIndex) : null;
+            },
+          ),
+          IconButton(
+            icon: Icon(currentIndex() == resourcesIndex ? Icons.folder : Icons.folder_outlined),
+            color: AllowedColors.white,
+            onPressed: () {
+              currentIndex() != resourcesIndex ? changePage(resourcesIndex) : null;
+            },
+          ),
+          
+          SizedBox(width: 50),
+          
+          IconButton(
+            icon: Icon(currentIndex() == mapIndex ? Icons.map : Icons.map_outlined),
+            color: AllowedColors.white,
+            onPressed: () {
+              currentIndex() != mapIndex ? changePage(mapIndex) : null;
+            },
+          ),
+          IconButton(
+            icon: Badge(child: Icon(currentIndex() == notificationsIndex ? Icons.notifications : Icons.notifications_outlined)),
+            color: AllowedColors.white,
+            onPressed: () {
+              currentIndex() != notificationsIndex ? changePage(notificationsIndex) : null;
+            },
+          ),
+        ],
+      ),
     );
   }
-
-  // Widget _buildFloatingButton() {
-  //   return Transform.translate(
-  //     offset: const Offset(0, -10),
-  //     child: FloatingActionButton(
-  //       backgroundColor: AllowedColors.blue,
-  //       onPressed: () {
-  //         // Acción del asistente virtual
-  //         Navigator.push(
-  //             context, MaterialPageRoute(builder: (context) => Chat()));
-  //       },
-  //       child: const Icon(Icons.smart_toy, size: 28, color: AllowedColors.white),
-  //     ),
-  //   );
-  // }
 
   Widget _buildProfileDrawer() {
     return Drawer(
