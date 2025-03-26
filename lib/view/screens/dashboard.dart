@@ -271,7 +271,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
                 // funciona para ir a la ventana del chat, automaticamente se conecta mediante sockets
                 // por defecto cuando se inicia enviar un mensaje al chatbot para iniciar el proceso, por ejmplo "comenzar proceso"
                 Navigator.push(
-                    context, MaterialPageRoute(builder: (context) => Chat()));
+                    context, MaterialPageRoute(builder: (context) => Chat(autoStart: true)));
               }),
           const SizedBox(height: 20),
           CustomButton(
