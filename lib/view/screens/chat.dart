@@ -7,6 +7,7 @@ import 'package:chatbot/view/screens/scanner.dart';
 import 'package:chatbot/service/chat_service.dart';
 import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:provider/provider.dart';
 import 'package:chatbot/model/storage/storage.dart';
 import 'package:logging/logging.dart';
@@ -31,7 +32,9 @@ Future<String> getUserId() async {
 }
 
 class Chat extends StatefulWidget {
-  const Chat({super.key});
+  Chat({super.key, this.autoStart = false});
+
+  bool autoStart;
 
   @override
   State<Chat> createState() => _ChatbotPageState();
@@ -51,6 +54,7 @@ class _ChatbotPageState extends State<Chat> {
   bool _isLoading = false;
   int _loadingIndex = 0;
   Timer? _loadingTimer;
+  List<Map<String, dynamic>>? _quickReplies;
 
   @override
   void initState() {
@@ -64,13 +68,17 @@ class _ChatbotPageState extends State<Chat> {
           // Elimina el mensaje de "Generando respuesta..."
           _messages.removeWhere((msg) => msg["loading"] == true);
           _messages.add({"text": "${data['text']}", "isBot": true});
+
+          if (data['quick_replies'] != null) {
+            _quickReplies = List<Map<String, dynamic>>.from(data['quick_replies'] as List<dynamic>);
+          }
         });
       }
     });
   }
 
-  void _sendMessage() async {
-    String message = _messageController.value.text.trim();
+  void _sendMessage([Map<String, dynamic>? dataPayload]) async {
+    String message = dataPayload?['title'] ?? _messageController.value.text.trim();
     if (message.isNotEmpty) {
       setState(() {
         _messages.add({"text": message, "isBot": false});
@@ -87,7 +95,7 @@ class _ChatbotPageState extends State<Chat> {
 
       _startLoadingAnimation(); // Iniciar animación de puntos
 
-      chatService.sendMessage(message, await getUserId());
+      chatService.sendMessage(dataPayload?['payload'] ?? message, await getUserId());
       _messageController.clear();
     }
   }
@@ -109,11 +117,17 @@ class _ChatbotPageState extends State<Chat> {
   @override
   void dispose() {
     chatService.disconnect();
+    focusNode.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (widget.autoStart) {
+      _sendMessage({"title": "Iniciar proceso", "payload:": "Iniciar proceso"});
+      widget.autoStart = false;
+    }
+
     final authProvider = context.watch<AuthProvider>();
     final chatProvider = context.watch<ChatProvider>();
     return PopScope(
@@ -127,7 +141,7 @@ class _ChatbotPageState extends State<Chat> {
           context: context, 
           title: "¿Salir del chat?", 
           message: "¿Seguro que desea salir? Se perderá todo el contenido del chat.", 
-          onYes: (){}
+          onYes: () async {chatService.reset(await getUserId());},
         ) ?? false;
 
         if (context.mounted && shouldPop) {
@@ -140,13 +154,22 @@ class _ChatbotPageState extends State<Chat> {
           child: Column(
             children: [
               Expanded(
-                  child: ListView.builder(
-                    //controller: chatProvider.chatScrollController,
+                child: ListView.builder(
+                  //controller: chatProvider.chatScrollController,
                 reverse: true,
                 padding: const EdgeInsets.all(10),
-                itemCount: _messages.length,
+                itemCount: _messages.length + (_quickReplies != null ? 1: 0),
                 itemBuilder: (context, index) {
                   //final message = chatProvider.messages[index];
+                  
+                  if (_quickReplies != null) {
+                    index = index - 1;
+                  }
+
+                  if (index < 0) {
+                    return _replyButtons(_quickReplies!);
+                  }
+
                   final message = _messages[_messages.length - 1 - index];
                   final messageRequest = MessageRequest(
                       text: message["text"],
@@ -156,7 +179,7 @@ class _ChatbotPageState extends State<Chat> {
                   return _buildChatBubble(messageRequest);
                 },
               )),
-              _buildMessageInput(),
+              if (_quickReplies == null) _buildMessageInput(),
               //buildTextField(chatProvider.sendMessage)
             ],
           ),
@@ -234,12 +257,40 @@ class _ChatbotPageState extends State<Chat> {
                 isBot ? const Radius.circular(12) : const Radius.circular(0),
           ),
         ),
-        child: Text(
-          message.text,
-          style: TextStyle(
-              fontSize: 12, color: isBot ? AllowedColors.black : AllowedColors.white),
+        child: MarkdownBody(
+          data: message.text,
+          styleSheet: MarkdownStyleSheet(
+            p: TextStyle(color: isBot ? AllowedColors.black : AllowedColors.white),
+          ),
         ),
+        // Text(
+        //   message.text,
+        //   style: TextStyle(
+        //       fontSize: 12, color: isBot ? AllowedColors.black : AllowedColors.white),
+        // ),
       ),
+    );
+  }
+
+  Widget _replyButtons(List<Map<String, dynamic>> answers) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      alignment: WrapAlignment.center,
+      children: answers
+          .map((answer) => ElevatedButton(
+                child: Text(
+                  answer["title"]!,
+                  style: const TextStyle(
+                    fontSize: 15
+                  ),
+                ),
+                onPressed: () {
+                  _quickReplies = null;
+                  _sendMessage(answer);
+                },
+              ))
+          .toList(),
     );
   }
 
