@@ -3,14 +3,23 @@ import 'package:chatbot/model/responses/info_socioeconomica_response.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
-class InfSocioeconomicaService {
-  final dio = Dio(BaseOptions(
-      baseUrl: "https://clias.ucuenca.edu.ec",
-      headers: {'Content-Type': 'application/json'}));
+final _log = Logger('InfoSocioService');
+Dio? _dio;
 
-  Future<InfoSocioeconomicaResponse?> getInformacion(BuildContext context, String publicId) async {
+Dio getDio() {
+  _dio ??= Dio(BaseOptions(
+      baseUrl: "https://clias.ucuenca.edu.ec",
+      headers: {'Content-Type': 'application/json'},
+      //TODO: Agregar el token de autenticacion como header Bearer ey....
+    ));
+
+  return _dio!;
+}
+
+sealed class InfSocioeconomicaService {
+  static Future<InfoSocioeconomicaResponse?> getInformacion(BuildContext context, String publicId) async {
     try {
-      final response = await dio.get("/info-socioeconomica/usuario/$publicId");
+      final response = await getDio().get("/info-socioeconomica/usuario/$publicId");
 
       if (response.statusCode == 200) {
         final infoResponse = InfoSocioeconomicaResponse.fromJsonMap(response.data);
@@ -25,6 +34,14 @@ class InfSocioeconomicaService {
         }
         return null;
       }
+    } on DioException catch(e) {
+      _log.severe('Server connection error: $e');
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error de conexión con el servidor')),
+        );
+      }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -37,9 +54,9 @@ class InfSocioeconomicaService {
     return null;
   }
 
-  Future<bool?> editarInformacion(BuildContext context, InfSocioeconomicaRequest informacion, String publicId) async {
+  static Future<bool?> editarInformacion(BuildContext context, InfSocioeconomicaRequest informacion, String publicId) async {
     try {
-      final response = await dio.put("/info-socioeconomica/editar/$publicId", data: informacion);
+      final response = await getDio().put("/info-socioeconomica/editar/$publicId", data: informacion.toJson());
 
       if (response.statusCode == 200) {
         return true;
@@ -51,6 +68,14 @@ class InfSocioeconomicaService {
             ),
           );
         }
+      }
+    } on DioException catch(e) {
+      _log.severe('Server connection error: $e');
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error de conexión con el servidor')),
+        );
       }
     } catch (e) {
       if (context.mounted) {

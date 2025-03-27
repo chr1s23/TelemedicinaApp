@@ -1,4 +1,4 @@
-enum Sender { bot, user}
+enum Sender { bot, user }
 
 class MessageRequest {
   final String text;
