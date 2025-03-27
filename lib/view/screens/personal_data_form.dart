@@ -19,12 +19,12 @@ class _PersonalDataFormState extends State<PersonalDataForm> {
     "ECUADOR",
     "VENEZUELA",
     "COLOMBIA",
-    "PERÚ",
+    "PERU",
     "CHILE",
     "ARGENTINA",
+    "BOLIVIA",
     "URUGUAY",
-    "BRASIL",
-    "MÉXICO",
+    "BRAZIL"
   ];
   final List<String> _languages = ["ESPAÑOL", "INGLÉS", "OTRO"];
   final List<String> _maritalStatusOptions = [

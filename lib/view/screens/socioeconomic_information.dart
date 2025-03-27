@@ -36,8 +36,8 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
     "Más de \$1350"
   ];
 
-  final List<String> _workStatusOptions = ["SI", "NO"];
-  final List<String> _bonusOptions = ["SI", "NO"];
+  final List<String> _workStatusOptions = ["SI", "NO", "NOSE"];
+  final List<String> _bonusOptions = ["SI", "NO", "NOSE"];
 
   @override
   Widget build(BuildContext context) {
