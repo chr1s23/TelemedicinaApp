@@ -1,11 +1,9 @@
-class DispositivoRequest{
-    String dispositivo;
+class DispositivoRequest {
+  String dispositivo;
 
-    DispositivoRequest(this.dispositivo);
+  DispositivoRequest(this.dispositivo);
 
-    Map<String, dynamic> toJson() {
-      return {
-        "dispositivo": dispositivo
-      };
-    }
+  Map<String, dynamic> toJson() {
+    return {"dispositivo": dispositivo};
+  }
 }

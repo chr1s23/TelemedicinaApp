@@ -33,10 +33,11 @@ class _AutoSamplingPageState extends State<Dashboard> {
           });
     _videoController.play();
     _videoController.setLooping(false);
-    helpVideoController = VideoPlayerController.asset('assets/videos/sample.mp4')
-      ..initialize().then((_) {
-        setState(() {});
-      });
+    helpVideoController =
+        VideoPlayerController.asset('assets/videos/sample.mp4')
+          ..initialize().then((_) {
+            setState(() {});
+          });
   }
 
   @override
@@ -51,7 +52,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
     return Scaffold(
       extendBody: true,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: Container(
+      floatingActionButton: SizedBox(
         width: 80,
         height: 80,
         child: FloatingActionButton(
@@ -59,8 +60,10 @@ class _AutoSamplingPageState extends State<Dashboard> {
           shape: const CircleBorder(),
           elevation: 0,
           heroTag: "chatbot",
-          child: SvgPicture.asset("assets/icons/chatbot.svg", height: 50, width: 50),
-          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => Chat())),
+          child: SvgPicture.asset("assets/icons/chatbot.svg",
+              height: 50, width: 50),
+          onPressed: () => Navigator.push(
+              context, MaterialPageRoute(builder: (context) => Chat())),
         ),
       ),
       appBar: _buildAppBar(),
@@ -81,8 +84,8 @@ class _AutoSamplingPageState extends State<Dashboard> {
     return AppBar(
       elevation: 0,
       leading: SizedBox(
-        width: 100,
-        height: 50,
+        width: 90,
+        height: 45,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(5.0, 0, 0, 0),
           child: IconButton(
@@ -126,18 +129,15 @@ class _AutoSamplingPageState extends State<Dashboard> {
   void _showHelpDialog() {
     showDialog(
       context: context,
-      barrierDismissible:
-          false, // Evita que el usuario cierre el diálogo tocando fuera
+      barrierDismissible: false,
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setState) {
             return Dialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Column(mainAxisSize: MainAxisSize.min, children: [
                   // Botón de cerrar (X)
                   Align(
                     alignment: Alignment.topLeft,
@@ -170,65 +170,29 @@ class _AutoSamplingPageState extends State<Dashboard> {
                           )
                         : Center(child: CircularProgressIndicator()),
                   ),
-
                   const SizedBox(height: 15),
-
-                  // Botones en la parte inferior
-                  Column(
-                    children: [
-                      SizedBox(
-                        width: 200,
-                        height: 50,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AllowedColors.red,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                          ),
-                          onPressed: () {
-                            helpVideoController.pause();
-                            helpVideoController.dispose();
-                            Navigator.pop(context);
-                          },
-                          child: Text(
-                            "Entendido",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: AllowedColors.white),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      SizedBox(
-                        width: 200,
-                        height: 50,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AllowedColors.blue,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                          ),
-                          onPressed: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => AboutUs()));
-                          },
-                          child: Text(
-                            "Acerca de",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: AllowedColors.white),
-                          ),
-                        ),
-                      ),
-                    ],
-                  )
-                ],
-              ),
-            );
+                  Column(children: [
+                    CustomButton(
+                        color: AllowedColors.red,
+                        onPressed: () {
+                          helpVideoController.pause();
+                          helpVideoController.dispose();
+                          Navigator.pop(context);
+                        },
+                        label: "Entendido"),
+                    const SizedBox(height: 20),
+                    CustomButton(
+                        color: AllowedColors.blue,
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => AboutUs()));
+                        },
+                        label: "Acerca de"),
+                    const SizedBox(height: 15)
+                  ])
+                ]));
           },
         );
       },
@@ -271,7 +235,9 @@ class _AutoSamplingPageState extends State<Dashboard> {
                 // funciona para ir a la ventana del chat, automaticamente se conecta mediante sockets
                 // por defecto cuando se inicia enviar un mensaje al chatbot para iniciar el proceso, por ejmplo "comenzar proceso"
                 Navigator.push(
-                    context, MaterialPageRoute(builder: (context) => Chat(autoStart: true)));
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => Chat(autoStart: true)));
               }),
           const SizedBox(height: 20),
           CustomButton(
@@ -280,7 +246,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
               onPressed: () {
                 // Acción de registrar el dispositivo, llevar a la pagina de escanear el dispositivo y guardar la ifnormacion en el servidor
                 Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => Scanner()));
+                    MaterialPageRoute(builder: (context) => Scanner(deviceRegister: true)));
               }),
           const SizedBox(height: 15),
           Text(
@@ -313,7 +279,6 @@ class _AutoSamplingPageState extends State<Dashboard> {
 
   Widget _buildBottomNavigationBar(
       void Function(int) setIndex, int Function() currentIndex) {
-
     const homeIndex = 0;
     const resourcesIndex = 1;
     const mapIndex = 2;
@@ -344,9 +309,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
               currentIndex() != resourcesIndex ? changePage(resourcesIndex) : null;
             },
           ),
-          
           SizedBox(width: 50),
-          
           IconButton(
             icon: Icon(currentIndex() == mapIndex ? Icons.map : Icons.map_outlined),
             color: AllowedColors.white,
@@ -380,7 +343,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
             backgroundImage: AssetImage('assets/images/avatar.png'),
           ),
           const SizedBox(height: 10),
-
+          //TODO: Agregar reemplazar por la informacion del usuario logeado
           // Nombre del Usuario
           Text(
             "Juan Pérez",
@@ -395,13 +358,13 @@ class _AutoSamplingPageState extends State<Dashboard> {
           _buildDrawerButton(Icons.person, "Perfil", () {
             Navigator.pop(context); // Cierra el Drawer
             // Navegar a la pantalla de perfil
-            Navigator.pushReplacement(context,
+            Navigator.push(context, //TODO: Agregar la logica para editar la informacion del usuario
                 MaterialPageRoute(builder: (context) => PersonalDataForm()));
           }),
           _buildDrawerButton(Icons.info, "Acerca de", () {
             Navigator.pop(context); // Cierra el Drawer
             // Navegar a Acerca de
-            Navigator.pushReplacement(
+            Navigator.push(
                 context, MaterialPageRoute(builder: (context) => AboutUs()));
           }),
 
@@ -421,7 +384,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
                 ),
                 onPressed: () {
                   Navigator.pop(context); // Cierra el Drawer
-                  // Agregar lógica de cierre de sesión
+                  // TODO: Agregar lógica de cierre de sesión para volver a la pantalla presentation
                 },
                 child: Text(
                   "Cerrar sesión",

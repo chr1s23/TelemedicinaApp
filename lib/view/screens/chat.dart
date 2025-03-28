@@ -1,14 +1,11 @@
 import 'dart:async';
 
 import 'package:chatbot/model/requests/message_request.dart';
-import 'package:chatbot/providers/auth_provider.dart';
-import 'package:chatbot/providers/chat_provider.dart';
 import 'package:chatbot/view/screens/scanner.dart';
 import 'package:chatbot/service/chat_service.dart';
 import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:provider/provider.dart';
 import 'package:chatbot/model/storage/storage.dart';
 import 'package:logging/logging.dart';
 
@@ -21,7 +18,7 @@ Future<String> getUserId() async {
     userId = await secureStorage.read(key: "user_id");
 
     if (userId != null) {
-      userId = userId!.replaceAll('-', '');
+      //userId = userId!.replaceAll('-', '');
       _log.fine("Clean user ID: $userId");
     } else {
       _log.severe("User ID not found in secure storage.");
@@ -35,6 +32,7 @@ class Chat extends StatefulWidget {
   Chat({super.key, this.autoStart = false});
 
   bool autoStart;
+  bool completeForm = false;
 
   @override
   State<Chat> createState() => _ChatbotPageState();
@@ -44,12 +42,7 @@ class _ChatbotPageState extends State<Chat> {
   final focusNode = FocusNode();
   final ChatService chatService = ChatService();
   final TextEditingController _messageController = TextEditingController();
-  final List<Map<String, dynamic>> _messages = [
-    {
-      "text": "¡Hola! Soy SisaChat. ¿En qué puedo ayudarte hoy?",
-      "isBot": true
-    },
-  ];
+  final List<Map<String, dynamic>> _messages = [];
 
   bool _isLoading = false;
   int _loadingIndex = 0;
@@ -65,7 +58,6 @@ class _ChatbotPageState extends State<Chat> {
         setState(() {
           _isLoading = false;
           _loadingTimer?.cancel(); // Detener animación
-          // Elimina el mensaje de "Generando respuesta..."
           _messages.removeWhere((msg) => msg["loading"] == true);
           _messages.add({"text": "${data['text']}", "isBot": true});
 
@@ -84,16 +76,11 @@ class _ChatbotPageState extends State<Chat> {
         _messages.add({"text": message, "isBot": false});
         _isLoading = true;
         _messages.add({"text": '', "loading": true, "isBot": true});
-        //_messages.add({
-        //  "text": "Generando respuesta...",
-        //  "isBot": true,
-        //  "loading": true
-        //}); // Mensaje de carga
       });
 
       FocusScope.of(context).unfocus(); // Ocultar el teclado
 
-      _startLoadingAnimation(); // Iniciar animación de puntos
+      _startLoadingAnimation();
 
       chatService.sendMessage(dataPayload?['payload'] ?? message, await getUserId());
       _messageController.clear();
@@ -109,7 +96,7 @@ class _ChatbotPageState extends State<Chat> {
         return;
       }
       setState(() {
-        _loadingIndex = (_loadingIndex + 1) % 4; // Rotar los puntos
+        _loadingIndex = (_loadingIndex + 1) % 4;
       });
     });
   }
@@ -128,8 +115,6 @@ class _ChatbotPageState extends State<Chat> {
       widget.autoStart = false;
     }
 
-    final authProvider = context.watch<AuthProvider>();
-    final chatProvider = context.watch<ChatProvider>();
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (bool didPop, Object? result) async {
@@ -211,11 +196,11 @@ class _ChatbotPageState extends State<Chat> {
         IconButton(
           icon: Image.asset('assets/images/qrscan.png',
               height: 30), // Ícono de QR
-          onPressed: () {
+          onPressed: widget.completeForm ? () {
             // Acción de escanear QR
             Navigator.push(
                 context, MaterialPageRoute(builder: (context) => Scanner()));
-          },
+          } : null,
         ),
       ],
     );
@@ -258,16 +243,11 @@ class _ChatbotPageState extends State<Chat> {
           ),
         ),
         child: MarkdownBody(
-          data: message.text,
+          data:  message.text.replaceAll("\n", "  \n"),
           styleSheet: MarkdownStyleSheet(
             p: TextStyle(color: isBot ? AllowedColors.black : AllowedColors.white),
           ),
         ),
-        // Text(
-        //   message.text,
-        //   style: TextStyle(
-        //       fontSize: 12, color: isBot ? AllowedColors.black : AllowedColors.white),
-        // ),
       ),
     );
   }
@@ -291,24 +271,6 @@ class _ChatbotPageState extends State<Chat> {
                 },
               ))
           .toList(),
-    );
-  }
-
-  // Animación de los tres puntos
-  Widget _dotAnimation(int delay) {
-    return TweenAnimationBuilder<double>(
-      tween: Tween<double>(begin: 0.3, end: 1.0),
-      duration: const Duration(milliseconds: 800),
-      curve: Curves.easeInOut,
-      builder: (context, value, child) {
-        return Opacity(opacity: value, child: child);
-      },
-      onEnd: () {
-        Future.delayed(Duration(milliseconds: delay), () {
-          if (mounted) setState(() {});
-        });
-      },
-      child: const CircleAvatar(radius: 3, backgroundColor: Colors.grey),
     );
   }
 

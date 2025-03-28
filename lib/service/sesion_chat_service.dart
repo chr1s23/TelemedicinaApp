@@ -1,7 +1,8 @@
+import 'package:chatbot/model/requests/sesion_chat_request.dart';
+import 'package:chatbot/model/storage/storage.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:chatbot/model/storage/storage.dart';
 
 final _log = Logger('SesionChatService');
 Dio? _dio;
@@ -9,28 +10,40 @@ Dio? _dio;
 Dio getDio() {
   _dio ??= Dio(BaseOptions(
       baseUrl: "https://clias.ucuenca.edu.ec",
-      headers: {'Content-Type': 'application/json'},
-      //TODO: Agregar el token de autenticacion como header con inicio Bearer ey....
-    ));
+      headers: {'Content-Type': 'application/json'}));
+
+  // Agregar interceptor para incluir el token en cada petición
+  _dio!.interceptors.add(InterceptorsWrapper(
+    onRequest: (options, handler) async {
+      String token = await secureStorage.read(key: "user_token") ?? "";
+
+      options.headers['Authorization'] = "Bearer $token";
+      return handler.next(options);
+    },
+  ));
 
   return _dio!;
 }
 
 sealed class SesionChatService {
-  static Future<bool??> registrarInfoExamen(BuildContext context, SesionChatRequest sesion) async {
+  static Future<bool?> registrarInfoExamen(
+      BuildContext context, SesionChatRequest sesion) async {
     try {
-      final response = await getDio().post("/sesion-chat/usuario", data: sesion.toJson());
+      final response =
+          await getDio().post("/sesion-chat/usuario", data: sesion.toJson());
 
       if (response.statusCode == 200) {
         return true;
       } else {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('No se pudo registrar la información del examen VPH')),
+            SnackBar(
+                content:
+                    Text('No se pudo registrar la información del examen VPH')),
           );
         }
       }
-    } on DioException catch(e) {
+    } on DioException catch (e) {
       _log.severe('Server connection error: $e');
 
       if (context.mounted) {
@@ -49,7 +62,7 @@ sealed class SesionChatService {
         );
       }
     }
-    
+
     return null;
   }
 }

@@ -1,20 +1,21 @@
-class SesionChatRequest{
-    String cuentaPublicId;
-    String inicio;
-    String fin;
-    String? contenido;
-    ExamenVphRequest? examenVph;
+import 'package:chatbot/model/requests/examen_vph_request.dart';
 
-    SesionChatRequest(this.cuentaPublicId, this.inicio, this.fin, this.contenido);
+class SesionChatRequest {
+  String cuentaPublicId;
+  String inicio;
+  String fin;
+  String? contenido;
+  ExamenVphRequest? examenVph;
 
-    Map<String, dynamic> toJson() {
-        return {
-            "cuentaPublicId": cuentaPublicId,
-            "inicio": inicio,
-            "fin": fin,
-            "contenido": contenido?,
-            "examenVph": examenVph?.toJson()
-        };
-    }
+  SesionChatRequest(this.cuentaPublicId, this.inicio, this.fin, this.contenido);
 
+  Map<String, dynamic> toJson() {
+    return {
+      "cuentaPublicId": cuentaPublicId,
+      "inicio": inicio,
+      "fin": fin,
+      "contenido": contenido,
+      "examenVph": examenVph?.toJson()
+    };
+  }
 }

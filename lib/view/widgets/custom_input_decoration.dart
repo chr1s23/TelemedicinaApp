@@ -2,7 +2,7 @@ import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
 
 class CustomInputDecoration {
-  InputDecoration getDecoration(String hintText) {
+  static InputDecoration getDecoration(String hintText) {
     return InputDecoration(
       hintText: hintText, // Placeholder
       hintStyle: TextStyle(
