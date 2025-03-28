@@ -2,6 +2,7 @@ import 'package:chatbot/view/screens/chat.dart';
 import 'package:chatbot/view/screens/dashboard.dart';
 import 'package:chatbot/view/screens/notifications.dart';
 import 'package:chatbot/view/screens/resources.dart';
+import 'package:chatbot/view/widgets/custom_input_decoration.dart';
 import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
@@ -134,17 +135,7 @@ class _ResultPageState extends State<Result> {
     return TextFormField(
       initialValue: value,
       readOnly: true,
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle:
-            TextStyle(fontSize: 12, color: AllowedColors.gray),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30),
-          borderSide: const BorderSide(color: Colors.grey),
-        ),
-        filled: true,
-        fillColor: AllowedColors.gray,
-      ),
+      decoration: CustomInputDecoration.getDecoration("Detalle resultado"),
       style: TextStyle(fontSize: 15, color: AllowedColors.black),
     );
   }

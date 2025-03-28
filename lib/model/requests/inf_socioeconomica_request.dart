@@ -5,7 +5,8 @@ class InfSocioeconomicaRequest {
   String? ocupacion;
   String? recibeBono;
 
-  InfSocioeconomicaRequest(this.instruccion, this.ingresos, this.trabajoRemunerado, this.ocupacion, this.recibeBono);
+  InfSocioeconomicaRequest(this.instruccion, this.ingresos,
+      this.trabajoRemunerado, this.ocupacion, this.recibeBono);
 
   Map<String, String> nivelInstruccion = {
     "NINGUNO": "NINGUNO",

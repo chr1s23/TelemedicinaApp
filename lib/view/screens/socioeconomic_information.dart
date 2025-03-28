@@ -1,6 +1,8 @@
 import 'package:chatbot/model/requests/inf_socioeconomica_request.dart';
 import 'package:chatbot/model/requests/user_request.dart';
 import 'package:chatbot/view/screens/terms_and_conditions.dart';
+import 'package:chatbot/view/widgets/custom_button.dart';
+import 'package:chatbot/view/widgets/custom_ink_well.dart';
 import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
 
@@ -53,15 +55,18 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
           TextButton(
               onPressed: () {
                 modalYesNoDialog(
-                  context: context, 
-                  title: "¿Cancelar?", 
-                  message: "¿Desea cancelar la creación de su cuenta? Se perderán todos los datos ingresados.", 
-                  onYes: () => Navigator.of(context)..pop()..pop()..pop(),
+                  context: context,
+                  title: "¿Cancelar?",
+                  message:
+                      "¿Desea cancelar la creación de su cuenta? Se perderán todos los datos ingresados.",
+                  onYes: () => Navigator.of(context)
+                    ..pop()
+                    ..pop()
+                    ..pop(),
                 );
               },
               child: Text("Cancelar",
-                  style: TextStyle(
-                      color: AllowedColors.red, fontSize: 12))),
+                  style: TextStyle(color: AllowedColors.red, fontSize: 12))),
         ],
       ),
       body: SingleChildScrollView(
@@ -117,8 +122,7 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
               TextFormField(
                 controller: _occupationController,
                 style: TextStyle(fontSize: 15, color: AllowedColors.black),
-                decoration: inputDecoration(
-                    "Ejemplo: Profesor, Comerciante"),
+                decoration: inputDecoration("Ejemplo: Profesor, Comerciante"),
               ),
 
               const SizedBox(height: 20),
@@ -142,22 +146,14 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
   Widget _buildButtons() {
     return Column(
       children: [
-        SizedBox(
-          width: 300,
-          height: 50,
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AllowedColors.blue,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30),
-              ),
-            ),
+        CustomButton(
+            color: AllowedColors.blue,
             onPressed: () {
-              //agregar la logica para guardar los campos que si estan llenos de informacion
               UserRequest? user = UserRequest.getUserRequest();
 
               if (user != null) {
-                InfSocioeconomicaRequest socioeconomica = InfSocioeconomicaRequest(
+                InfSocioeconomicaRequest socioeconomica =
+                    InfSocioeconomicaRequest(
                   _selectedEducationLevel,
                   _selectedIncome,
                   _selectedWorkStatus,
@@ -167,37 +163,22 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
 
                 user.paciente.infoSocioeconomica = socioeconomica;
               }
-              
-              Navigator.push(context, MaterialPageRoute(builder: (context) => TermsAndConditions()));
+
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => TermsAndConditions()));
             },
-            child: Text(
-              "Continuar",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: AllowedColors.white,
-              ),
-            ),
-          ),
-        ),
+            label: "Continuar"),
         const SizedBox(height: 15),
-        SizedBox(
-          width: 300,
-          height: 50,
-          child: Center(
-            child: InkWell(
-              onTap: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => TermsAndConditions()));
-              },
-              child: Text(
-                "En otro momento",
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: AllowedColors.red),
-              ),
-            ),
-          ),
-        ),
+        CustomInkWell(
+            label: "En otro momento",
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => TermsAndConditions()));
+            })
       ],
     );
   }

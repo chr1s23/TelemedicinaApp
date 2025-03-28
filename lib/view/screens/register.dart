@@ -7,14 +7,9 @@ import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
 import 'login.dart'; // Para navegar a la pantalla de inicio de sesión
 
-class Register extends StatefulWidget {
-  const Register({super.key});
+class Register extends StatelessWidget {
+  Register({super.key});
 
-  @override
-  State<Register> createState() => _RegisterScreenState();
-}
-
-class _RegisterScreenState extends State<Register> {
   final _formKey = GlobalKey<FormState>();
 
   final TextEditingController _nameController = TextEditingController();
@@ -22,15 +17,6 @@ class _RegisterScreenState extends State<Register> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _usernameController.dispose();
-    _passwordController.dispose();
-    _confirmPasswordController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,8 +52,7 @@ class _RegisterScreenState extends State<Register> {
                 alignment: Alignment.topLeft,
                 child: Text(
                   "Nombre*",
-                  style: TextStyle(
-                      fontSize: 12, color: AllowedColors.gray),
+                  style: TextStyle(fontSize: 12, color: AllowedColors.gray),
                 ),
               ),
               CustomInputField(
@@ -83,8 +68,7 @@ class _RegisterScreenState extends State<Register> {
                 alignment: Alignment.topLeft,
                 child: Text(
                   "Número de teléfono*",
-                  style: TextStyle(
-                      fontSize: 12, color: AllowedColors.gray),
+                  style: TextStyle(fontSize: 12, color: AllowedColors.gray),
                 ),
               ),
               CustomInputField(
@@ -101,8 +85,7 @@ class _RegisterScreenState extends State<Register> {
                 alignment: Alignment.topLeft,
                 child: Text(
                   "Contraseña*",
-                  style: TextStyle(
-                      fontSize: 12, color: AllowedColors.gray),
+                  style: TextStyle(fontSize: 12, color: AllowedColors.gray),
                 ),
               ),
               CustomInputField(
@@ -119,8 +102,7 @@ class _RegisterScreenState extends State<Register> {
                 alignment: Alignment.topLeft,
                 child: Text(
                   "Confirmar contraseña*",
-                  style: TextStyle(
-                      fontSize: 12, color: AllowedColors.gray),
+                  style: TextStyle(fontSize: 12, color: AllowedColors.gray),
                 ),
               ),
               CustomInputField(
@@ -150,14 +132,15 @@ class _RegisterScreenState extends State<Register> {
                                 content: Text(
                                     "Las contraseñas no coinciden. Por favor, inténtalo de nuevo.")));
                           } else {
-                            User.setCurrentUser(User(_nameController.text, _usernameController.text, _passwordController.text));
+                            User.setCurrentUser(User(
+                                _nameController.text,
+                                _usernameController.text,
+                                _passwordController.text));
 
                             Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => 
-                                PersonalDataForm()
-                              )
-                            );
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => PersonalDataForm()));
                           }
                         }
                       }),

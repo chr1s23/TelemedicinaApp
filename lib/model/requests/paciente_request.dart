@@ -9,7 +9,8 @@ class PacienteRequest {
   String sexo;
   InfSocioeconomicaRequest? infoSocioeconomica;
 
-  PacienteRequest(this.nombre, this.fechaNacimiento, this.pais, this.lenguaMaterna, this.estadoCivil, this.sexo, this.infoSocioeconomica);
+  PacienteRequest(this.nombre, this.fechaNacimiento, this.pais,
+      this.lenguaMaterna, this.estadoCivil, this.sexo, this.infoSocioeconomica);
 
   Map<String, String> lenguas = {
     "ESPAÑOL": "ESPANOL",
@@ -24,7 +25,7 @@ class PacienteRequest {
     "VIUDO/A": "VIUDO",
     "UNIÓN LIBRE": "UNION_LIBRE",
   };
- 
+
   Map<String, dynamic> toJson() {
     return {
       "nombre": nombre,

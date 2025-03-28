@@ -1,11 +1,17 @@
+import 'package:chatbot/model/requests/dispositivo_request.dart';
+import 'package:chatbot/model/requests/sesion_chat_request.dart';
+import 'package:chatbot/service/paciente_service.dart';
+import 'package:chatbot/service/sesion_chat_service.dart';
 import 'package:chatbot/view/screens/dashboard.dart';
 import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 class Scanner extends StatefulWidget {
-  const Scanner({super.key});
-  
+  Scanner({super.key, this.deviceRegister = false});
+
+  bool deviceRegister;
+
   @override
   State<Scanner> createState() => _QRScannerPageState();
 }
@@ -15,7 +21,7 @@ class _QRScannerPageState extends State<Scanner> {
 
   void _onQRScanned(BarcodeCapture capture) {
     if (capture.barcodes.isNotEmpty) {
-      String qrData = capture.barcodes.first.rawValue ?? "Código no válido";
+      String qrData = capture.barcodes.first.rawValue ?? "Código QR no válido";
       _scannerController.stop();
       _showQRResultDialog(qrData);
     }
@@ -36,10 +42,26 @@ class _QRScannerPageState extends State<Scanner> {
             child: const Text("Escanear de nuevo"),
           ),
           TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.pop(context, qrData); // Devuelve el resultado a la pantalla anterior
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Dashboard()));
+            onPressed: () async {
+              if (widget.deviceRegister) {
+                await PacienteService.registrarDispositivo(
+                    context, DispositivoRequest(qrData));
+              } else {
+                //TODO: Logica para recolectar las preguntas del formulario y guardarlas en el servidor
+                //inicio y fin deben ser de la forma 2025-03-10T10:30:00
+                //cuentaPublicId es el id del usuario
+                //contenido es un string con todo el contenido del chat
+                //se requiere la informacion sexual del formulario SaludSexualRequest obligatoriamente
+                //await SesionChatService.registrarInfoExamen(context, SesionChatRequest(cuentaPublicId, inicio, fin, contenido, SaludSexualRequest));
+              }
+
+              if (context.mounted) {
+                Navigator.pop(context);
+                Navigator.pop(context,
+                    qrData); // Devuelve el resultado a la pantalla anterior
+                Navigator.pushReplacement(context,
+                    MaterialPageRoute(builder: (context) => Dashboard()));
+              }
             },
             child: const Text("Aceptar"),
           ),

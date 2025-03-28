@@ -1,6 +1,7 @@
 import 'package:chatbot/model/requests/user_request.dart';
 import 'package:chatbot/model/responses/user_response.dart';
 import 'package:chatbot/service/auth_service.dart';
+import 'package:chatbot/utils/terms_conditions.dart';
 import 'package:chatbot/view/screens/dashboard.dart';
 import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +26,7 @@ class _TermsAndConditionsPageState extends State<TermsAndConditions> {
         final doneLoading = modalLoadingDialog(context: context);
 
         UserResponse? userLogged = await AuthService.signUp(context, user);
-        
+
         doneLoading();
 
         if (userLogged != null) {
@@ -99,16 +100,7 @@ class _TermsAndConditionsPageState extends State<TermsAndConditions> {
                       padding: const EdgeInsets.all(12),
                       child: SingleChildScrollView(
                         child: Text(
-                          "Aquí van los términos y condiciones de la aplicación.\n\n"
-                          "1. Aceptación de términos.\n"
-                          "2. Uso de la información.\n"
-                          "3. Responsabilidad del usuario.\n"
-                          "4. Privacidad y seguridad.\n"
-                          "5. Derechos y obligaciones.\n"
-                          "6. Modificaciones y actualizaciones.\n"
-                          "7. Contacto y soporte.\n\n"
-                          "Al aceptar estos términos, confirma que ha leído y entendido "
-                          "las políticas de uso de la aplicación.",
+                          TermsConditions.termsAndConditions,
                           style: TextStyle(fontSize: 12, color: Colors.black87),
                         ),
                       ),
@@ -123,7 +115,7 @@ class _TermsAndConditionsPageState extends State<TermsAndConditions> {
             InkWell(
               onTap: () {
                 setState(() {
-                  _acceptedTerms = !_acceptedTerms; // Alternar estado
+                  _acceptedTerms = !_acceptedTerms;
                 });
               },
               child: Row(
@@ -139,7 +131,7 @@ class _TermsAndConditionsPageState extends State<TermsAndConditions> {
                   ),
                   Expanded(
                     child: Text(
-                      "He leído y acepto los términos",
+                      "He leído y acepto los términos y condiciones.",
                       style: TextStyle(
                         fontSize: 11,
                         color: AllowedColors.black,

@@ -16,7 +16,7 @@ class _ResourcesPageState extends State<Resources> {
       "title": "Automuestreo",
       "description":
           "Aprende el proceso correcto para realizar un automuestreo de VPH.",
-      "videoPath": "assets/videos/sample.mp4",
+      "videoPath": "assets/videos/automuestreo.mp4",
       "rating": 4.8,
       "liked": false,
     },
@@ -24,7 +24,7 @@ class _ResourcesPageState extends State<Resources> {
       "title": "Salud Sexual",
       "description":
           "Sigue estas medidas para proteger tu salud y la de los demás.",
-      "videoPath": "assets/videos/sample.mp4",
+      "videoPath": "assets/videos/automuestreo.mp4",
       "rating": 4.3,
       "liked": false,
     },
@@ -175,13 +175,13 @@ class _ResourcesPageState extends State<Resources> {
         Positioned(
           child: GestureDetector(
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) =>
-                      ResourceDetail(videos: _videos, initialIndex: index),
-                ),
-              );
+              //Navigator.push(
+              //  context,
+              //  MaterialPageRoute(
+              //    builder: (context) =>
+              //        ResourceDetail(videos: _videos, initialIndex: index),
+               // ),
+              //);
             },
             child: Container(
               decoration: BoxDecoration(

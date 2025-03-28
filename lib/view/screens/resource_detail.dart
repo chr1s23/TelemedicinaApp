@@ -110,8 +110,17 @@ class _VideoPlayerPageState extends State<ResourceDetail> {
           ? _videoController.value.aspectRatio
           : 16 / 9,
       child: _videoController.value.isInitialized
-          ? VideoPlayer(_videoController)
-          : const Center(child: CircularProgressIndicator()),
+          ? InkWell(
+              child: VideoPlayer(_videoController),
+              onTap: () {
+                setState(() {
+                  _videoController.value.isPlaying
+                      ? _videoController.pause()
+                      : _videoController.play();
+                });
+              },
+            )
+          : Center(child: CircularProgressIndicator()),
     );
   }
 
@@ -138,12 +147,12 @@ class _VideoPlayerPageState extends State<ResourceDetail> {
 
   Widget _buildVideoDetails() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
           widget.videos[_currentIndex]["title"]!,
           style: TextStyle(
-            fontSize: 15,
+            fontSize: 17,
             color: AllowedColors.black,
           ),
         ),

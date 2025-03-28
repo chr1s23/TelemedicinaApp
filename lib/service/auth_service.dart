@@ -11,9 +11,9 @@ Dio? _dio;
 
 Dio getDio() {
   _dio ??= Dio(BaseOptions(
-      baseUrl: "https://clias.ucuenca.edu.ec",
-      headers: {'Content-Type': 'application/json'},
-    ));
+    baseUrl: "https://clias.ucuenca.edu.ec",
+    headers: {'Content-Type': 'application/json'},
+  ));
 
   return _dio!;
 }
@@ -32,7 +32,8 @@ sealed class AuthService {
         secureStorage.write(key: "user_id", value: userResponse.publicId);
         secureStorage.write(key: "user_token", value: userResponse.token);
 
-        _log.fine("Saved to storage: ID - ${userResponse.publicId} | Token - ${userResponse.token}");
+        _log.fine(
+            "Saved to storage: ID - ${userResponse.publicId} | Token - ${userResponse.token}");
 
         return userResponse;
       } else {
@@ -42,7 +43,7 @@ sealed class AuthService {
           );
         }
       }
-    } on DioException catch(e) {
+    } on DioException catch (e) {
       _log.severe('Server connection error: $e');
 
       if (context.mounted) {
@@ -61,11 +62,12 @@ sealed class AuthService {
         );
       }
     }
-    
+
     return null;
   }
 
-  static Future<UserResponse?> signUp(BuildContext context, UserRequest user) async {
+  static Future<UserResponse?> signUp(
+      BuildContext context, UserRequest user) async {
     try {
       var request = user.toJson();
       _log.fine(request);
@@ -79,7 +81,8 @@ sealed class AuthService {
 
         return userResponse;
       } else {
-        _log.severe("Unexpected server response during signup: ${response.data}");
+        _log.severe(
+            "Unexpected server response during signup: ${response.data}");
 
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(

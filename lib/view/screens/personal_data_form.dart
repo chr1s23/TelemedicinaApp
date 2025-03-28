@@ -2,6 +2,7 @@ import 'package:chatbot/model/requests/paciente_request.dart';
 import 'package:chatbot/model/requests/user.dart';
 import 'package:chatbot/model/requests/user_request.dart';
 import 'package:chatbot/view/screens/socioeconomic_information.dart';
+import 'package:chatbot/view/widgets/custom_button.dart';
 import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
 
@@ -19,12 +20,12 @@ class _PersonalDataFormState extends State<PersonalDataForm> {
     "ECUADOR",
     "VENEZUELA",
     "COLOMBIA",
-    "PERÚ",
+    "PERU",
     "CHILE",
     "ARGENTINA",
+    "BOLIVIA",
     "URUGUAY",
-    "BRASIL",
-    "MÉXICO",
+    "BRAZIL"
   ];
   final List<String> _languages = ["ESPAÑOL", "INGLÉS", "OTRO"];
   final List<String> _maritalStatusOptions = [
@@ -63,7 +64,12 @@ class _PersonalDataFormState extends State<PersonalDataForm> {
     );
     if (picked != null && picked != _selectedDate) {
       setState(() {
-        dateController.text = picked.toIso8601String().split("T")[0].split("-").reversed.join("/");
+        dateController.text = picked
+            .toIso8601String()
+            .split("T")[0]
+            .split("-")
+            .reversed
+            .join("/");
       });
     }
   }
@@ -80,18 +86,19 @@ class _PersonalDataFormState extends State<PersonalDataForm> {
         ),
         actions: [
           TextButton(
-            onPressed: () {
-              modalYesNoDialog(
-                context: context, 
-                title: "¿Cancelar?", 
-                message: "¿Desea cancelar la creación de su cuenta? Se perderán todos los datos ingresados.", 
-                onYes: () => Navigator.of(context)..pop()..pop(),
-              );
-            },
-            child: Text("Cancelar",
-              style: TextStyle(color: AllowedColors.red, fontSize: 12)
-            )
-          ),
+              onPressed: () {
+                modalYesNoDialog(
+                  context: context,
+                  title: "¿Cancelar?",
+                  message:
+                      "¿Desea cancelar la creación de su cuenta? Se perderán todos los datos ingresados.",
+                  onYes: () => Navigator.of(context)
+                    ..pop()
+                    ..pop(),
+                );
+              },
+              child: Text("Cancelar",
+                  style: TextStyle(color: AllowedColors.red, fontSize: 12))),
         ],
       ),
       body: SingleChildScrollView(
@@ -120,19 +127,20 @@ class _PersonalDataFormState extends State<PersonalDataForm> {
               buildLabel("Fecha de nacimiento*"),
               TextFormField(
                 controller: dateController,
-                  validator: (value) {
-                    if (value?.isEmpty ?? false) {
-                      return 'Campo obligatorio';
-                    }
-                    return null;
-                  },
-                  style: TextStyle(fontSize: 15, color: AllowedColors.black),
-                  decoration: inputDecoration('dd/MM/yyyy', isCalendar: true),
-                  readOnly: true,
-                  onTap: () {
-                    _selectDate(context);
-                  },),
-              
+                validator: (value) {
+                  if (value?.isEmpty ?? false) {
+                    return 'Campo obligatorio';
+                  }
+                  return null;
+                },
+                style: TextStyle(fontSize: 15, color: AllowedColors.black),
+                decoration: inputDecoration('dd/MM/yyyy', isCalendar: true),
+                readOnly: true,
+                onTap: () {
+                  _selectDate(context);
+                },
+              ),
+
               const SizedBox(height: 20),
 
               // País
@@ -177,52 +185,33 @@ class _PersonalDataFormState extends State<PersonalDataForm> {
               const SizedBox(height: 30),
 
               // Botón de continuar
-              SizedBox(
-                width: 300,
-                height: 50,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AllowedColors.blue,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                  ),
+              CustomButton(
+                  color: AllowedColors.blue,
                   onPressed: () {
                     if (_formKey.currentState?.validate() ?? false) {
                       User user = User.getCurrentUser();
                       //TODO: Handle edit
-                      UserRequest.setUserRequest(
-                        UserRequest(
-                          user.nombreUsuario, 
-                          user.contrasena, 
-                          "USER", 
+                      UserRequest.setUserRequest(UserRequest(
+                          user.nombreUsuario,
+                          user.contrasena,
+                          "USER",
                           false,
                           PacienteRequest(
-                            user.nombre, 
-                            dateController.text, 
-                            _selectedCountry!, 
-                            _selectedLanguage!, 
-                            _selectedMaritalStatus!, 
-                            _selectedGender!, 
-                            null
-                          )
-                        )
-                      );
+                              user.nombre,
+                              dateController.text,
+                              _selectedCountry!,
+                              _selectedLanguage!,
+                              _selectedMaritalStatus!,
+                              _selectedGender!,
+                              null)));
                       Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => SocioeconomicInformation()
-                        )
-                      );
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  SocioeconomicInformation()));
                     }
                   },
-                  child: Text(
-                    "Continuar",
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold, color: AllowedColors.white),
-                  ),
-                ),
-              ),
+                  label: "Continuar")
             ],
           ),
         ),
