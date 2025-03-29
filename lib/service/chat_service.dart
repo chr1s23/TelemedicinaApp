@@ -11,7 +11,6 @@ class ChatService {
     var sessionId = await secureStorage.read(key: "user_id");
 
     if (sessionId != null) {
-      //sessionId = sessionId.replaceAll('-', '');
       _log.fine("Clean session ID: $sessionId");
     } else {
       _log.severe("Session ID not found in secure storage.");
@@ -38,7 +37,6 @@ class ChatService {
       // Manejo de eventos
       socket.onConnect((_) {
         socket.emit('session_request', {"session_id": sessionId});
-        sendMessage("Hola", sessionId);
       });
 
       socket.onDisconnect((_) {

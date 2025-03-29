@@ -73,7 +73,7 @@ class Register extends StatelessWidget {
               ),
               CustomInputField(
                 controller: _usernameController,
-                hint: "Ingresa tu número de teléfono",
+                hint: "Ingresa tu número de teléfono (min. 7 digitos)",
                 obscureText: false,
                 errorMessage: "Este campo es obligatorio",
                 isNumber: true,
@@ -90,7 +90,7 @@ class Register extends StatelessWidget {
               ),
               CustomInputField(
                 controller: _passwordController,
-                hint: "Ingresa tu contraseña, min. 6 caracteres",
+                hint: "Ingresa tu contraseña (min. 6 caracteres)",
                 obscureText: true,
                 errorMessage: "Este campo es obligatorio",
                 isNumber: false,
@@ -120,6 +120,12 @@ class Register extends StatelessWidget {
                       label: "Crear una cuenta",
                       onPressed: () {
                         if (_formKey.currentState?.validate() ?? false) {
+                          if (_usernameController.text.length < 7) {
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                content: Text(
+                                    "El número de teléfono es incorrecto.")));
+                            return;
+                          }
                           if (_passwordController.text.length < 6) {
                             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                                 content: Text(

@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:chatbot/model/requests/message_request.dart';
 import 'package:chatbot/view/screens/scanner.dart';
@@ -18,7 +20,6 @@ Future<String> getUserId() async {
     userId = await secureStorage.read(key: "user_id");
 
     if (userId != null) {
-      //userId = userId!.replaceAll('-', '');
       _log.fine("Clean user ID: $userId");
     } else {
       _log.severe("User ID not found in secure storage.");
@@ -308,6 +309,46 @@ class _ChatbotPageState extends State<Chat> {
           ),
         ],
       ),
+    );
+  }
+
+  void showImageDialog(BuildContext context) {
+    String base64String =
+        "iVBORw0KGgoAAAANSUhEUgAAATMAAAGdCAYAAAB+TpTAAAAxL3pUWHRSYXcgcHJvZmlsZSB0eXBlIGV4aWYAAHjarZxZsly3ckX/MQoNAT0Sw0Eb4Rl4+F4bVSRFPenZYVskb1OqOg2QuZtE4rjzn/9x3R9//BFCqNnl0qz2Wj3/5Z57HPxg/vPffF+Dz+/r+y+l70/h99dd398fI9+T3vn5Hz1+D3Z4nZ/D9/f+PUn48f4fB/rxQxj8VH79jzG+r8/fX5/fA0b764G+V5DC58x+fz/wPVCK3yvKn9/X94pqt/bbre31PXP+vmS//uXUYi01tMzXHH1rtfOzRZ8b47l1oXfF/g5UPgP684Ufv/94a+Sa4kkheb7GFD9XmfQvpcH3zFded7wxJOOXwnd9TW/gPVPJJXCl/Xui761qMP88Nr/G6B/++5/c1jdMXhj8nLV5fp7ht/j4+dNfwqON7+vp8/rPA/n68/tv0/rj9VD+8nr6eZr42xXZrzPHP19RqHH8ds9/mtV7t9173ptdHrlyz/V7Uz9u5f3EG6dG632s8qfxr/Bze386f8wPvwid7fwioya/ .....";
+
+    Uint8List imageBytes = base64Decode(base64String);
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          child: Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Stack(
+              children: [
+                Center(
+                  child: Image.memory(imageBytes, fit: BoxFit.contain),
+                ),
+                Positioned(
+                  top: 20,
+                  right: 20,
+                  child: IconButton(
+                    icon: Icon(Icons.close, color: Colors.white, size: 30),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 

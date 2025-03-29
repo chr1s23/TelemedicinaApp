@@ -5,6 +5,7 @@ import 'package:chatbot/utils/terms_conditions.dart';
 import 'package:chatbot/view/screens/dashboard.dart';
 import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 
 class TermsAndConditions extends StatefulWidget {
   const TermsAndConditions({super.key});
@@ -92,19 +93,21 @@ class _TermsAndConditionsPageState extends State<TermsAndConditions> {
                     ),
                     const SizedBox(height: 20),
                     Container(
-                      height: 500, // Espacio grande para los términos
-                      decoration: BoxDecoration(
-                        border: Border.all(color: AllowedColors.gray, width: 1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      padding: const EdgeInsets.all(12),
-                      child: SingleChildScrollView(
-                        child: Text(
-                          TermsConditions.termsAndConditions,
-                          style: TextStyle(fontSize: 12, color: Colors.black87),
+                        height: 500, // Espacio grande para los términos
+                        decoration: BoxDecoration(
+                          border:
+                              Border.all(color: AllowedColors.gray, width: 1),
+                          borderRadius: BorderRadius.circular(8),
                         ),
-                      ),
-                    ),
+                        padding: const EdgeInsets.all(12),
+                        child: SingleChildScrollView(
+                            child: MarkdownBody(
+                                data: TermsConditions.termsAndConditions
+                                    .replaceAll("\n", "  \n"),
+                                styleSheet: MarkdownStyleSheet(
+                                  p: TextStyle(
+                                      fontSize: 12, color: Colors.black87),
+                                ))))
                   ],
                 ),
               ),

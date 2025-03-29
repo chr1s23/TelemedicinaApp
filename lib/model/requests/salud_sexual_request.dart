@@ -30,7 +30,7 @@ class SaludSexualRequest {
   Map<String, String> opciones = {
     "No": "NO",
     "Nose": "NOSE",
-    "Si 3 años": "SI"
+    "Si": "SI"
   };
 
   Map<String, dynamic> toJson() {
