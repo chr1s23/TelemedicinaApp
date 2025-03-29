@@ -1,10 +1,10 @@
+import 'package:chatbot/model/storage/storage.dart';
 import 'package:chatbot/providers/auth_provider.dart';
 import 'package:chatbot/providers/chat_provider.dart';
 import 'package:chatbot/view/screens/dashboard.dart';
 import 'package:chatbot/view/screens/presentation.dart';
 import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:provider/provider.dart';
 import 'log_utils.dart';
 
@@ -44,8 +44,6 @@ class SplashScreen extends StatefulWidget {
 }
 
 class SplashScreenState extends State<SplashScreen> {
-  final _storage = FlutterSecureStorage();
-
   @override
   void initState() {
     super.initState();
@@ -53,7 +51,7 @@ class SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _checkAuth() async {
-    String? token = await _storage.read(key: "user_token");
+    String? token = await secureStorage.read(key: "user_token");
 
     if (!mounted) return;
 

@@ -85,7 +85,6 @@ flutter:
   assets:
     - assets/images/logo_ucuenca_top.png
     - assets/images/sisa.png
-    - assets/images/qrscan.png
     - assets/images/chatbot.png
     - assets/icons/chatbot.svg
     - assets/images/avatar.png

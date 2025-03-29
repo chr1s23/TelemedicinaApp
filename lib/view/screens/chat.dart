@@ -1,12 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:chatbot/model/requests/message_request.dart';
+import 'package:chatbot/service/archivo_service.dart';
 import 'package:chatbot/view/screens/scanner.dart';
 import 'package:chatbot/service/chat_service.dart';
 import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:chatbot/model/storage/storage.dart';
 import 'package:logging/logging.dart';
@@ -33,22 +34,51 @@ class Chat extends StatefulWidget {
   Chat({super.key, this.autoStart = false});
 
   bool autoStart;
-  bool completeForm = false;
 
   @override
   State<Chat> createState() => _ChatbotPageState();
 }
 
 class _ChatbotPageState extends State<Chat> {
+  bool completeForm = false;
   final focusNode = FocusNode();
   final ChatService chatService = ChatService();
   final TextEditingController _messageController = TextEditingController();
+  final TextEditingController dateController = TextEditingController();
   final List<Map<String, dynamic>> _messages = [];
 
   bool _isLoading = false;
+  bool inputNumber = false;
+  bool showInputText = false;
+  bool showDatePickerSelector = false;
   int _loadingIndex = 0;
   Timer? _loadingTimer;
   List<Map<String, dynamic>>? _quickReplies;
+
+  final DateTime now = DateTime.now();
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime firstAllowedDate =
+        DateTime(now.year, now.month - 2, now.day);
+    final DateTime lastAllowedDate = now.subtract(Duration(days: 1));
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      firstDate: firstAllowedDate,
+      lastDate: lastAllowedDate,
+    );
+    if (picked != null) {
+      setState(() {
+        _messageController.text = picked
+            .toIso8601String()
+            .split("T")[0]
+            .split("-")
+            .reversed
+            .join("/");
+        showDatePickerSelector = false;
+        _sendMessage();
+      });
+    }
+  }
 
   @override
   void initState() {
@@ -57,13 +87,41 @@ class _ChatbotPageState extends State<Chat> {
     chatService.socket.on('bot_uttered', (data) {
       if (mounted) {
         setState(() {
+          showInputText = false;
+          if (data.containsKey('selector_fecha')) {
+            showDatePickerSelector = true;
+          }
+          if (data.containsKey('teclado_numerico')) {
+            inputNumber = true;
+          }
           _isLoading = false;
           _loadingTimer?.cancel(); // Detener animación
           _messages.removeWhere((msg) => msg["loading"] == true);
-          _messages.add({"text": "${data['text']}", "isBot": true});
+          if (data.containsKey('text')) {
+            _messages.add({"text": "${data['text']}", "isBot": true});
+          }
 
           if (data['quick_replies'] != null) {
-            _quickReplies = List<Map<String, dynamic>>.from(data['quick_replies'] as List<dynamic>);
+            _quickReplies = List<Map<String, dynamic>>.from(
+                data['quick_replies'] as List<dynamic>);
+
+            bool containsVPHOrDiabetes = _quickReplies!.any((answer) =>
+                answer.containsKey("payload") &&
+                (answer["payload"] == "VPH" ||
+                    answer["payload"] == "Diabetes" ||
+                    answer["payload"] == "Ver video"));
+
+            if (containsVPHOrDiabetes) {
+              showInputText = true;
+            }
+
+            bool containsVerVideo = _quickReplies!.any((answer) =>
+                answer.containsKey("payload") &&
+                (answer["payload"] == "Ver video"));
+
+            if (containsVerVideo) {
+              completeForm = true;
+            }
           }
         });
       }
@@ -71,9 +129,13 @@ class _ChatbotPageState extends State<Chat> {
   }
 
   void _sendMessage([Map<String, dynamic>? dataPayload]) async {
-    String message = dataPayload?['title'] ?? _messageController.value.text.trim();
+    String message =
+        dataPayload?['title'] ?? _messageController.value.text.trim();
     if (message.isNotEmpty) {
       setState(() {
+        if (inputNumber) {
+          inputNumber = false;
+        }
         _messages.add({"text": message, "isBot": false});
         _isLoading = true;
         _messages.add({"text": '', "loading": true, "isBot": true});
@@ -83,7 +145,8 @@ class _ChatbotPageState extends State<Chat> {
 
       _startLoadingAnimation();
 
-      chatService.sendMessage(dataPayload?['payload'] ?? message, await getUserId());
+      chatService.sendMessage(
+          dataPayload?['payload'] ?? message, await getUserId());
       _messageController.clear();
     }
   }
@@ -124,11 +187,15 @@ class _ChatbotPageState extends State<Chat> {
         }
 
         final bool shouldPop = await modalYesNoDialog(
-          context: context, 
-          title: "¿Salir del chat?", 
-          message: "¿Seguro que desea salir? Se perderá todo el contenido del chat.", 
-          onYes: () async {chatService.reset(await getUserId());},
-        ) ?? false;
+              context: context,
+              title: "¿Salir del chat?",
+              message:
+                  "¿Seguro que desea salir? Se perderá todo el contenido del chat.",
+              onYes: () async {
+                chatService.reset(await getUserId());
+              },
+            ) ??
+            false;
 
         if (context.mounted && shouldPop) {
           Navigator.pop(context);
@@ -140,14 +207,11 @@ class _ChatbotPageState extends State<Chat> {
           child: Column(
             children: [
               Expanded(
-                child: ListView.builder(
-                  //controller: chatProvider.chatScrollController,
+                  child: ListView.builder(
                 reverse: true,
                 padding: const EdgeInsets.all(10),
-                itemCount: _messages.length + (_quickReplies != null ? 1: 0),
+                itemCount: _messages.length + (_quickReplies != null ? 1 : 0),
                 itemBuilder: (context, index) {
-                  //final message = chatProvider.messages[index];
-                  
                   if (_quickReplies != null) {
                     index = index - 1;
                   }
@@ -165,8 +229,7 @@ class _ChatbotPageState extends State<Chat> {
                   return _buildChatBubble(messageRequest);
                 },
               )),
-              if (_quickReplies == null) _buildMessageInput(),
-              //buildTextField(chatProvider.sendMessage)
+              if (showInputText) _buildMessageInput(),
             ],
           ),
         ),
@@ -177,7 +240,7 @@ class _ChatbotPageState extends State<Chat> {
   AppBar _buildAppBar() {
     return AppBar(
       iconTheme: IconThemeData(color: AllowedColors.gray),
-      elevation: 0,
+      elevation: 10,
       title: Row(
         children: [
           Image.asset('assets/images/chatbot.png',
@@ -195,13 +258,15 @@ class _ChatbotPageState extends State<Chat> {
       centerTitle: false,
       actions: [
         IconButton(
-          icon: Image.asset('assets/images/qrscan.png',
-              height: 30), // Ícono de QR
-          onPressed: widget.completeForm ? () {
-            // Acción de escanear QR
-            Navigator.push(
-                context, MaterialPageRoute(builder: (context) => Scanner()));
-          } : null,
+          icon: Icon(Icons.qr_code_scanner,
+              size: 30,
+              color: completeForm ? AllowedColors.blue : AllowedColors.gray),
+          onPressed: completeForm
+              ? () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => Scanner()));
+                }
+              : null,
         ),
       ],
     );
@@ -244,9 +309,10 @@ class _ChatbotPageState extends State<Chat> {
           ),
         ),
         child: MarkdownBody(
-          data:  message.text.replaceAll("\n", "  \n"),
+          data: message.text.replaceAll("\n", "  \n"),
           styleSheet: MarkdownStyleSheet(
-            p: TextStyle(color: isBot ? AllowedColors.black : AllowedColors.white),
+            p: TextStyle(
+                color: isBot ? AllowedColors.black : AllowedColors.white),
           ),
         ),
       ),
@@ -254,7 +320,7 @@ class _ChatbotPageState extends State<Chat> {
   }
 
   Widget _replyButtons(List<Map<String, dynamic>> answers) {
-    return Wrap(
+    var buttons = Wrap(
       spacing: 8,
       runSpacing: 8,
       alignment: WrapAlignment.center,
@@ -262,16 +328,108 @@ class _ChatbotPageState extends State<Chat> {
           .map((answer) => ElevatedButton(
                 child: Text(
                   answer["title"]!,
-                  style: const TextStyle(
-                    fontSize: 15
-                  ),
+                  style: const TextStyle(fontSize: 15),
                 ),
                 onPressed: () {
-                  _quickReplies = null;
-                  _sendMessage(answer);
+                  if (answer["title"] == "Más información") {
+                    _mostrarDialogo(context, answer["payload"]);
+                  } else if (answer["title"] == "Ver video") {
+                    showImageDialog(context);
+                  } else {
+                    _quickReplies = null;
+                    _sendMessage(answer);
+                  }
                 },
               ))
           .toList(),
+    );
+
+    if (showDatePickerSelector) {
+      buttons.children.add(_dateSelector());
+    }
+    return buttons;
+  }
+
+  void _mostrarDialogo(BuildContext context, String text) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: AllowedColors.white,
+          insetPadding: EdgeInsets.zero,
+          child: Container(
+            width: MediaQuery.of(context).size.width,
+            height:
+                MediaQuery.of(context).size.height * 0.9,
+            padding: EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  "Más información",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 10),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: MarkdownBody(
+                      data: text.replaceAll("\n", "  \n"),
+                      styleSheet: MarkdownStyleSheet(
+                        p: TextStyle(color: AllowedColors.black),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 10),
+                Align(
+                  alignment: Alignment.bottomRight,
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(); // Cierra el diálogo
+                    },
+                    child: Text("Cerrar"),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _dateSelector() {
+    return SizedBox(
+      height: 50,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          padding: EdgeInsets.zero,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30),
+          ),
+          backgroundColor: AllowedColors.white,
+          elevation: 2,
+        ),
+        onPressed: () {
+          _selectDate(context);
+        },
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: Icon(Icons.calendar_today,
+                  color: AllowedColors.gray, size: 20),
+            ),
+            Expanded(
+              child: Text(
+                "dd/MM/yyyy",
+                style: TextStyle(fontSize: 16, color: AllowedColors.black),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -283,10 +441,16 @@ class _ChatbotPageState extends State<Chat> {
           Expanded(
             child: TextField(
               controller: _messageController,
+              keyboardType:
+                  inputNumber ? TextInputType.number : TextInputType.text,
+              inputFormatters: [
+                inputNumber
+                    ? FilteringTextInputFormatter.digitsOnly
+                    : FilteringTextInputFormatter.singleLineFormatter
+              ],
               decoration: InputDecoration(
                 hintText: "Escribe un mensaje...",
-                hintStyle: TextStyle(
-                    color: AllowedColors.gray, fontSize: 13),
+                hintStyle: TextStyle(color: AllowedColors.gray, fontSize: 13),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(30),
                   borderSide: BorderSide.none,
@@ -312,9 +476,12 @@ class _ChatbotPageState extends State<Chat> {
     );
   }
 
-  void showImageDialog(BuildContext context) {
-    String base64String =
-        "iVBORw0KGgoAAAANSUhEUgAAATMAAAGdCAYAAAB+TpTAAAAxL3pUWHRSYXcgcHJvZmlsZSB0eXBlIGV4aWYAAHjarZxZsly3ckX/MQoNAT0Sw0Eb4Rl4+F4bVSRFPenZYVskb1OqOg2QuZtE4rjzn/9x3R9//BFCqNnl0qz2Wj3/5Z57HPxg/vPffF+Dz+/r+y+l70/h99dd398fI9+T3vn5Hz1+D3Z4nZ/D9/f+PUn48f4fB/rxQxj8VH79jzG+r8/fX5/fA0b764G+V5DC58x+fz/wPVCK3yvKn9/X94pqt/bbre31PXP+vmS//uXUYi01tMzXHH1rtfOzRZ8b47l1oXfF/g5UPgP684Ufv/94a+Sa4kkheb7GFD9XmfQvpcH3zFded7wxJOOXwnd9TW/gPVPJJXCl/Xui761qMP88Nr/G6B/++5/c1jdMXhj8nLV5fp7ht/j4+dNfwqON7+vp8/rPA/n68/tv0/rj9VD+8nr6eZr42xXZrzPHP19RqHH8ds9/mtV7t9173ptdHrlyz/V7Uz9u5f3EG6dG632s8qfxr/Bze386f8wPvwid7fwioya/ .....";
+  void showImageDialog(BuildContext context,
+      {String nombreArchivo = "clias.png"}) async {
+    String? base64String =
+        await ArchivoService.getArchivo(context, nombreArchivo);
+
+    if (base64String == null) return;
 
     Uint8List imageBytes = base64Decode(base64String);
 
@@ -322,62 +489,42 @@ class _ChatbotPageState extends State<Chat> {
       context: context,
       builder: (BuildContext context) {
         return Dialog(
-          backgroundColor: Colors.transparent,
-          child: Container(
-            width: double.infinity,
-            height: double.infinity,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Stack(
-              children: [
-                Center(
-                  child: Image.memory(imageBytes, fit: BoxFit.contain),
+          backgroundColor: AllowedColors.white,
+          insetPadding: EdgeInsets.zero, // Elimina los márgenes del diálogo
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              double screenHeight = MediaQuery.of(context).size.height;
+              double screenWidth = MediaQuery.of(context).size.width;
+
+              return Container(
+                width: screenWidth, // Ocupar todo el ancho de la pantalla
+                height: screenHeight * 0.95, // 90% del alto de la pantalla
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                Positioned(
-                  top: 20,
-                  right: 20,
-                  child: IconButton(
-                    icon: Icon(Icons.close, color: Colors.white, size: 30),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  ),
+                child: Stack(
+                  children: [
+                    Center(
+                      child: Image.memory(imageBytes, fit: BoxFit.contain),
+                    ),
+                    Positioned(
+                      top: 20,
+                      right: 20,
+                      child: IconButton(
+                        icon: Icon(Icons.close,
+                            color: AllowedColors.red, size: 30),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              );
+            },
           ),
         );
       },
     );
-  }
-
-  Widget buildTextField(ValueChanged<String> onValue) {
-    final outlineInputBorder = UnderlineInputBorder(
-        borderSide: const BorderSide(color: Colors.transparent),
-        borderRadius: BorderRadius.circular(30));
-
-    return TextFormField(
-        onTapOutside: (event) {
-          focusNode.unfocus();
-        },
-        focusNode: focusNode,
-        controller: _messageController,
-        onFieldSubmitted: (value) {
-          _messageController.clear();
-          focusNode.unfocus();
-          onValue(value);
-        },
-        decoration: InputDecoration(
-            filled: true,
-            hintText: "Escribe tu mensaje...",
-            enabledBorder: outlineInputBorder,
-            focusedBorder: outlineInputBorder,
-            suffixIcon: IconButton(
-                onPressed: () {
-                  final value = _messageController.value.text;
-                  onValue(value);
-                },
-                icon: const Icon(Icons.send_outlined))));
   }
 }

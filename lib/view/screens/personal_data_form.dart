@@ -39,7 +39,6 @@ class _PersonalDataFormState extends State<PersonalDataForm> {
 
   final TextEditingController dateController = TextEditingController();
 
-  DateTime? _selectedDate;
   String? _selectedCountry;
   String? _selectedLanguage;
   String? _selectedMaritalStatus;
@@ -62,7 +61,7 @@ class _PersonalDataFormState extends State<PersonalDataForm> {
       firstDate: DateTime(1900),
       lastDate: DateTime(2017),
     );
-    if (picked != null && picked != _selectedDate) {
+    if (picked != null) {
       setState(() {
         dateController.text = picked
             .toIso8601String()

@@ -31,6 +31,7 @@ class _TermsAndConditionsPageState extends State<TermsAndConditions> {
         doneLoading();
 
         if (userLogged != null) {
+          if (!mounted) return ;
           Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(builder: (context) => Dashboard()),
