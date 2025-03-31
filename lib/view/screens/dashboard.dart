@@ -33,11 +33,12 @@ class _AutoSamplingPageState extends State<Dashboard> {
           });
     _videoController.play();
     _videoController.setLooping(false);
+
     helpVideoController =
-        VideoPlayerController.asset('assets/videos/sample.mp4')
-          ..initialize().then((_) {
-            setState(() {});
-          });
+      VideoPlayerController.asset('assets/videos/sample.mp4')
+        ..initialize().then((_) {
+          setState(() {});
+        });
   }
 
   @override
@@ -80,49 +81,54 @@ class _AutoSamplingPageState extends State<Dashboard> {
     );
   }
 
-  AppBar _buildAppBar() {
-    return AppBar(
-      elevation: 0,
-      leading: SizedBox(
-        width: 90,
-        height: 45,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(5.0, 0, 0, 0),
-          child: IconButton(
-            style: IconButton.styleFrom(
-              backgroundColor: AllowedColors.red,
-              shape: CircleBorder(),
+  PreferredSizeWidget _buildAppBar() {
+    return PreferredSize(
+      preferredSize: Size.fromHeight(72),
+      child: Builder(builder: (context) {
+        return AppBar(
+          elevation: 0,
+          leading: SizedBox(
+            width: 90,
+            height: 45,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(5.0, 0, 0, 0),
+              child: IconButton(
+                style: IconButton.styleFrom(
+                  backgroundColor: AllowedColors.red,
+                  shape: CircleBorder(),
+                ),
+                onPressed: () {
+                  _showHelpDialog();
+                },
+                icon: const Icon(Icons.help_outline, color: AllowedColors.white),
+                iconSize: 35,
+              ),
             ),
-            onPressed: () {
-              _showHelpDialog();
-            },
-            icon: const Icon(Icons.help_outline, color: AllowedColors.white),
-            iconSize: 35,
           ),
-        ),
-      ),
-      title: Text(
-        "SISA",
-        style: TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.bold,
-            color: AllowedColors.red),
-      ),
-      centerTitle: true,
-      actions: [
-        IconButton(
-          icon: CircleAvatar(
-            backgroundImage:
-                AssetImage('assets/images/avatar.png'), // Imagen del avatar
-            radius: 15,
+          title: Text(
+            "SISA",
+            style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: AllowedColors.red),
           ),
-          onPressed: () {
-            // Acción del perfil
-            Scaffold.of(context)
-                .openEndDrawer(); // Abre el Drawer desde la derecha
-          },
-        ),
-      ],
+          centerTitle: true,
+          actions: [
+            IconButton(
+              icon: CircleAvatar(
+                backgroundImage:
+                    AssetImage('assets/images/avatar.png'), // Imagen del avatar
+                radius: 15,
+              ),
+              onPressed: () {
+                // Acción del perfil
+                Scaffold.of(context)
+                    .openEndDrawer(); // Abre el Drawer desde la derecha
+              },
+            ),
+          ],
+        );
+      }),
     );
   }
 
@@ -137,62 +143,65 @@ class _AutoSamplingPageState extends State<Dashboard> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15),
                 ),
-                child: Column(mainAxisSize: MainAxisSize.min, children: [
-                  // Botón de cerrar (X)
-                  Align(
-                    alignment: Alignment.topLeft,
-                    child: IconButton(
-                      icon: const Icon(Icons.close,
-                          color: AllowedColors.black, size: 24),
-                      onPressed: () {
-                        helpVideoController.pause();
-                        helpVideoController.dispose();
-                        Navigator.pop(context);
-                      },
-                    ),
-                  ),
-
-                  // Video
-                  AspectRatio(
-                    aspectRatio: helpVideoController.value.isInitialized
-                        ? helpVideoController.value.aspectRatio
-                        : 16 / 9,
-                    child: helpVideoController.value.isInitialized
-                        ? InkWell(
-                            child: VideoPlayer(helpVideoController),
-                            onTap: () {
-                              setState(() {
-                                helpVideoController.value.isPlaying
-                                    ? helpVideoController.pause()
-                                    : helpVideoController.play();
-                              });
-                            },
-                          )
-                        : Center(child: CircularProgressIndicator()),
-                  ),
-                  const SizedBox(height: 15),
-                  Column(children: [
-                    CustomButton(
-                        color: AllowedColors.red,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(mainAxisSize: MainAxisSize.min, children: [
+                    // Botón de cerrar (X)
+                    Align(
+                      alignment: Alignment.topLeft,
+                      child: IconButton(
+                        icon: const Icon(Icons.close,
+                            color: AllowedColors.black, size: 24),
                         onPressed: () {
                           helpVideoController.pause();
-                          helpVideoController.dispose();
+                          //helpVideoController.dispose();
                           Navigator.pop(context);
                         },
-                        label: "Entendido"),
-                    const SizedBox(height: 20),
-                    CustomButton(
-                        color: AllowedColors.blue,
-                        onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => AboutUs()));
-                        },
-                        label: "Acerca de"),
-                    const SizedBox(height: 15)
-                  ])
-                ]));
+                      ),
+                    ),
+                  
+                    // Video
+                    AspectRatio(
+                      aspectRatio: helpVideoController.value.isInitialized
+                          ? helpVideoController.value.aspectRatio
+                          : 16 / 9,
+                      child: helpVideoController.value.isInitialized
+                          ? InkWell(
+                              child: VideoPlayer(helpVideoController),
+                              onTap: () {
+                                setState(() {
+                                  helpVideoController.value.isPlaying
+                                      ? helpVideoController.pause()
+                                      : helpVideoController.play();
+                                });
+                              },
+                            )
+                          : Center(child: CircularProgressIndicator()),
+                    ),
+                    const SizedBox(height: 15),
+                    Column(children: [
+                      CustomButton(
+                          color: AllowedColors.red,
+                          onPressed: () {
+                            helpVideoController.pause();
+                            //helpVideoController.dispose();
+                            Navigator.pop(context);
+                          },
+                          label: "Entendido"),
+                      const SizedBox(height: 20),
+                      CustomButton(
+                          color: AllowedColors.blue,
+                          onPressed: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => AboutUs()));
+                          },
+                          label: "Acerca de"),
+                      const SizedBox(height: 15)
+                    ])
+                  ]),
+                ));
           },
         );
       },
@@ -232,8 +241,8 @@ class _AutoSamplingPageState extends State<Dashboard> {
               color: Color.fromRGBO(0, 40, 86, 1),
               label: "Iniciar proceso",
               onPressed: () {
-                // funciona para ir a la ventana del chat, automaticamente se conecta mediante sockets
-                // por defecto cuando se inicia enviar un mensaje al chatbot para iniciar el proceso, por ejmplo "comenzar proceso"
+                // funciona para ir a la ventana del chat, automáticamente se conecta mediante sockets
+                // por defecto cuando se inicia enviar un mensaje al chatbot para iniciar el proceso, por ejemplo "comenzar proceso"
                 Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -244,7 +253,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
               color: Color.fromRGBO(0, 40, 86, 1),
               label: "Registrar Dispositivo",
               onPressed: () {
-                // Acción de registrar el dispositivo, llevar a la pagina de escanear el dispositivo y guardar la ifnormacion en el servidor
+                // Acción de registrar el dispositivo, llevar a la pagina de escanear el dispositivo y guardar la información en el servidor
                 Navigator.push(context,
                     MaterialPageRoute(builder: (context) => Scanner(deviceRegister: true)));
               }),
