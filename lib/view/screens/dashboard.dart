@@ -7,6 +7,7 @@ import 'package:chatbot/view/screens/scanner.dart';
 import 'package:chatbot/view/screens/wip.dart';
 import 'package:chatbot/view/widgets/utils.dart';
 import 'package:chatbot/view/widgets/custom_button.dart';
+import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -21,29 +22,67 @@ class Dashboard extends StatefulWidget {
 class _AutoSamplingPageState extends State<Dashboard> {
   late VideoPlayerController _videoController;
   late VideoPlayerController helpVideoController;
+  ChewieController? _chewieController;
+  ChewieController? helpChewieController;
   int _currentIndex = 0;
 
   @override
   void initState() {
+    _initializePlayer();
     super.initState();
+  }
+
+  Future<void> _initializePlayer() async {
     _videoController =
-        VideoPlayerController.asset('assets/videos/automuestreo.mp4')
-          ..initialize().then((_) {
-            setState(() {});
-          });
-    _videoController.play();
-    _videoController.setLooping(false);
+        VideoPlayerController.asset('assets/videos/automuestreo.mp4');
+
+    await _videoController.initialize();
+
+    _chewieController = ChewieController(
+      videoPlayerController: _videoController,
+      autoPlay: true,
+      looping: false,
+      showControls: true,
+      aspectRatio: 16 / 9,
+      allowFullScreen: true,
+      allowMuting: true,
+      materialProgressColors: ChewieProgressColors(
+        playedColor: AllowedColors.blue,
+        handleColor: Colors.blueAccent,
+        backgroundColor: AllowedColors.gray,
+        bufferedColor: Colors.lightBlueAccent,
+      ),
+    );
+
     helpVideoController =
-        VideoPlayerController.asset('assets/videos/sample.mp4')
-          ..initialize().then((_) {
-            setState(() {});
-          });
+        VideoPlayerController.asset('assets/videos/sample.mp4');
+
+    await helpVideoController.initialize();
+
+    helpChewieController = ChewieController(
+      videoPlayerController: helpVideoController,
+      autoPlay: true,
+      looping: false,
+      showControls: true,
+      aspectRatio: 16 / 9,
+      allowFullScreen: true,
+      allowMuting: true,
+      materialProgressColors: ChewieProgressColors(
+        playedColor: AllowedColors.blue,
+        handleColor: Colors.blueAccent,
+        backgroundColor: AllowedColors.gray,
+        bufferedColor: Colors.lightBlueAccent,
+      ),
+    );
+
+    setState(() {});
   }
 
   @override
   void dispose() {
     _videoController.dispose();
     helpVideoController.dispose();
+    _chewieController?.dispose();
     super.dispose();
   }
 
@@ -70,7 +109,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
       endDrawer:
           _buildProfileDrawer(), // Drawer que se desliza desde la derecha
       body: <Widget?>[
-        SingleChildScrollView(child: _buildBody()),
+        _buildBody(),
         Resources(),
         WIPScreen(),
         Notifications(),
@@ -80,49 +119,55 @@ class _AutoSamplingPageState extends State<Dashboard> {
     );
   }
 
-  AppBar _buildAppBar() {
-    return AppBar(
-      elevation: 0,
-      leading: SizedBox(
-        width: 90,
-        height: 45,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(5.0, 0, 0, 0),
-          child: IconButton(
-            style: IconButton.styleFrom(
-              backgroundColor: AllowedColors.red,
-              shape: CircleBorder(),
+  PreferredSizeWidget _buildAppBar() {
+    return PreferredSize(
+      preferredSize: Size.fromHeight(50),
+      child: Builder(builder: (context) {
+        return AppBar(
+          elevation: 0,
+          leading: SizedBox(
+            width: 90,
+            height: 45,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(5.0, 0, 0, 0),
+              child: IconButton(
+                style: IconButton.styleFrom(
+                  backgroundColor: AllowedColors.red,
+                  shape: CircleBorder(),
+                ),
+                onPressed: () {
+                  _showHelpDialog();
+                },
+                icon:
+                    const Icon(Icons.help_outline, color: AllowedColors.white),
+                iconSize: 35,
+              ),
             ),
-            onPressed: () {
-              _showHelpDialog();
-            },
-            icon: const Icon(Icons.help_outline, color: AllowedColors.white),
-            iconSize: 35,
           ),
-        ),
-      ),
-      title: Text(
-        "SISA",
-        style: TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.bold,
-            color: AllowedColors.red),
-      ),
-      centerTitle: true,
-      actions: [
-        IconButton(
-          icon: CircleAvatar(
-            backgroundImage:
-                AssetImage('assets/images/avatar.png'), // Imagen del avatar
-            radius: 15,
+          title: Text(
+            "SISA",
+            style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: AllowedColors.red),
           ),
-          onPressed: () {
-            // Acción del perfil
-            Scaffold.of(context)
-                .openEndDrawer(); // Abre el Drawer desde la derecha
-          },
-        ),
-      ],
+          centerTitle: true,
+          actions: [
+            IconButton(
+              icon: CircleAvatar(
+                backgroundImage:
+                    AssetImage('assets/images/avatar.png'), // Imagen del avatar
+                radius: 15,
+              ),
+              onPressed: () {
+                // Acción del perfil
+                Scaffold.of(context)
+                    .openEndDrawer(); // Abre el Drawer desde la derecha
+              },
+            ),
+          ],
+        );
+      }),
     );
   }
 
@@ -131,70 +176,53 @@ class _AutoSamplingPageState extends State<Dashboard> {
       context: context,
       barrierDismissible: false,
       builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return Dialog(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
+        return Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(mainAxisSize: MainAxisSize.min, children: [
+                // Botón de cerrar (X)
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: IconButton(
+                    icon: const Icon(Icons.close,
+                        color: AllowedColors.black, size: 24),
+                    onPressed: () {
+                      helpVideoController.pause();
+                      //helpVideoController.dispose();
+                      Navigator.pop(context);
+                    },
+                  ),
                 ),
-                child: Column(mainAxisSize: MainAxisSize.min, children: [
-                  // Botón de cerrar (X)
-                  Align(
-                    alignment: Alignment.topLeft,
-                    child: IconButton(
-                      icon: const Icon(Icons.close,
-                          color: AllowedColors.black, size: 24),
+
+                // Video
+                _buildVideoPlayer(helpVideoController, helpChewieController),
+                const SizedBox(height: 15),
+                Column(children: [
+                  CustomButton(
+                      color: AllowedColors.red,
                       onPressed: () {
                         helpVideoController.pause();
-                        helpVideoController.dispose();
                         Navigator.pop(context);
                       },
-                    ),
-                  ),
-
-                  // Video
-                  AspectRatio(
-                    aspectRatio: helpVideoController.value.isInitialized
-                        ? helpVideoController.value.aspectRatio
-                        : 16 / 9,
-                    child: helpVideoController.value.isInitialized
-                        ? InkWell(
-                            child: VideoPlayer(helpVideoController),
-                            onTap: () {
-                              setState(() {
-                                helpVideoController.value.isPlaying
-                                    ? helpVideoController.pause()
-                                    : helpVideoController.play();
-                              });
-                            },
-                          )
-                        : Center(child: CircularProgressIndicator()),
-                  ),
-                  const SizedBox(height: 15),
-                  Column(children: [
-                    CustomButton(
-                        color: AllowedColors.red,
-                        onPressed: () {
-                          helpVideoController.pause();
-                          helpVideoController.dispose();
-                          Navigator.pop(context);
-                        },
-                        label: "Entendido"),
-                    const SizedBox(height: 20),
-                    CustomButton(
-                        color: AllowedColors.blue,
-                        onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => AboutUs()));
-                        },
-                        label: "Acerca de"),
-                    const SizedBox(height: 15)
-                  ])
-                ]));
-          },
-        );
+                      label: "Entendido"),
+                  const SizedBox(height: 20),
+                  CustomButton(
+                      color: AllowedColors.blue,
+                      onPressed: () {
+                        helpVideoController.pause();
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) => AboutUs()));
+                      },
+                      label: "Acerca de"),
+                  const SizedBox(height: 15)
+                ])
+              ]),
+            ));
+        //  },
+        //);
       },
     );
   }
@@ -208,73 +236,67 @@ class _AutoSamplingPageState extends State<Dashboard> {
           Text(
             "Automuestreo",
             style: TextStyle(
-                fontSize: 15,
+                fontSize: 17,
                 fontWeight: FontWeight.bold,
                 color: AllowedColors.black),
           ),
           const SizedBox(height: 15),
-          _buildVideoPlayer(),
-          FloatingActionButton(
-            onPressed: () {
-              setState(() {
-                _videoController.value.isPlaying
-                    ? _videoController.pause()
-                    : _videoController.play();
-              });
-            },
-            heroTag: "player",
-            child: Icon(
-              _videoController.value.isPlaying ? Icons.pause : Icons.play_arrow,
+          Expanded(
+              child: SingleChildScrollView(
+            child: Column(
+              children: [
+                _buildVideoPlayer(_videoController, _chewieController),
+                const SizedBox(height: 20),
+                CustomButton(
+                    color: Color.fromRGBO(0, 40, 86, 1),
+                    label: "Iniciar proceso",
+                    onPressed: () {
+                      // funciona para ir a la ventana del chat, automáticamente se conecta mediante sockets
+                      // por defecto cuando se inicia enviar un mensaje al chatbot para iniciar el proceso, por ejemplo "comenzar proceso"
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => Chat(autoStart: true)));
+                    }),
+                const SizedBox(height: 20),
+                CustomButton(
+                    color: Color.fromRGBO(0, 40, 86, 1),
+                    label: "Registrar Dispositivo",
+                    onPressed: () {
+                      // Acción de registrar el dispositivo, llevar a la pagina de escanear el dispositivo y guardar la información en el servidor
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  Scanner(deviceRegister: true)));
+                    }),
+                const SizedBox(height: 15),
+                Text(
+                    "Este video explica el proceso de automuestreo. Sigue los pasos descritos para completar el procedimiento correctamente.",
+                    style: TextStyle(fontSize: 12, color: AllowedColors.gray)),
+                const SizedBox(
+                  height: 150,
+                )
+              ],
             ),
-          ),
-          const SizedBox(height: 20),
-          CustomButton(
-              color: Color.fromRGBO(0, 40, 86, 1),
-              label: "Iniciar proceso",
-              onPressed: () {
-                // funciona para ir a la ventana del chat, automaticamente se conecta mediante sockets
-                // por defecto cuando se inicia enviar un mensaje al chatbot para iniciar el proceso, por ejmplo "comenzar proceso"
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => Chat(autoStart: true)));
-              }),
-          const SizedBox(height: 20),
-          CustomButton(
-              color: Color.fromRGBO(0, 40, 86, 1),
-              label: "Registrar Dispositivo",
-              onPressed: () {
-                // Acción de registrar el dispositivo, llevar a la pagina de escanear el dispositivo y guardar la ifnormacion en el servidor
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => Scanner(deviceRegister: true)));
-              }),
-          const SizedBox(height: 15),
-          Text(
-              "Este video explica el proceso de automuestreo. Sigue los pasos descritos para completar el procedimiento correctamente.",
-              style: TextStyle(fontSize: 12, color: AllowedColors.gray)),
+          )),
         ],
       ),
     );
   }
 
-  Widget _buildVideoPlayer() {
-    return AspectRatio(
-      aspectRatio: _videoController.value.isInitialized
-          ? _videoController.value.aspectRatio
-          : 16 / 9,
-      child: _videoController.value.isInitialized
-          ? InkWell(
-              child: VideoPlayer(_videoController),
-              onTap: () {
-                setState(() {
-                  _videoController.value.isPlaying
-                      ? _videoController.pause()
-                      : _videoController.play();
-                });
-              },
-            )
-          : Center(child: CircularProgressIndicator()),
-    );
+  Widget _buildVideoPlayer(
+      VideoPlayerController playerController, ChewieController? chewie) {
+    final chewieController = chewie;
+
+    if (chewieController == null) {
+      return const Center(child: CircularProgressIndicator());
+    } else {
+      return AspectRatio(
+        aspectRatio: playerController.value.aspectRatio,
+        child: Chewie(controller: chewieController),
+      );
+    }
   }
 
   Widget _buildBottomNavigationBar(
@@ -285,8 +307,8 @@ class _AutoSamplingPageState extends State<Dashboard> {
     const notificationsIndex = 3;
 
     changePage(int index) => setState(() {
-      setIndex(index);
-    });
+          setIndex(index);
+        });
 
     return BottomAppBar(
       shape: CircularNotchedRectangle(),
@@ -296,32 +318,43 @@ class _AutoSamplingPageState extends State<Dashboard> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           IconButton(
-            icon: Icon(currentIndex() == homeIndex ? Icons.home : Icons.home_outlined),
+            icon: Icon(
+                currentIndex() == homeIndex ? Icons.home : Icons.home_outlined),
             color: AllowedColors.white,
             onPressed: () {
               currentIndex() != homeIndex ? changePage(homeIndex) : null;
             },
           ),
           IconButton(
-            icon: Icon(currentIndex() == resourcesIndex ? Icons.folder : Icons.folder_outlined),
+            icon: Icon(currentIndex() == resourcesIndex
+                ? Icons.folder
+                : Icons.folder_outlined),
             color: AllowedColors.white,
             onPressed: () {
-              currentIndex() != resourcesIndex ? changePage(resourcesIndex) : null;
+              currentIndex() != resourcesIndex
+                  ? changePage(resourcesIndex)
+                  : null;
             },
           ),
           SizedBox(width: 50),
           IconButton(
-            icon: Icon(currentIndex() == mapIndex ? Icons.map : Icons.map_outlined),
+            icon: Icon(
+                currentIndex() == mapIndex ? Icons.map : Icons.map_outlined),
             color: AllowedColors.white,
             onPressed: () {
               currentIndex() != mapIndex ? changePage(mapIndex) : null;
             },
           ),
           IconButton(
-            icon: Badge(child: Icon(currentIndex() == notificationsIndex ? Icons.notifications : Icons.notifications_outlined)),
+            icon: Badge(
+                child: Icon(currentIndex() == notificationsIndex
+                    ? Icons.notifications
+                    : Icons.notifications_outlined)),
             color: AllowedColors.white,
             onPressed: () {
-              currentIndex() != notificationsIndex ? changePage(notificationsIndex) : null;
+              currentIndex() != notificationsIndex
+                  ? changePage(notificationsIndex)
+                  : null;
             },
           ),
         ],
@@ -346,7 +379,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
           //TODO: Agregar reemplazar por la informacion del usuario logeado
           // Nombre del Usuario
           Text(
-            "Juan Pérez",
+            "Gabriela Orellana",
             style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.bold,
@@ -358,7 +391,8 @@ class _AutoSamplingPageState extends State<Dashboard> {
           _buildDrawerButton(Icons.person, "Perfil", () {
             Navigator.pop(context); // Cierra el Drawer
             // Navegar a la pantalla de perfil
-            Navigator.push(context, //TODO: Agregar la logica para editar la informacion del usuario
+            Navigator.push(
+                context, //TODO: Agregar la logica para editar la informacion del usuario
                 MaterialPageRoute(builder: (context) => PersonalDataForm()));
           }),
           _buildDrawerButton(Icons.info, "Acerca de", () {
