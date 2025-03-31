@@ -11,7 +11,6 @@ class AboutUs extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
           elevation: 0,
-          backgroundColor: AllowedColors.white,
           centerTitle: true,
           title: Image.asset(
             'assets/images/logo_ucuenca_top.png',
@@ -24,7 +23,7 @@ class AboutUs extends StatelessWidget {
             Expanded(
               child: SingleChildScrollView(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
                       "Acerca de",

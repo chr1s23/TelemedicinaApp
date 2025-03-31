@@ -109,7 +109,7 @@ class _ChatbotPageState extends State<Chat> {
                 answer.containsKey("payload") &&
                 (answer["payload"] == "VPH" ||
                     answer["payload"] == "Diabetes" ||
-                    answer["payload"] == "Ver video"));
+                    answer["title"] == "Ver video"));
 
             if (containsVPHOrDiabetes) {
               showInputText = true;
@@ -117,7 +117,7 @@ class _ChatbotPageState extends State<Chat> {
 
             bool containsVerVideo = _quickReplies!.any((answer) =>
                 answer.containsKey("payload") &&
-                (answer["payload"] == "Ver video"));
+                (answer["title"] == "¡Escanear dispositivo!"));
 
             if (containsVerVideo) {
               completeForm = true;
@@ -136,6 +136,9 @@ class _ChatbotPageState extends State<Chat> {
         if (inputNumber) {
           inputNumber = false;
         }
+        if (dataPayload?['payload'] == 'No Recuerdo') {
+        showDatePickerSelector = false;
+      }
         _messages.add({"text": message, "isBot": false});
         _isLoading = true;
         _messages.add({"text": '', "loading": true, "isBot": true});
@@ -225,11 +228,11 @@ class _ChatbotPageState extends State<Chat> {
                       text: message["text"],
                       sender: message["isBot"] ? Sender.bot : Sender.user,
                       loading: message["loading"] ?? false);
-      
+
                   return _buildChatBubble(messageRequest);
                 },
-              )),
-              if (showInputText) _buildMessageInput(),
+              )), //verificar si se muestra el input en las preguntas del chat normal y del formulario en las que corresponden
+              if (_quickReplies == null || showInputText || completeForm) _buildMessageInput(),
             ],
           ),
         ),
@@ -335,6 +338,9 @@ class _ChatbotPageState extends State<Chat> {
                     _mostrarDialogo(context, answer["payload"]);
                   } else if (answer["title"] == "Ver video") {
                     showImageDialog(context);
+                  } else if (answer["title"] == "¡Escanear dispositivo!") {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => Scanner()));
                   } else {
                     _quickReplies = null;
                     _sendMessage(answer);
@@ -359,8 +365,7 @@ class _ChatbotPageState extends State<Chat> {
           insetPadding: EdgeInsets.zero,
           child: Container(
             width: MediaQuery.of(context).size.width,
-            height:
-                MediaQuery.of(context).size.height * 0.9,
+            height: MediaQuery.of(context).size.height * 0.9,
             padding: EdgeInsets.all(16),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -399,36 +404,33 @@ class _ChatbotPageState extends State<Chat> {
   }
 
   Widget _dateSelector() {
-    return SizedBox(
-      height: 50,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          padding: EdgeInsets.zero,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        padding: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30),
+        ),
+        backgroundColor: AllowedColors.white,
+        elevation: 2,
+      ),
+      onPressed: () {
+        _selectDate(context);
+      },
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child:
+                Icon(Icons.calendar_today, color: AllowedColors.gray, size: 20),
           ),
-          backgroundColor: AllowedColors.white,
-          elevation: 2,
-        ),
-        onPressed: () {
-          _selectDate(context);
-        },
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: Icon(Icons.calendar_today,
-                  color: AllowedColors.gray, size: 20),
+          Expanded(
+            child: Text(
+              "dd/MM/yyyy",
+              style: TextStyle(fontSize: 16, color: AllowedColors.black),
             ),
-            Expanded(
-              child: Text(
-                "dd/MM/yyyy",
-                style: TextStyle(fontSize: 16, color: AllowedColors.black),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -468,7 +470,7 @@ class _ChatbotPageState extends State<Chat> {
             radius: 25,
             child: IconButton(
               icon: const Icon(Icons.send, color: AllowedColors.white),
-              onPressed: _sendMessage,
+              onPressed: _isLoading ? null : _sendMessage,
             ),
           ),
         ],
