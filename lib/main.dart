@@ -5,8 +5,11 @@ import 'package:chatbot/view/screens/dashboard.dart';
 import 'package:chatbot/view/screens/presentation.dart';
 import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 import 'log_utils.dart';
+
+final _log = Logger('Main');
 
 void main() {
   initializeLogger();
@@ -30,7 +33,7 @@ class MyApp extends StatelessWidget {
             useMaterial3: true,
             colorSchemeSeed: AllowedColors.blue,
             fontFamily: "ArialNarrow"),
-        home: Presentation(),
+        home: SplashScreen(),
       ),
     );
   }
@@ -56,9 +59,11 @@ class SplashScreenState extends State<SplashScreen> {
     if (!mounted) return;
 
     if (token != null && token.isNotEmpty) {
+      _log.fine("Token found in secure storage, skipping login.");
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (_) => Dashboard()));
     } else {
+      _log.fine("Token not found in secure storage, redirecting to login.");
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (_) => Presentation()));
     }

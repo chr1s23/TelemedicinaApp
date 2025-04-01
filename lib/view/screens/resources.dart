@@ -164,8 +164,7 @@ class _ResourcesPageState extends State<Resources> {
             future: videoController.initialize(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.done) {
-                return VideoPlayer(
-                    videoController); // Muestra la miniatura del video
+                return VideoPlayer(videoController); // Muestra la miniatura del video
               } else {
                 return const Center(child: CircularProgressIndicator());
               }
@@ -175,13 +174,13 @@ class _ResourcesPageState extends State<Resources> {
         Positioned(
           child: GestureDetector(
             onTap: () {
-              //Navigator.push(
-              //  context,
-              //  MaterialPageRoute(
-              //    builder: (context) =>
-              //        ResourceDetail(videos: _videos, initialIndex: index),
-               // ),
-              //);
+              Navigator.push(
+               context,
+               MaterialPageRoute(
+                 builder: (context) =>
+                     ResourceDetail(videos: _videos, initialIndex: index),
+               ),
+              );
             },
             child: Container(
               decoration: BoxDecoration(

@@ -1,4 +1,6 @@
+import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
+import 'package:video_player/video_player.dart';
 
 sealed class AllowedColors {
   static const Color red = Color.fromRGBO(165, 16, 8, 1);
@@ -114,4 +116,47 @@ InputDecoration inputDecoration(hint, {isCalendar = false}) {
 // For testing purposes
 Future<void> delay(Duration duration) {
   return Future.delayed(duration);
+}
+
+Future<(VideoPlayerController, ChewieController)> initializeVideoPlayer(String videoUrl, {
+  bool autoPlay = false,
+  bool looping = false,
+}) async {
+  final videoPlayerController = VideoPlayerController.asset(videoUrl);
+  await videoPlayerController.initialize();
+
+  final chewieController = ChewieController(
+    videoPlayerController: videoPlayerController,
+    autoPlay: autoPlay,
+    looping: looping,
+    showControls: true,
+    aspectRatio: 16 / 9,
+    allowFullScreen: true,
+    allowMuting: true,
+    materialProgressColors: ChewieProgressColors(
+      playedColor: AllowedColors.blue,
+      handleColor: Colors.blueAccent,
+      backgroundColor: AllowedColors.gray,
+      bufferedColor: Colors.lightBlueAccent,
+    ),
+  );
+
+  return (videoPlayerController, chewieController);
+}
+
+Widget buildVideoPlayer(VideoPlayerController? playerController, ChewieController? chewie) {
+  if (playerController == null) {
+    return const Center(widthFactor: null, heightFactor: 3, child: CircularProgressIndicator());
+  }
+
+  final chewieController = chewie;
+
+  if (chewieController == null) {
+    return const Center(child: CircularProgressIndicator());
+  } else {
+    return AspectRatio(
+      aspectRatio: playerController.value.aspectRatio,
+      child: Chewie(controller: chewieController),
+    );
+  }
 }
