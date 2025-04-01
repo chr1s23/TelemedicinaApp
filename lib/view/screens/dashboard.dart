@@ -1,10 +1,10 @@
-import 'package:chatbot/view/screens/about_us.dart';
 import 'package:chatbot/view/screens/chat.dart';
 import 'package:chatbot/view/screens/notifications.dart';
-import 'package:chatbot/view/screens/personal_data_form.dart';
 import 'package:chatbot/view/screens/resources.dart';
 import 'package:chatbot/view/screens/scanner.dart';
 import 'package:chatbot/view/screens/wip.dart';
+import 'package:chatbot/view/widgets/custom_app_bar.dart';
+import 'package:chatbot/view/widgets/custom_drawer.dart';
 import 'package:chatbot/view/widgets/utils.dart';
 import 'package:chatbot/view/widgets/custom_button.dart';
 import 'package:chewie/chewie.dart';
@@ -20,10 +20,8 @@ class Dashboard extends StatefulWidget {
 }
 
 class _AutoSamplingPageState extends State<Dashboard> {
-  late VideoPlayerController _videoController;
-  late VideoPlayerController helpVideoController;
+  VideoPlayerController? _videoController;
   ChewieController? _chewieController;
-  ChewieController? helpChewieController;
   int _currentIndex = 0;
 
   @override
@@ -33,55 +31,19 @@ class _AutoSamplingPageState extends State<Dashboard> {
   }
 
   Future<void> _initializePlayer() async {
-    _videoController =
-        VideoPlayerController.asset('assets/videos/automuestreo.mp4');
-
-    await _videoController.initialize();
-
-    _chewieController = ChewieController(
-      videoPlayerController: _videoController,
-      autoPlay: true,
-      looping: false,
-      showControls: true,
-      aspectRatio: 16 / 9,
-      allowFullScreen: true,
-      allowMuting: true,
-      materialProgressColors: ChewieProgressColors(
-        playedColor: AllowedColors.blue,
-        handleColor: Colors.blueAccent,
-        backgroundColor: AllowedColors.gray,
-        bufferedColor: Colors.lightBlueAccent,
-      ),
+    var (video, chewie) = await initializeVideoPlayer('assets/videos/automuestreo.mp4', 
+      autoPlay: true, 
     );
 
-    helpVideoController =
-        VideoPlayerController.asset('assets/videos/sample.mp4');
-
-    await helpVideoController.initialize();
-
-    helpChewieController = ChewieController(
-      videoPlayerController: helpVideoController,
-      autoPlay: true,
-      looping: false,
-      showControls: true,
-      aspectRatio: 16 / 9,
-      allowFullScreen: true,
-      allowMuting: true,
-      materialProgressColors: ChewieProgressColors(
-        playedColor: AllowedColors.blue,
-        handleColor: Colors.blueAccent,
-        backgroundColor: AllowedColors.gray,
-        bufferedColor: Colors.lightBlueAccent,
-      ),
-    );
-
-    setState(() {});
+    setState(() {
+      _videoController = video;
+      _chewieController = chewie;
+    });
   }
 
   @override
   void dispose() {
-    _videoController.dispose();
-    helpVideoController.dispose();
+    _videoController?.dispose();
     _chewieController?.dispose();
     super.dispose();
   }
@@ -99,15 +61,13 @@ class _AutoSamplingPageState extends State<Dashboard> {
           shape: const CircleBorder(),
           elevation: 0,
           heroTag: "chatbot",
-          child: SvgPicture.asset("assets/icons/chatbot.svg",
-              height: 50, width: 50),
+          child: SvgPicture.asset("assets/icons/chatbot.svg", height: 50, width: 50),
           onPressed: () => Navigator.push(
               context, MaterialPageRoute(builder: (context) => Chat())),
         ),
       ),
-      appBar: _buildAppBar(),
-      endDrawer:
-          _buildProfileDrawer(), // Drawer que se desliza desde la derecha
+      appBar: const CustomAppBar(),
+      endDrawer: const CustomDrawer(), // Drawer que se desliza desde la derecha
       body: <Widget?>[
         _buildBody(),
         Resources(),
@@ -116,114 +76,6 @@ class _AutoSamplingPageState extends State<Dashboard> {
       ][_currentIndex],
       bottomNavigationBar: _buildBottomNavigationBar(
           (index) => _currentIndex = index, () => _currentIndex),
-    );
-  }
-
-  PreferredSizeWidget _buildAppBar() {
-    return PreferredSize(
-      preferredSize: Size.fromHeight(50),
-      child: Builder(builder: (context) {
-        return AppBar(
-          elevation: 0,
-          leading: SizedBox(
-            width: 90,
-            height: 45,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(5.0, 0, 0, 0),
-              child: IconButton(
-                style: IconButton.styleFrom(
-                  backgroundColor: AllowedColors.red,
-                  shape: CircleBorder(),
-                ),
-                onPressed: () {
-                  _showHelpDialog();
-                },
-                icon:
-                    const Icon(Icons.help_outline, color: AllowedColors.white),
-                iconSize: 35,
-              ),
-            ),
-          ),
-          title: Text(
-            "SISA",
-            style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
-                color: AllowedColors.red),
-          ),
-          centerTitle: true,
-          actions: [
-            IconButton(
-              icon: CircleAvatar(
-                backgroundImage:
-                    AssetImage('assets/images/avatar.png'), // Imagen del avatar
-                radius: 15,
-              ),
-              onPressed: () {
-                // Acción del perfil
-                Scaffold.of(context)
-                    .openEndDrawer(); // Abre el Drawer desde la derecha
-              },
-            ),
-          ],
-        );
-      }),
-    );
-  }
-
-  void _showHelpDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) {
-        return Dialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(mainAxisSize: MainAxisSize.min, children: [
-                // Botón de cerrar (X)
-                Align(
-                  alignment: Alignment.topLeft,
-                  child: IconButton(
-                    icon: const Icon(Icons.close,
-                        color: AllowedColors.black, size: 24),
-                    onPressed: () {
-                      helpVideoController.pause();
-                      //helpVideoController.dispose();
-                      Navigator.pop(context);
-                    },
-                  ),
-                ),
-
-                // Video
-                _buildVideoPlayer(helpVideoController, helpChewieController),
-                const SizedBox(height: 15),
-                Column(children: [
-                  CustomButton(
-                      color: AllowedColors.red,
-                      onPressed: () {
-                        helpVideoController.pause();
-                        Navigator.pop(context);
-                      },
-                      label: "Entendido"),
-                  const SizedBox(height: 20),
-                  CustomButton(
-                      color: AllowedColors.blue,
-                      onPressed: () {
-                        helpVideoController.pause();
-                        Navigator.push(context,
-                            MaterialPageRoute(builder: (context) => AboutUs()));
-                      },
-                      label: "Acerca de"),
-                  const SizedBox(height: 15)
-                ])
-              ]),
-            ));
-        //  },
-        //);
-      },
     );
   }
 
@@ -245,7 +97,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
               child: SingleChildScrollView(
             child: Column(
               children: [
-                _buildVideoPlayer(_videoController, _chewieController),
+                buildVideoPlayer(_videoController, _chewieController),
                 const SizedBox(height: 20),
                 CustomButton(
                     color: Color.fromRGBO(0, 40, 86, 1),
@@ -283,20 +135,6 @@ class _AutoSamplingPageState extends State<Dashboard> {
         ],
       ),
     );
-  }
-
-  Widget _buildVideoPlayer(
-      VideoPlayerController playerController, ChewieController? chewie) {
-    final chewieController = chewie;
-
-    if (chewieController == null) {
-      return const Center(child: CircularProgressIndicator());
-    } else {
-      return AspectRatio(
-        aspectRatio: playerController.value.aspectRatio,
-        child: Chewie(controller: chewieController),
-      );
-    }
   }
 
   Widget _buildBottomNavigationBar(
@@ -359,91 +197,6 @@ class _AutoSamplingPageState extends State<Dashboard> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildProfileDrawer() {
-    return Drawer(
-      width: 280, // Ajusta el tamaño del drawer
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          const SizedBox(height: 40), // Espaciado
-
-          // Avatar del Usuario
-          CircleAvatar(
-            radius: 40,
-            backgroundImage: AssetImage('assets/images/avatar.png'),
-          ),
-          const SizedBox(height: 10),
-          //TODO: Agregar reemplazar por la informacion del usuario logeado
-          // Nombre del Usuario
-          Text(
-            "Gabriela Orellana",
-            style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
-                color: AllowedColors.black),
-          ),
-          const SizedBox(height: 30),
-
-          // Botones de Opciones
-          _buildDrawerButton(Icons.person, "Perfil", () {
-            Navigator.pop(context); // Cierra el Drawer
-            // Navegar a la pantalla de perfil
-            Navigator.push(
-                context, //TODO: Agregar la logica para editar la informacion del usuario
-                MaterialPageRoute(builder: (context) => PersonalDataForm()));
-          }),
-          _buildDrawerButton(Icons.info, "Acerca de", () {
-            Navigator.pop(context); // Cierra el Drawer
-            // Navegar a Acerca de
-            Navigator.push(
-                context, MaterialPageRoute(builder: (context) => AboutUs()));
-          }),
-
-          const Spacer(), // Empuja el botón "Cerrar sesión" hacia abajo
-
-          // Botón Cerrar Sesión
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AllowedColors.red,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                ),
-                onPressed: () {
-                  Navigator.pop(context); // Cierra el Drawer
-                  // TODO: Agregar lógica de cierre de sesión para volver a la pantalla presentation
-                },
-                child: Text(
-                  "Cerrar sesión",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: AllowedColors.white,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 20),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDrawerButton(IconData icon, String label, VoidCallback onTap) {
-    return ListTile(
-      leading: Icon(icon, color: AllowedColors.blue),
-      title: Text(
-        label,
-        style: TextStyle(fontSize: 13),
-      ),
-      onTap: onTap,
     );
   }
 }

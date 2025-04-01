@@ -1,8 +1,7 @@
-import 'package:chatbot/view/screens/chat.dart';
-import 'package:chatbot/view/screens/dashboard.dart';
-import 'package:chatbot/view/screens/notifications.dart';
-import 'package:chatbot/view/screens/resources.dart';
+import 'package:chatbot/view/widgets/custom_app_bar.dart';
+import 'package:chatbot/view/widgets/custom_drawer.dart';
 import 'package:chatbot/view/widgets/utils.dart';
+import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
@@ -18,7 +17,8 @@ class ResourceDetail extends StatefulWidget {
 }
 
 class _VideoPlayerPageState extends State<ResourceDetail> {
-  late VideoPlayerController _videoController;
+  VideoPlayerController? _videoController;
+  ChewieController? _chewieController;
   late int _currentIndex;
 
   @override
@@ -28,21 +28,21 @@ class _VideoPlayerPageState extends State<ResourceDetail> {
     _initializeVideo();
   }
 
-  void _initializeVideo() {
-    _videoController =
-        VideoPlayerController.asset(widget.videos[_currentIndex]["videoPath"]!)
-          ..initialize().then((_) {
-            setState(() {});
-            _videoController.play();
-          });
+  void _initializeVideo() async {
+    var (video, chewie) = await initializeVideoPlayer(widget.videos[_currentIndex]["videoPath"], autoPlay: true);
+
+    setState(() {
+      _videoController = video;
+      _chewieController = chewie;      
+    });
   }
 
   void _changeVideo(int newIndex) {
     if (newIndex >= 0 && newIndex < widget.videos.length) {
       setState(() {
         _currentIndex = newIndex;
-        _videoController.pause();
-        _videoController.dispose();
+        _videoController?.pause();
+        _videoController?.dispose();
         _initializeVideo();
       });
     }
@@ -50,42 +50,17 @@ class _VideoPlayerPageState extends State<ResourceDetail> {
 
   @override
   void dispose() {
-    _videoController.dispose();
+    _videoController?.dispose();
+    _chewieController?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _buildAppBar(),
+      appBar: const CustomAppBar(),
       body: _buildBody(),
-      bottomNavigationBar: _buildBottomNavigationBar(),
-    );
-  }
-
-  AppBar _buildAppBar() {
-    return AppBar(
-      elevation: 0,
-      title: Text(
-        "SISA",
-        style: TextStyle(
-          fontSize: 15,
-          fontWeight: FontWeight.bold,
-          color: AllowedColors.red,
-        ),
-      ),
-      centerTitle: true,
-      actions: [
-        IconButton(
-          icon: CircleAvatar(
-            backgroundImage: AssetImage('assets/images/avatar.png'),
-            radius: 18,
-          ),
-          onPressed: () {
-            // Acción del perfil
-          },
-        ),
-      ],
+      endDrawer: const CustomDrawer(),
     );
   }
 
@@ -94,7 +69,7 @@ class _VideoPlayerPageState extends State<ResourceDetail> {
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
-          _buildVideoPlayer(),
+          buildVideoPlayer(_videoController, _chewieController),
           const SizedBox(height: 15),
           _buildNavigationButtons(),
           const SizedBox(height: 15),
@@ -104,39 +79,29 @@ class _VideoPlayerPageState extends State<ResourceDetail> {
     );
   }
 
-  Widget _buildVideoPlayer() {
-    return AspectRatio(
-      aspectRatio: _videoController.value.isInitialized
-          ? _videoController.value.aspectRatio
-          : 16 / 9,
-      child: _videoController.value.isInitialized
-          ? InkWell(
-              child: VideoPlayer(_videoController),
-              onTap: () {
-                setState(() {
-                  _videoController.value.isPlaying
-                      ? _videoController.pause()
-                      : _videoController.play();
-                });
-              },
-            )
-          : Center(child: CircularProgressIndicator()),
-    );
-  }
-
   Widget _buildNavigationButtons() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         IconButton(
-          icon: const Icon(Icons.arrow_back,
-              size: 40, color: AllowedColors.blue),
+          style: IconButton.styleFrom(
+            backgroundColor: AllowedColors.blue,
+            shape: CircleBorder(),
+          ),
+          color: AllowedColors.white,
+          disabledColor: AllowedColors.gray,
+          icon: const Icon(Icons.arrow_left, size: 40),
           onPressed:
               _currentIndex > 0 ? () => _changeVideo(_currentIndex - 1) : null,
         ),
         IconButton(
-          icon: const Icon(Icons.arrow_forward,
-              size: 40, color: AllowedColors.blue),
+          style: IconButton.styleFrom(
+            backgroundColor: AllowedColors.blue,
+            shape: CircleBorder(),
+          ),
+          color: AllowedColors.white,
+          disabledColor: AllowedColors.gray,
+          icon: const Icon(Icons.arrow_right, size: 40),
           onPressed: _currentIndex < widget.videos.length - 1
               ? () => _changeVideo(_currentIndex + 1)
               : null,
@@ -163,64 +128,6 @@ class _VideoPlayerPageState extends State<ResourceDetail> {
               TextStyle(fontSize: 13, color: AllowedColors.gray),
         ),
       ],
-    );
-  }
-
-  Widget _buildBottomNavigationBar() {
-    return BottomAppBar(
-      shape: const CircularNotchedRectangle(),
-      notchMargin: 10.0,
-      child: Container(
-        height: 60,
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _buildNavItem(Icons.home, true,
-                MaterialPageRoute(builder: (context) => Dashboard())),
-            _buildNavItem(Icons.folder, false,
-                MaterialPageRoute(builder: (context) => Resources())),
-            _buildFloatingButton(), // Botón central del chatbot
-            _buildNavItem(Icons.map, false, null),
-            _buildNavItem(Icons.notifications, false,
-                MaterialPageRoute(builder: (context) => Notifications())),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNavItem(IconData icon, bool marked, MaterialPageRoute? nav) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        IconButton(
-            onPressed: () {
-              if (nav != null) {
-                Navigator.push(context, nav);
-              }
-            },
-            icon: Icon(icon,
-                color: marked
-                    ? AllowedColors.blue
-                    : AllowedColors.gray,
-                size: 28))
-      ],
-    );
-  }
-
-  Widget _buildFloatingButton() {
-    return Transform.translate(
-      offset: const Offset(0, -10),
-      child: FloatingActionButton(
-        backgroundColor: AllowedColors.blue,
-        onPressed: () {
-          // Acción del asistente virtual
-          Navigator.push(
-              context, MaterialPageRoute(builder: (context) => Chat()));
-        },
-        child: const Icon(Icons.smart_toy, size: 28, color: AllowedColors.white),
-      ),
     );
   }
 }
