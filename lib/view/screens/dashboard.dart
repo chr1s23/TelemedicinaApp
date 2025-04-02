@@ -72,7 +72,8 @@ class _AutoSamplingPageState extends State<Dashboard> {
         _buildBody(),
         Resources(),
         WIPScreen(),
-        Notifications(),
+        WIPScreen(),
+        //Notifications(),
       ][_currentIndex],
       bottomNavigationBar: _buildBottomNavigationBar(
           (index) => _currentIndex = index, () => _currentIndex),
