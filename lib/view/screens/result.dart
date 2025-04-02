@@ -61,6 +61,7 @@ class _ResultPageState extends State<Result> {
   Widget _buildTitle() {
     return Text(
       "Resultado",
+      textAlign: TextAlign.center,
       style: TextStyle(
         fontSize: 15,
         fontWeight: FontWeight.bold,
