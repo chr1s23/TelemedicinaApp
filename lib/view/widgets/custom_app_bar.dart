@@ -6,13 +6,15 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
 class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
-  const CustomAppBar({super.key});
-  
+  const CustomAppBar({super.key, this.helpButton = false});
+
+  final bool helpButton;
+
   @override
   State<StatefulWidget> createState() {
     return CustomAppBarState();
   }
-  
+
   @override
   Size get preferredSize => const Size.fromHeight(62);
 }
@@ -35,8 +37,9 @@ class CustomAppBarState extends State<CustomAppBar> {
   }
 
   void _initVideoPlayer() async {
-    var (video, chewie) = await initializeVideoPlayer('assets/videos/sample.mp4', 
-      autoPlay: true, 
+    var (video, chewie) = await initializeVideoPlayer(
+      'assets/videos/sample.mp4',
+      autoPlay: true,
     );
 
     _videoController = video;
@@ -49,26 +52,28 @@ class CustomAppBarState extends State<CustomAppBar> {
   Widget build(BuildContext context) {
     return AppBar(
       elevation: 0,
-      leading: SizedBox(
-        width: 90,
-        height: 45,
-        child: Padding(
-          padding: const EdgeInsets.all(11),
-          child: IconButton(
-            padding: const EdgeInsets.all(1),
-            style: IconButton.styleFrom(
-              backgroundColor: AllowedColors.red,
-              shape: CircleBorder(),
-            ),
-            onPressed: () {
-              _showHelpDialog(context);
-            },
-            icon:
-                const Icon(Icons.help_outline, color: AllowedColors.white),
-            iconSize: 30,
-          ),
-        ),
-      ),
+      leading: widget.helpButton
+          ? SizedBox(
+              width: 90,
+              height: 45,
+              child: Padding(
+                padding: const EdgeInsets.all(11),
+                child: IconButton(
+                  padding: const EdgeInsets.all(1),
+                  style: IconButton.styleFrom(
+                    backgroundColor: AllowedColors.red,
+                    shape: CircleBorder(),
+                  ),
+                  onPressed: () {
+                    _showHelpDialog(context);
+                  },
+                  icon: const Icon(Icons.help_outline,
+                      color: AllowedColors.white),
+                  iconSize: 30,
+                ),
+              ),
+            )
+          : null,
       title: Text(
         "SISA",
         style: TextStyle(
@@ -144,8 +149,6 @@ class CustomAppBarState extends State<CustomAppBar> {
                 ])
               ]),
             ));
-        //  },
-        //);
       },
     );
   }

@@ -66,7 +66,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
               context, MaterialPageRoute(builder: (context) => Chat())),
         ),
       ),
-      appBar: const CustomAppBar(),
+      appBar: const CustomAppBar(helpButton: true,),
       endDrawer: const CustomDrawer(), // Drawer que se desliza desde la derecha
       body: <Widget?>[
         _buildBody(),
@@ -101,7 +101,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
                 const SizedBox(height: 20),
                 CustomButton(
                     color: Color.fromRGBO(0, 40, 86, 1),
-                    label: "Iniciar proceso",
+                    label: "Iniciar proceso de Automuestreo",
                     onPressed: () {
                       // funciona para ir a la ventana del chat, automáticamente se conecta mediante sockets
                       // por defecto cuando se inicia enviar un mensaje al chatbot para iniciar el proceso, por ejemplo "comenzar proceso"
@@ -113,7 +113,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
                 const SizedBox(height: 20),
                 CustomButton(
                     color: Color.fromRGBO(0, 40, 86, 1),
-                    label: "Registrar Dispositivo",
+                    label: "Registrar dispositivo de Automuestreo",
                     onPressed: () {
                       // Acción de registrar el dispositivo, llevar a la pagina de escanear el dispositivo y guardar la información en el servidor
                       Navigator.push(

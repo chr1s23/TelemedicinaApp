@@ -5,12 +5,16 @@ import 'package:chatbot/model/requests/message_request.dart';
 import 'package:chatbot/service/archivo_service.dart';
 import 'package:chatbot/view/screens/scanner.dart';
 import 'package:chatbot/service/chat_service.dart';
+import 'package:chatbot/view/widgets/custom_button.dart';
 import 'package:chatbot/view/widgets/utils.dart';
+import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:chatbot/model/storage/storage.dart';
 import 'package:logging/logging.dart';
+import 'package:pdfx/pdfx.dart';
+import 'package:video_player/video_player.dart';
 
 Logger _log = Logger('Chat');
 
@@ -46,6 +50,9 @@ class _ChatbotPageState extends State<Chat> {
   final TextEditingController _messageController = TextEditingController();
   final TextEditingController dateController = TextEditingController();
   final List<Map<String, dynamic>> _messages = [];
+  late PdfControllerPinch pdfController;
+  VideoPlayerController? _videoController;
+  ChewieController? _chewieController;
 
   bool _isLoading = false;
   bool inputNumber = false;
@@ -82,6 +89,7 @@ class _ChatbotPageState extends State<Chat> {
 
   @override
   void initState() {
+    _initVideoPlayer();
     super.initState();
     chatService.connect();
     chatService.socket.on('bot_uttered', (data) {
@@ -128,6 +136,18 @@ class _ChatbotPageState extends State<Chat> {
     });
   }
 
+  void _initVideoPlayer() async {
+    var (video, chewie) = await initializeVideoPlayer(
+      'assets/videos/sample.mp4',
+      autoPlay: true,
+    );
+
+    _videoController = video;
+    _chewieController = chewie;
+
+    setState(() {});
+  }
+
   void _sendMessage([Map<String, dynamic>? dataPayload]) async {
     String message =
         dataPayload?['title'] ?? _messageController.value.text.trim();
@@ -137,8 +157,8 @@ class _ChatbotPageState extends State<Chat> {
           inputNumber = false;
         }
         if (dataPayload?['payload'] == 'No Recuerdo') {
-        showDatePickerSelector = false;
-      }
+          showDatePickerSelector = false;
+        }
         _messages.add({"text": message, "isBot": false});
         _isLoading = true;
         _messages.add({"text": '', "loading": true, "isBot": true});
@@ -172,6 +192,9 @@ class _ChatbotPageState extends State<Chat> {
   void dispose() {
     chatService.disconnect();
     focusNode.dispose();
+    pdfController.dispose();
+    _videoController?.dispose();
+    _chewieController?.dispose();
     super.dispose();
   }
 
@@ -232,7 +255,8 @@ class _ChatbotPageState extends State<Chat> {
                   return _buildChatBubble(messageRequest);
                 },
               )), //verificar si se muestra el input en las preguntas del chat normal y del formulario en las que corresponden
-              if (_quickReplies == null || showInputText || completeForm) _buildMessageInput(),
+              if (_quickReplies == null || showInputText || completeForm)
+                _buildMessageInput(),
             ],
           ),
         ),
@@ -337,10 +361,12 @@ class _ChatbotPageState extends State<Chat> {
                   if (answer["title"] == "Más información") {
                     _mostrarDialogo(context, answer["payload"]);
                   } else if (answer["title"] == "Ver video") {
-                    showImageDialog(context);
+                    showVideoDialog(context);
                   } else if (answer["title"] == "¡Escanear dispositivo!") {
                     Navigator.push(context,
                         MaterialPageRoute(builder: (context) => Scanner()));
+                  } else if (answer["title"] == "Ver imagen") {
+                    showImageDialog(context, answer["payload"]);
                   } else {
                     _quickReplies = null;
                     _sendMessage(answer);
@@ -478,14 +504,61 @@ class _ChatbotPageState extends State<Chat> {
     );
   }
 
-  void showImageDialog(BuildContext context,
-      {String nombreArchivo = "clias.png"}) async {
+  void showVideoDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(mainAxisSize: MainAxisSize.min, children: [
+                // Botón de cerrar (X)
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: IconButton(
+                    icon: const Icon(Icons.close,
+                        color: AllowedColors.black, size: 24),
+                    onPressed: () {
+                      _videoController?.pause();
+                      Navigator.pop(context);
+                    },
+                  ),
+                ),
+
+                // Video
+                buildVideoPlayer(_videoController, _chewieController),
+                const SizedBox(height: 15),
+                Column(children: [
+                  CustomButton(
+                      color: AllowedColors.red,
+                      onPressed: () {
+                        _videoController?.pause();
+                        Navigator.pop(context);
+                      },
+                      label: "Entendido"),
+                  const SizedBox(height: 20),
+                ])
+              ]),
+            ));
+      },
+    );
+  }
+
+  void showImageDialog(BuildContext context, String nombreArchivo) async {
     String? base64String =
         await ArchivoService.getArchivo(context, nombreArchivo);
 
     if (base64String == null) return;
 
     Uint8List imageBytes = base64Decode(base64String);
+
+    pdfController = PdfControllerPinch(
+      document: PdfDocument.openData(imageBytes),
+    );
 
     showDialog(
       context: context,
@@ -506,9 +579,23 @@ class _ChatbotPageState extends State<Chat> {
                 ),
                 child: Stack(
                   children: [
-                    Center(
-                      child: Image.memory(imageBytes, fit: BoxFit.contain),
+                    Expanded(
+                      child: nombreArchivo.isNotEmpty
+                          ? PdfViewPinch(
+                              controller: pdfController,
+                              onDocumentError: (error) => _log.severe(error),
+                            )
+                          : const Center(
+                              child: Text(
+                                "No se encontró el PDF",
+                                style: TextStyle(
+                                    fontSize: 12, color: AllowedColors.red),
+                              ),
+                            ),
                     ),
+                    //Center(
+                    //  child: Image.memory(imageBytes, fit: BoxFit.contain),
+                    //),
                     Positioned(
                       top: 20,
                       right: 20,

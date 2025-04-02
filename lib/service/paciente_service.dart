@@ -27,12 +27,11 @@ Dio getDio() {
 }
 
 sealed class PacienteService {
-  static Future<bool?> registrarDispositivo(BuildContext context,
-      DispositivoRequest dispositivo) async {
+  static Future<bool?> registrarDispositivo(
+      BuildContext context, DispositivoRequest dispositivo) async {
     try {
       final publicId = await secureStorage.read(key: "user_id");
-      final response = await getDio().put(
-          "/paciente/registrar-dispositivo/$publicId",
+      final response = await getDio().put("/paciente/registrar-dispositivo/$publicId",
           data: dispositivo.toJson());
 
       if (response.statusCode == 200) {

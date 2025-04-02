@@ -1,16 +1,10 @@
-import 'package:chatbot/view/screens/chat.dart';
-import 'package:chatbot/view/screens/dashboard.dart';
-import 'package:chatbot/view/screens/notifications.dart';
-import 'package:chatbot/view/screens/resources.dart';
+import 'package:chatbot/view/widgets/custom_app_bar.dart';
 import 'package:chatbot/view/widgets/custom_input_decoration.dart';
+import 'package:chatbot/view/widgets/pdf_viewer.dart';
 import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'dart:io';
 import 'dart:async';
-import 'package:logging/logging.dart';
-
-final _log = Logger('Result');
 
 class Result extends StatefulWidget {
   final String pdfPath; // Ruta del PDF
@@ -46,7 +40,7 @@ class _ResultPageState extends State<Result> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _buildAppBar(),
+      appBar: const CustomAppBar(),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -60,28 +54,14 @@ class _ResultPageState extends State<Result> {
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomNavigationBar(),
-    );
-  }
-
-  AppBar _buildAppBar() {
-    return AppBar(
-      elevation: 0,
-      title: Text(
-        "SISA",
-        style: TextStyle(
-          fontSize: 15,
-          fontWeight: FontWeight.bold,
-          color: AllowedColors.red,
-        ),
-      ),
-      centerTitle: true,
+      //bottomNavigationBar: _buildBottomNavigationBar(),
     );
   }
 
   Widget _buildTitle() {
     return Text(
       "Resultado",
+      textAlign: TextAlign.center,
       style: TextStyle(
         fontSize: 15,
         fontWeight: FontWeight.bold,
@@ -95,20 +75,7 @@ class _ResultPageState extends State<Result> {
       child: isLoading
           ? const Center(child: CircularProgressIndicator())
           : widget.pdfPath.isNotEmpty
-              ? PDFView(
-                  filePath: widget.pdfPath,
-                  enableSwipe: true,
-                  swipeHorizontal: false,
-                  autoSpacing: true,
-                  pageSnap: true,
-                  fitPolicy: FitPolicy.BOTH,
-                  onError: (error) {
-                    _log.severe("Error al cargar PDF: $error");
-                  },
-                  onRender: (_) {
-                    setState(() {});
-                  },
-                )
+              ? PDFViewer(assetPath: widget.pdfPath)
               : const Center(
                   child: Text(
                     "No se encontró el PDF",
@@ -137,64 +104,6 @@ class _ResultPageState extends State<Result> {
       readOnly: true,
       decoration: CustomInputDecoration.getDecoration("Detalle resultado"),
       style: TextStyle(fontSize: 15, color: AllowedColors.black),
-    );
-  }
-
-  Widget _buildBottomNavigationBar() {
-    return BottomAppBar(
-      shape: const CircularNotchedRectangle(),
-      notchMargin: 10.0,
-      child: Container(
-        height: 60,
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _buildNavItem(Icons.home, true,
-                MaterialPageRoute(builder: (context) => Dashboard())),
-            _buildNavItem(Icons.folder, false,
-                MaterialPageRoute(builder: (context) => Resources())),
-            _buildFloatingButton(), // Botón central del chatbot
-            _buildNavItem(Icons.map, false, null),
-            _buildNavItem(Icons.notifications, false,
-                MaterialPageRoute(builder: (context) => Notifications())),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNavItem(IconData icon, bool marked, MaterialPageRoute? nav) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        IconButton(
-            onPressed: () {
-              if (nav != null) {
-                Navigator.push(context, nav);
-              }
-            },
-            icon: Icon(icon,
-                color: marked
-                    ? AllowedColors.blue
-                    : AllowedColors.gray,
-                size: 28))
-      ],
-    );
-  }
-
-  Widget _buildFloatingButton() {
-    return Transform.translate(
-      offset: const Offset(0, -10),
-      child: FloatingActionButton(
-        backgroundColor: AllowedColors.blue,
-        onPressed: () {
-          // Acción del asistente virtual
-          Navigator.push(
-              context, MaterialPageRoute(builder: (context) => Chat()));
-        },
-        child: const Icon(Icons.smart_toy, size: 28, color: AllowedColors.white),
-      ),
     );
   }
 }
