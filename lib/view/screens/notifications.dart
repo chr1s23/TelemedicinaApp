@@ -137,19 +137,26 @@ class _NotificationsPageState extends State<Notifications>
             Text(
               notification["date"],
               style: TextStyle(
-                  fontSize: 10, color: AllowedColors.gray),
+                fontSize: 10, 
+                color: AllowedColors.gray,
+                textBaseline: TextBaseline.alphabetic
+              ),
             ),
-            PopupMenuButton<String>(
-              icon: const Icon(Icons.more_vert,
-                  size: 20, color: AllowedColors.gray),
-              onSelected: (value) {
-                // Acción según opción seleccionada
-              },
-              itemBuilder: (context) => [
-                const PopupMenuItem(
-                    value: "markUnread", child: Text("Marcar como no leído")),
-                const PopupMenuItem(value: "delete", child: Text("Eliminar")),
-              ],
+            SizedBox(
+              width: 39,
+              height: 39,
+              child: PopupMenuButton<String>(
+                iconSize: 20,
+                icon: const Icon(Icons.more_vert, color: AllowedColors.gray),
+                onSelected: (value) {
+                  // Acción según opción seleccionada
+                },
+                itemBuilder: (context) => [
+                  const PopupMenuItem(
+                      value: "markUnread", child: Text("Marcar como no leído")),
+                  const PopupMenuItem(value: "delete", child: Text("Eliminar")),
+                ],
+              ),
             ),
           ],
         ),

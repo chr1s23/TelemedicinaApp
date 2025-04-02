@@ -66,7 +66,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
               context, MaterialPageRoute(builder: (context) => Chat())),
         ),
       ),
-      appBar: const CustomAppBar(),
+      appBar: const CustomAppBar(helpButton: true,),
       endDrawer: const CustomDrawer(), // Drawer que se desliza desde la derecha
       body: <Widget?>[
         _buildBody(),
