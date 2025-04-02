@@ -29,7 +29,7 @@ class _VideoPlayerPageState extends State<ResourceDetail> {
   }
 
   void _initializeVideo() async {
-    var (video, chewie) = await initializeVideoPlayer(widget.videos[_currentIndex]["videoPath"], autoPlay: true);
+    var (video, chewie) = await initializeVideoPlayer(widget.videos[_currentIndex]["videoPath"]);
 
     setState(() {
       _videoController = video;

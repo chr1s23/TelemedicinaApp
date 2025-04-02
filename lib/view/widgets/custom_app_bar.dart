@@ -6,8 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
 class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
-  const CustomAppBar({super.key});
+  const CustomAppBar({super.key, this.helpButton = false});
   
+  final bool helpButton;
+
   @override
   State<StatefulWidget> createState() {
     return CustomAppBarState();
@@ -49,7 +51,7 @@ class CustomAppBarState extends State<CustomAppBar> {
   Widget build(BuildContext context) {
     return AppBar(
       elevation: 0,
-      leading: SizedBox(
+      leading: widget.helpButton ? SizedBox(
         width: 90,
         height: 45,
         child: Padding(
@@ -68,7 +70,7 @@ class CustomAppBarState extends State<CustomAppBar> {
             iconSize: 30,
           ),
         ),
-      ),
+      ) : null,
       title: Text(
         "SISA",
         style: TextStyle(
