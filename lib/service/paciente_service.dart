@@ -18,7 +18,7 @@ Dio getDio() {
     onRequest: (options, handler) async {
       String token = await secureStorage.read(key: "user_token") ?? "";
 
-      options.headers['Authorization'] = "Bearer eyJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJodHRwczovL3d3dy51Y3VlbmNhLmVkdS5lYyIsInN1YiI6IjA5OTQ3MjgyNTEiLCJpYXQiOjE3NDM1OTg2NDEsImV4cCI6MTc0MzYwOTQ0MX0.6G9nS7rnahkPGUmg3umQornaROsE-7hFDVlQGakejnM2qJhHuVZVMHqlAakEDVaIyAV1Mjj0d6uO_qNtJxK-pA";
+      options.headers['Authorization'] = "Bearer $token";
       return handler.next(options);
     },
   ));
@@ -31,8 +31,7 @@ sealed class PacienteService {
       BuildContext context, DispositivoRequest dispositivo) async {
     try {
       final publicId = await secureStorage.read(key: "user_id");
-      final client = getDio();
-      final response = await client.put("/paciente/registrar-dispositivo/$publicId",
+      final response = await getDio().put("/paciente/registrar-dispositivo/$publicId",
           data: dispositivo.toJson());
 
       if (response.statusCode == 200) {
