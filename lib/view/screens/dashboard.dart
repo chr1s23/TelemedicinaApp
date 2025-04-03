@@ -23,6 +23,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
   VideoPlayerController? _videoController;
   ChewieController? _chewieController;
   int _currentIndex = 0;
+  bool deviceRegistered = false; //TODO: Agregar la logica para cambiar la variable cuando se registre el dispositivo y habilidar el boton
 
   @override
   void initState() {
@@ -72,7 +73,8 @@ class _AutoSamplingPageState extends State<Dashboard> {
         _buildBody(),
         Resources(),
         WIPScreen(),
-        Notifications(),
+        WIPScreen(),
+        //Notifications(),
       ][_currentIndex],
       bottomNavigationBar: _buildBottomNavigationBar(
           (index) => _currentIndex = index, () => _currentIndex),
@@ -100,21 +102,21 @@ class _AutoSamplingPageState extends State<Dashboard> {
                 buildVideoPlayer(_videoController, _chewieController),
                 const SizedBox(height: 20),
                 CustomButton(
-                    color: Color.fromRGBO(0, 40, 86, 1),
+                    color: deviceRegistered ? AllowedColors.blue : AllowedColors.gray,
                     label: "Iniciar proceso de Automuestreo",
-                    onPressed: () {
+                    onPressed: deviceRegistered ? () {
                       // funciona para ir a la ventana del chat, automáticamente se conecta mediante sockets
                       // por defecto cuando se inicia enviar un mensaje al chatbot para iniciar el proceso, por ejemplo "comenzar proceso"
                       Navigator.push(
                           context,
                           MaterialPageRoute(
                               builder: (context) => Chat(autoStart: true)));
-                    }),
+                    } : null),
                 const SizedBox(height: 20),
                 CustomButton(
-                    color: Color.fromRGBO(0, 40, 86, 1),
+                    color: deviceRegistered ? AllowedColors.gray : AllowedColors.blue,
                     label: "Registrar dispositivo de Automuestreo",
-                    onPressed: () {
+                    onPressed: deviceRegistered ? null : () {
                       // Acción de registrar el dispositivo, llevar a la pagina de escanear el dispositivo y guardar la información en el servidor
                       Navigator.push(
                           context,

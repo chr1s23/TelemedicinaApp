@@ -23,7 +23,6 @@ String? userId;
 Future<String> getUserId() async {
   if (userId == null) {
     userId = await secureStorage.read(key: "user_id");
-
     if (userId != null) {
       _log.fine("Clean user ID: $userId");
     } else {
@@ -50,7 +49,6 @@ class _ChatbotPageState extends State<Chat> {
   final TextEditingController _messageController = TextEditingController();
   final TextEditingController dateController = TextEditingController();
   final List<Map<String, dynamic>> _messages = [];
-  late PdfControllerPinch pdfController;
   VideoPlayerController? _videoController;
   ChewieController? _chewieController;
 
@@ -66,7 +64,7 @@ class _ChatbotPageState extends State<Chat> {
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime firstAllowedDate =
-        DateTime(now.year, now.month - 2, now.day);
+        DateTime(now.year, now.month - 3, now.day);
     final DateTime lastAllowedDate = now.subtract(Duration(days: 1));
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -89,7 +87,6 @@ class _ChatbotPageState extends State<Chat> {
 
   @override
   void initState() {
-    _initVideoPlayer();
     super.initState();
     chatService.connect();
     chatService.socket.on('bot_uttered', (data) {
@@ -113,21 +110,21 @@ class _ChatbotPageState extends State<Chat> {
             _quickReplies = List<Map<String, dynamic>>.from(
                 data['quick_replies'] as List<dynamic>);
 
-            bool containsVPHOrDiabetes = _quickReplies!.any((answer) =>
+            bool enableInput = _quickReplies!.any((answer) =>
                 answer.containsKey("payload") &&
-                (answer["payload"] == "VPH" ||
-                    answer["payload"] == "Diabetes" ||
-                    answer["title"] == "Ver video"));
+                    (answer["title"] == "Ver video") ||
+                answer["title"] == "Ver imagen");
 
-            if (containsVPHOrDiabetes) {
+            if (enableInput) {
               showInputText = true;
             }
 
-            bool containsVerVideo = _quickReplies!.any((answer) =>
+            bool processFinished = _quickReplies!.any((answer) =>
                 answer.containsKey("payload") &&
                 (answer["title"] == "¡Escanear dispositivo!"));
 
-            if (containsVerVideo) {
+            if (processFinished) {
+              _initVideoPlayer();
               completeForm = true;
             }
           }
@@ -138,8 +135,8 @@ class _ChatbotPageState extends State<Chat> {
 
   void _initVideoPlayer() async {
     var (video, chewie) = await initializeVideoPlayer(
-      'assets/videos/sample.mp4',
-      autoPlay: true,
+      'assets/videos/short.mp4',
+      autoPlay: false,
     );
 
     _videoController = video;
@@ -156,7 +153,7 @@ class _ChatbotPageState extends State<Chat> {
         if (inputNumber) {
           inputNumber = false;
         }
-        if (dataPayload?['payload'] == 'No Recuerdo') {
+        if (showDatePickerSelector) {
           showDatePickerSelector = false;
         }
         _messages.add({"text": message, "isBot": false});
@@ -192,7 +189,7 @@ class _ChatbotPageState extends State<Chat> {
   void dispose() {
     chatService.disconnect();
     focusNode.dispose();
-    pdfController.dispose();
+    //pdfController?.dispose();
     _videoController?.dispose();
     _chewieController?.dispose();
     super.dispose();
@@ -366,7 +363,8 @@ class _ChatbotPageState extends State<Chat> {
                     Navigator.push(context,
                         MaterialPageRoute(builder: (context) => Scanner()));
                   } else if (answer["title"] == "Ver imagen") {
-                    showImageDialog(context, answer["payload"]);
+                    showPdfDialog(context, answer["payload"]);
+                    _quickReplies = null;
                   } else {
                     _quickReplies = null;
                     _sendMessage(answer);
@@ -496,7 +494,7 @@ class _ChatbotPageState extends State<Chat> {
             radius: 25,
             child: IconButton(
               icon: const Icon(Icons.send, color: AllowedColors.white),
-              onPressed: _isLoading ? null : _sendMessage,
+              onPressed: _sendMessage,
             ),
           ),
         ],
@@ -505,45 +503,103 @@ class _ChatbotPageState extends State<Chat> {
   }
 
   void showVideoDialog(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isDismissible: false,
+      isScrollControlled: true, // Permite que el diálogo ocupe más espacio
+      backgroundColor: Colors.transparent, // Fondo transparente
+      builder: (context) {
+        return Container(
+          width: double.infinity, // Ocupa todo el ancho disponible
+          height: MediaQuery.of(context).size.height * 0.7, // 90% de la altura
+          decoration: BoxDecoration(
+            color: Colors.white, // Fondo del diálogo
+            borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
+          ),
+          child: Column(
+            children: [
+              // Botón de cerrar (superior derecho)
+              Align(
+                alignment: Alignment.topLeft,
+                child: IconButton(
+                  icon: Icon(Icons.close, color: AllowedColors.black, size: 24),
+                  onPressed: () {
+                    _videoController?.pause();
+                    Navigator.pop(context);
+                  },
+                ),
+              ),
+
+              // Video en pantalla completa
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8),
+                  child: buildVideoPlayer(_videoController, _chewieController),
+                ),
+              ),
+
+              SizedBox(height: 20),
+
+              // Botón "Entendido"
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: CustomButton(
+                  color: AllowedColors.red,
+                  onPressed: () {
+                    _videoController?.pause();
+                    Navigator.pop(context);
+                  },
+                  label: "Entendido",
+                ),
+              ),
+
+              SizedBox(height: 16),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void showPdfDialog(BuildContext context, String nombreArchivo) async {
+    String? base64String =
+        await ArchivoService.getArchivo(context, nombreArchivo);
+
+    if (base64String == null) return;
+
+    Uint8List pdfBytes = base64Decode(base64String);
+
+    PdfControllerPinch pdfController = PdfControllerPinch(
+      document: PdfDocument.openData(pdfBytes),
+    );
+
     showDialog(
       context: context,
-      barrierDismissible: false,
-      builder: (context) {
-        return Dialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(mainAxisSize: MainAxisSize.min, children: [
-                // Botón de cerrar (X)
-                Align(
-                  alignment: Alignment.topLeft,
-                  child: IconButton(
-                    icon: const Icon(Icons.close,
-                        color: AllowedColors.black, size: 24),
-                    onPressed: () {
-                      _videoController?.pause();
-                      Navigator.pop(context);
-                    },
-                  ),
+      barrierDismissible: false, // No se puede cerrar tocando fuera del diálogo
+      builder: (BuildContext context) {
+        return Dialog.fullscreen(
+          backgroundColor: Colors.black, // Fondo oscuro para resaltar el PDF
+          child: Stack(
+            children: [
+              // Vista del PDF
+              Positioned.fill(
+                child: PdfViewPinch(
+                  controller: pdfController,
+                  onDocumentError: (error) => _log.severe(error),
                 ),
-
-                // Video
-                buildVideoPlayer(_videoController, _chewieController),
-                const SizedBox(height: 15),
-                Column(children: [
-                  CustomButton(
-                      color: AllowedColors.red,
-                      onPressed: () {
-                        _videoController?.pause();
-                        Navigator.pop(context);
-                      },
-                      label: "Entendido"),
-                  const SizedBox(height: 20),
-                ])
-              ]),
-            ));
+              ),
+              // Botón de cierre en la parte superior derecha
+              Positioned(
+                top: 20,
+                right: 20,
+                child: IconButton(
+                  icon: Icon(Icons.close, color: AllowedColors.red, size: 30),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ),
+            ],
+          ),
+        );
       },
     );
   }
@@ -556,7 +612,7 @@ class _ChatbotPageState extends State<Chat> {
 
     Uint8List imageBytes = base64Decode(base64String);
 
-    pdfController = PdfControllerPinch(
+    PdfControllerPinch pdfController = PdfControllerPinch(
       document: PdfDocument.openData(imageBytes),
     );
 

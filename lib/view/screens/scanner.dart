@@ -167,19 +167,19 @@ class _QRScannerPageState extends State<Scanner> {
         ),
       ),
       centerTitle: true,
-      actions: [
-        IconButton(
-          icon: CircleAvatar(
-            backgroundImage:
-                AssetImage('assets/images/avatar.png'), // Imagen del avatar
-            radius: 15,
-          ),
-          onPressed: () {
-            // Acción del perfil
-            _showQRResultDialog("pruebas de codigo qr");
-          },
-        ),
-      ],
+      //actions: [
+      //  IconButton(
+      //    icon: CircleAvatar(
+      //      backgroundImage:
+      //          AssetImage('assets/images/avatar.png'), // Imagen del avatar
+      //      radius: 15,
+      //    ),
+      //    onPressed: () {
+      // Acción del perfil
+      //      _showQRResultDialog("pruebas de codigo qr");
+      //    },
+      //  ),
+      //],
     );
   }
 

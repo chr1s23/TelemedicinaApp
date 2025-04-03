@@ -1,3 +1,4 @@
+import 'package:chatbot/model/requests/user.dart';
 import 'package:chatbot/model/storage/storage.dart';
 import 'package:chatbot/providers/auth_provider.dart';
 import 'package:chatbot/providers/chat_provider.dart';
@@ -55,15 +56,19 @@ class SplashScreenState extends State<SplashScreen> {
 
   Future<void> _checkAuth() async {
     String? token = await secureStorage.read(key: "user_token");
+    User? user = await User.loadUser();
 
     if (!mounted) return;
 
-    if (token != null && token.isNotEmpty) {
-      _log.fine("Token found in secure storage, skipping login.");
+    if (token != null && token.isNotEmpty && user != null) {
+      User.setCurrentUser(user, save: false);
+
+      _log.fine("User info found in secure storage. Skipping login.");
+
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (_) => Dashboard()));
     } else {
-      _log.fine("Token not found in secure storage, redirecting to login.");
+      _log.fine("Some or all user information is missing. Redirecting to login.");
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (_) => Presentation()));
     }
