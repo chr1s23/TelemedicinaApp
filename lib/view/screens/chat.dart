@@ -48,7 +48,14 @@ class _ChatbotPageState extends State<Chat> {
   final ChatService chatService = ChatService();
   final TextEditingController _messageController = TextEditingController();
   final TextEditingController dateController = TextEditingController();
-  final List<Map<String, dynamic>> _messages = [];
+  final List<Map<String, dynamic>> _messages = [
+    {
+      "text":
+          '👋 ¡Hola! Soy tu asistente virtual de salud.\nEstoy aquí para responder tus preguntas sobre el **Automuestreo, Virus del Papiloma Humano (VPH), Cáncer de Cuello Uterino (CCU)** y temas relacionados con tu salud sexual y reproductiva.\nSi tienes alguna duda, puedes preguntarme. ¡Estoy para ayudarte! 😊',
+      "loading": false,
+      "isBot": true
+    }
+  ];
   VideoPlayerController? _videoController;
   ChewieController? _chewieController;
 

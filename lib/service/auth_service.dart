@@ -49,7 +49,7 @@ sealed class AuthService {
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error de conexión con el servidor')),
+          SnackBar(content: Text('Usuario o contraseña incorrectos')),
         );
       }
     } catch (e) {
