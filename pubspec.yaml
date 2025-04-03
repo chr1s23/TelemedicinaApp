@@ -91,6 +91,7 @@ flutter:
     - assets/images/avatar.png
     - assets/videos/sample.mp4
     - assets/videos/automuestreo.mp4
+    - assets/videos/short.mp4
     - assets/docs/resultado.pdf
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

@@ -13,18 +13,18 @@ class Resources extends StatefulWidget {
 class _ResourcesPageState extends State<Resources> {
   final List<Map<String, dynamic>> _videos = [
     {
-      "title": "Automuestreo",
+      "title": "Detección Cáncer Cervical",
       "description":
-          "Aprende el proceso correcto para realizar un automuestreo de VPH.",
+          "Aprende sobre el cáncer cervical y sus formas de detección",
       "videoPath": "assets/videos/automuestreo.mp4",
       "rating": 4.8,
       "liked": false,
     },
     {
-      "title": "Salud Sexual",
+      "title": "Automuestreo",
       "description":
-          "Sigue estas medidas para proteger tu salud y la de los demás.",
-      "videoPath": "assets/videos/automuestreo.mp4",
+          "Aprende el proceso correcto para realizar un automuestreo de Virus de Papiloma Humano.",
+      "videoPath": "assets/videos/short.mp4",
       "rating": 4.3,
       "liked": false,
     },

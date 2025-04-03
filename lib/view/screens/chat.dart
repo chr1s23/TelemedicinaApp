@@ -135,7 +135,7 @@ class _ChatbotPageState extends State<Chat> {
 
   void _initVideoPlayer() async {
     var (video, chewie) = await initializeVideoPlayer(
-      'assets/videos/sample.mp4',
+      'assets/videos/short.mp4',
       autoPlay: true,
     );
 
