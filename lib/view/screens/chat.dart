@@ -120,7 +120,9 @@ class _ChatbotPageState extends State<Chat> {
             bool enableInput = _quickReplies!.any((answer) =>
                 answer.containsKey("payload") &&
                     (answer["title"] == "Ver video") ||
-                answer["title"] == "Ver imagen");
+                (answer["title"] == "Ver imagen") ||
+                ((answer["title"] == "Más información") &&
+                    answer["title"] != "Si"));
 
             if (enableInput) {
               showInputText = true;
