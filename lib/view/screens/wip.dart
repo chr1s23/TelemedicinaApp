@@ -19,6 +19,7 @@ class WIPScreen extends StatelessWidget {
             'Estamos trabajando en esta sección.',
             style: TextStyle(fontSize: 20),
           ),
+          SizedBox(height: 200),
         ],
       ),
     );

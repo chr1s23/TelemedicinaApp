@@ -31,9 +31,10 @@ sealed class AuthService {
 
         secureStorage.write(key: "user_id", value: userResponse.publicId);
         secureStorage.write(key: "user_token", value: userResponse.token);
+        
+        User.setCurrentUser(User(userResponse.nombre, userResponse.nombreUsuario, "*****"));
 
-        _log.fine(
-            "Saved to storage: ID - ${userResponse.publicId} | Token - ${userResponse.token}");
+        _log.fine("Saved to storage: ID - ${userResponse.publicId} | Token - ${userResponse.token}");
 
         return userResponse;
       } else {

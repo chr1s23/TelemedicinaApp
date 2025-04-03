@@ -1,5 +1,7 @@
+import 'package:chatbot/model/requests/user.dart';
 import 'package:chatbot/view/screens/about_us.dart';
 import 'package:chatbot/view/screens/personal_data_form.dart';
+import 'package:chatbot/view/screens/presentation.dart';
 import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
 
@@ -21,10 +23,8 @@ class CustomDrawer extends StatelessWidget {
             backgroundImage: AssetImage('assets/images/avatar.png'),
           ),
           const SizedBox(height: 10),
-          //TODO: Agregar reemplazar por la informacion del usuario logeado
-          // Nombre del Usuario
           Text(
-            "Gabriela Orellana",
+            User.getCurrentUser().nombre,
             style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.bold,
@@ -33,13 +33,16 @@ class CustomDrawer extends StatelessWidget {
           const SizedBox(height: 30),
 
           // Botones de Opciones
-          _buildDrawerButton(Icons.person, "Perfil", () {
-            Navigator.pop(context); // Cierra el Drawer
-            // Navegar a la pantalla de perfil
-            Navigator.push(
-                context, //TODO: Agregar la logica para editar la informacion del usuario
-                MaterialPageRoute(builder: (context) => PersonalDataForm()));
-          }),
+          _buildDrawerButton(Icons.person, "Perfil (¡Próximamente!)", null
+          // Disabled for now. TODO: Re-enable after it's implemented
+          // () {
+          //   Navigator.pop(context); // Cierra el Drawer
+          //   // Navegar a la pantalla de perfil
+          //   Navigator.push(
+          //       context, //TODO: Agregar la logica para editar la informacion del usuario
+          //       MaterialPageRoute(builder: (context) => PersonalDataForm()));
+          // }
+          ),
           _buildDrawerButton(Icons.info, "Acerca de", () {
             Navigator.pop(context); // Cierra el Drawer
             // Navegar a Acerca de
@@ -63,7 +66,8 @@ class CustomDrawer extends StatelessWidget {
                 ),
                 onPressed: () {
                   Navigator.pop(context); // Cierra el Drawer
-                  // TODO: Agregar lógica de cierre de sesión para volver a la pantalla presentation
+                  User.clear();
+                  Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => Presentation()), (route) => false);
                 },
                 child: Text(
                   "Cerrar sesión",
@@ -81,7 +85,7 @@ class CustomDrawer extends StatelessWidget {
     );
   }
 
-  Widget _buildDrawerButton(IconData icon, String label, VoidCallback onTap) {
+  Widget _buildDrawerButton(IconData icon, String label, VoidCallback? onTap) {
     return ListTile(
       leading: Icon(icon, color: AllowedColors.blue),
       title: Text(
