@@ -87,7 +87,6 @@ class _ChatbotPageState extends State<Chat> {
 
   @override
   void initState() {
-    _initVideoPlayer();
     super.initState();
     chatService.connect();
     chatService.socket.on('bot_uttered', (data) {
@@ -125,6 +124,7 @@ class _ChatbotPageState extends State<Chat> {
                 (answer["title"] == "¡Escanear dispositivo!"));
 
             if (processFinished) {
+              _initVideoPlayer();
               completeForm = true;
             }
           }
@@ -136,7 +136,7 @@ class _ChatbotPageState extends State<Chat> {
   void _initVideoPlayer() async {
     var (video, chewie) = await initializeVideoPlayer(
       'assets/videos/short.mp4',
-      autoPlay: true,
+      autoPlay: false,
     );
 
     _videoController = video;
@@ -153,7 +153,7 @@ class _ChatbotPageState extends State<Chat> {
         if (inputNumber) {
           inputNumber = false;
         }
-        if (dataPayload?['payload'] == 'No Recuerdo') {
+        if (showDatePickerSelector) {
           showDatePickerSelector = false;
         }
         _messages.add({"text": message, "isBot": false});
@@ -363,7 +363,7 @@ class _ChatbotPageState extends State<Chat> {
                     Navigator.push(context,
                         MaterialPageRoute(builder: (context) => Scanner()));
                   } else if (answer["title"] == "Ver imagen") {
-                    showImageDialog(context, answer["payload"]);
+                    showPdfDialog(context, answer["payload"]);
                     _quickReplies = null;
                   } else {
                     _quickReplies = null;
@@ -503,45 +503,103 @@ class _ChatbotPageState extends State<Chat> {
   }
 
   void showVideoDialog(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isDismissible: false,
+      isScrollControlled: true, // Permite que el diálogo ocupe más espacio
+      backgroundColor: Colors.transparent, // Fondo transparente
+      builder: (context) {
+        return Container(
+          width: double.infinity, // Ocupa todo el ancho disponible
+          height: MediaQuery.of(context).size.height * 0.7, // 90% de la altura
+          decoration: BoxDecoration(
+            color: Colors.white, // Fondo del diálogo
+            borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
+          ),
+          child: Column(
+            children: [
+              // Botón de cerrar (superior derecho)
+              Align(
+                alignment: Alignment.topLeft,
+                child: IconButton(
+                  icon: Icon(Icons.close, color: AllowedColors.black, size: 24),
+                  onPressed: () {
+                    _videoController?.pause();
+                    Navigator.pop(context);
+                  },
+                ),
+              ),
+
+              // Video en pantalla completa
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8),
+                  child: buildVideoPlayer(_videoController, _chewieController),
+                ),
+              ),
+
+              SizedBox(height: 20),
+
+              // Botón "Entendido"
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: CustomButton(
+                  color: AllowedColors.red,
+                  onPressed: () {
+                    _videoController?.pause();
+                    Navigator.pop(context);
+                  },
+                  label: "Entendido",
+                ),
+              ),
+
+              SizedBox(height: 16),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void showPdfDialog(BuildContext context, String nombreArchivo) async {
+    String? base64String =
+        await ArchivoService.getArchivo(context, nombreArchivo);
+
+    if (base64String == null) return;
+
+    Uint8List pdfBytes = base64Decode(base64String);
+
+    PdfControllerPinch pdfController = PdfControllerPinch(
+      document: PdfDocument.openData(pdfBytes),
+    );
+
     showDialog(
       context: context,
-      barrierDismissible: false,
-      builder: (context) {
-        return Dialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(mainAxisSize: MainAxisSize.min, children: [
-                // Botón de cerrar (X)
-                Align(
-                  alignment: Alignment.topLeft,
-                  child: IconButton(
-                    icon: const Icon(Icons.close,
-                        color: AllowedColors.black, size: 24),
-                    onPressed: () {
-                      _videoController?.pause();
-                      Navigator.pop(context);
-                    },
-                  ),
+      barrierDismissible: false, // No se puede cerrar tocando fuera del diálogo
+      builder: (BuildContext context) {
+        return Dialog.fullscreen(
+          backgroundColor: Colors.black, // Fondo oscuro para resaltar el PDF
+          child: Stack(
+            children: [
+              // Vista del PDF
+              Positioned.fill(
+                child: PdfViewPinch(
+                  controller: pdfController,
+                  onDocumentError: (error) => _log.severe(error),
                 ),
-
-                // Video
-                buildVideoPlayer(_videoController, _chewieController),
-                const SizedBox(height: 15),
-                Column(children: [
-                  CustomButton(
-                      color: AllowedColors.red,
-                      onPressed: () {
-                        _videoController?.pause();
-                        Navigator.pop(context);
-                      },
-                      label: "Entendido"),
-                  const SizedBox(height: 20),
-                ])
-              ]),
-            ));
+              ),
+              // Botón de cierre en la parte superior derecha
+              Positioned(
+                top: 20,
+                right: 20,
+                child: IconButton(
+                  icon: Icon(Icons.close, color: AllowedColors.red, size: 30),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ),
+            ],
+          ),
+        );
       },
     );
   }

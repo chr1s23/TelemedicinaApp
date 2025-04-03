@@ -175,7 +175,7 @@ class _QRScannerPageState extends State<Scanner> {
       //      radius: 15,
       //    ),
       //    onPressed: () {
-            // Acción del perfil
+      // Acción del perfil
       //      _showQRResultDialog("pruebas de codigo qr");
       //    },
       //  ),

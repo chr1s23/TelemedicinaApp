@@ -35,6 +35,11 @@ sealed class PacienteService {
           data: dispositivo.toJson());
 
       if (response.statusCode == 200) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Dispositivo registrado correctamente.')),
+          );
+        }
         return true;
       } else {
         if (context.mounted) {
