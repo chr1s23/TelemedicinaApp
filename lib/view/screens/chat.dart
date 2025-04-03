@@ -23,7 +23,6 @@ String? userId;
 Future<String> getUserId() async {
   if (userId == null) {
     userId = await secureStorage.read(key: "user_id");
-
     if (userId != null) {
       _log.fine("Clean user ID: $userId");
     } else {
@@ -50,7 +49,6 @@ class _ChatbotPageState extends State<Chat> {
   final TextEditingController _messageController = TextEditingController();
   final TextEditingController dateController = TextEditingController();
   final List<Map<String, dynamic>> _messages = [];
-  late PdfControllerPinch pdfController;
   VideoPlayerController? _videoController;
   ChewieController? _chewieController;
 
@@ -66,7 +64,7 @@ class _ChatbotPageState extends State<Chat> {
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime firstAllowedDate =
-        DateTime(now.year, now.month - 2, now.day);
+        DateTime(now.year, now.month - 3, now.day);
     final DateTime lastAllowedDate = now.subtract(Duration(days: 1));
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -113,21 +111,20 @@ class _ChatbotPageState extends State<Chat> {
             _quickReplies = List<Map<String, dynamic>>.from(
                 data['quick_replies'] as List<dynamic>);
 
-            bool containsVPHOrDiabetes = _quickReplies!.any((answer) =>
+            bool enableInput = _quickReplies!.any((answer) =>
                 answer.containsKey("payload") &&
-                (answer["payload"] == "VPH" ||
-                    answer["payload"] == "Diabetes" ||
-                    answer["title"] == "Ver video"));
+                    (answer["title"] == "Ver video") ||
+                answer["title"] == "Ver imagen");
 
-            if (containsVPHOrDiabetes) {
+            if (enableInput) {
               showInputText = true;
             }
 
-            bool containsVerVideo = _quickReplies!.any((answer) =>
+            bool processFinished = _quickReplies!.any((answer) =>
                 answer.containsKey("payload") &&
                 (answer["title"] == "¡Escanear dispositivo!"));
 
-            if (containsVerVideo) {
+            if (processFinished) {
               completeForm = true;
             }
           }
@@ -192,7 +189,7 @@ class _ChatbotPageState extends State<Chat> {
   void dispose() {
     chatService.disconnect();
     focusNode.dispose();
-    pdfController.dispose();
+    //pdfController?.dispose();
     _videoController?.dispose();
     _chewieController?.dispose();
     super.dispose();
@@ -367,6 +364,7 @@ class _ChatbotPageState extends State<Chat> {
                         MaterialPageRoute(builder: (context) => Scanner()));
                   } else if (answer["title"] == "Ver imagen") {
                     showImageDialog(context, answer["payload"]);
+                    _quickReplies = null;
                   } else {
                     _quickReplies = null;
                     _sendMessage(answer);
@@ -496,7 +494,7 @@ class _ChatbotPageState extends State<Chat> {
             radius: 25,
             child: IconButton(
               icon: const Icon(Icons.send, color: AllowedColors.white),
-              onPressed: _isLoading ? null : _sendMessage,
+              onPressed: _sendMessage,
             ),
           ),
         ],
@@ -556,7 +554,7 @@ class _ChatbotPageState extends State<Chat> {
 
     Uint8List imageBytes = base64Decode(base64String);
 
-    pdfController = PdfControllerPinch(
+    PdfControllerPinch pdfController = PdfControllerPinch(
       document: PdfDocument.openData(imageBytes),
     );
 
