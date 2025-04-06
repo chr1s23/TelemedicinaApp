@@ -9,8 +9,9 @@ class User {
   String nombre;
   String contrasena;
   String nombreUsuario;
+  String? dispositivo;
 
-  User(this.nombre, this.nombreUsuario, this.contrasena);
+  User(this.nombre, this.nombreUsuario, this.contrasena, this.dispositivo);
 
   static User getCurrentUser() {
     if (_currentUser == null) {
@@ -33,6 +34,7 @@ class User {
     secureStorage.delete(key: "user_token");
     secureStorage.delete(key: "user_name");
     secureStorage.delete(key: "user_username");
+    secureStorage.delete(key: "user_device");
 
     _currentUser = null;
   }
@@ -40,9 +42,10 @@ class User {
   static Future<User?> loadUser() async {
     String? name = await secureStorage.read(key: "user_name");
     String? username = await secureStorage.read(key: "user_username");
+    String? device = await secureStorage.read(key: "user_device");
 
     if (name != null && name.isNotEmpty && username != null && username.isNotEmpty) {
-      return User(name, username, "*****");
+      return User(name, username, "*****", device);
     }
 
     return null;

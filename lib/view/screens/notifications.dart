@@ -183,7 +183,8 @@ class _NotificationsPageState extends State<Notifications>
                         context,
                         MaterialPageRoute(
                             builder: (context) =>
-                                Result(pdfPath: attachment["path"])))
+                                //Result(pdfName: attachment["path"])))
+                                Result(pdfName: "violencia_genero_autocuidado.pdf")))
                     : () => {};
               },
               child: Text(

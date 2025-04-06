@@ -31,8 +31,9 @@ sealed class AuthService {
 
         secureStorage.write(key: "user_id", value: userResponse.publicId);
         secureStorage.write(key: "user_token", value: userResponse.token);
+        secureStorage.write(key: "user_device", value: userResponse.dispositivo);
         
-        User.setCurrentUser(User(userResponse.nombre, userResponse.nombreUsuario, "*****"));
+        User.setCurrentUser(User(userResponse.nombre, userResponse.nombreUsuario, "*****", userResponse.dispositivo));
 
         _log.fine("Saved to storage: ID - ${userResponse.publicId} | Token - ${userResponse.token}");
 
@@ -49,7 +50,7 @@ sealed class AuthService {
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error de conexión con el servidor')),
+          SnackBar(content: Text('Usuario o contraseña incorrectos')),
         );
       }
     } catch (e) {
@@ -73,12 +74,12 @@ sealed class AuthService {
       var request = user.toJson();
       _log.fine(request);
       final response = await getDio().post("/usuarios/registro", data: request);
-      _log.fine(response);
       if (response.statusCode == 200) {
         UserResponse userResponse = UserResponse.fromJsonMap(response.data);
 
         secureStorage.write(key: "user_id", value: userResponse.publicId);
         secureStorage.write(key: "user_token", value: userResponse.token);
+        secureStorage.write(key: "user_device", value: userResponse.dispositivo);
 
         return userResponse;
       } else {

@@ -6,6 +6,7 @@ import 'package:chatbot/service/archivo_service.dart';
 import 'package:chatbot/view/screens/scanner.dart';
 import 'package:chatbot/service/chat_service.dart';
 import 'package:chatbot/view/widgets/custom_button.dart';
+import 'package:chatbot/view/widgets/pdf_viewer.dart';
 import 'package:chatbot/view/widgets/utils.dart';
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
@@ -113,9 +114,17 @@ class _ChatbotPageState extends State<Chat> {
             bool enableInput = _quickReplies!.any((answer) =>
                 answer.containsKey("payload") &&
                     (answer["title"] == "Ver video") ||
-                answer["title"] == "Ver imagen");
+                (answer["title"] == "Ver imagen"));
 
             if (enableInput) {
+              showInputText = true;
+            }
+
+            bool isFormInformation = _quickReplies!.any((answer) =>
+                answer["title"] == "Más información" &&
+                _quickReplies!.length == 1);
+
+            if (isFormInformation) {
               showInputText = true;
             }
 
@@ -146,6 +155,7 @@ class _ChatbotPageState extends State<Chat> {
   }
 
   void _sendMessage([Map<String, dynamic>? dataPayload]) async {
+    _quickReplies = null;
     String message =
         dataPayload?['title'] ?? _messageController.value.text.trim();
     if (message.isNotEmpty) {
@@ -189,7 +199,6 @@ class _ChatbotPageState extends State<Chat> {
   void dispose() {
     chatService.disconnect();
     focusNode.dispose();
-    //pdfController?.dispose();
     _videoController?.dispose();
     _chewieController?.dispose();
     super.dispose();
@@ -200,6 +209,13 @@ class _ChatbotPageState extends State<Chat> {
     if (widget.autoStart) {
       _sendMessage({"title": "Iniciar proceso", "payload:": "Iniciar proceso"});
       widget.autoStart = false;
+    } else if (_messages.isEmpty) {
+      _messages.add({
+        "text":
+            '👋 ¡Hola! Soy tu asistente virtual de salud.\nEstoy aquí para responder tus preguntas sobre el **Automuestreo, Virus del Papiloma Humano (VPH), Cáncer de Cuello Uterino (CCU)** y temas relacionados con tu salud sexual y reproductiva.\nSi tienes alguna duda, puedes preguntarme. ¡Estoy para ayudarte! 😊',
+        "loading": false,
+        "isBot": true
+      });
     }
 
     return PopScope(
@@ -213,7 +229,7 @@ class _ChatbotPageState extends State<Chat> {
               context: context,
               title: "¿Salir del chat?",
               message:
-                  "¿Seguro que desea salir? Se perderá todo el contenido del chat.",
+                  "Se perderá todo el contenido del chat.",
               onYes: () async {
                 chatService.reset(await getUserId());
               },
@@ -287,7 +303,8 @@ class _ChatbotPageState extends State<Chat> {
               color: completeForm ? AllowedColors.blue : AllowedColors.gray),
           onPressed: completeForm
               ? () {
-                  Navigator.push(context,
+                  Navigator.push(
+                      context, //TODO: Agregar el request con toda la informacion del chat y formulario
                       MaterialPageRoute(builder: (context) => Scanner()));
                 }
               : null,
@@ -360,13 +377,14 @@ class _ChatbotPageState extends State<Chat> {
                   } else if (answer["title"] == "Ver video") {
                     showVideoDialog(context);
                   } else if (answer["title"] == "¡Escanear dispositivo!") {
-                    Navigator.push(context,
+                    Navigator.push(
+                        context, //TODO: Agregar el request con toda la infor del formulario y chat
                         MaterialPageRoute(builder: (context) => Scanner()));
                   } else if (answer["title"] == "Ver imagen") {
                     showPdfDialog(context, answer["payload"]);
-                    _quickReplies = null;
+                    //_quickReplies = null;
                   } else {
-                    _quickReplies = null;
+                    //_quickReplies = null;
                     _sendMessage(answer);
                   }
                 },
@@ -416,7 +434,10 @@ class _ChatbotPageState extends State<Chat> {
                     onPressed: () {
                       Navigator.of(context).pop(); // Cierra el diálogo
                     },
-                    child: Text("Cerrar"),
+                    child: Text(
+                      "Cerrar",
+                      style: TextStyle(color: AllowedColors.blue),
+                    ),
                   ),
                 ),
               ],
@@ -511,36 +532,30 @@ class _ChatbotPageState extends State<Chat> {
       builder: (context) {
         return Container(
           width: double.infinity, // Ocupa todo el ancho disponible
-          height: MediaQuery.of(context).size.height * 0.7, // 90% de la altura
+          height: MediaQuery.of(context).size.height * 0.7,
           decoration: BoxDecoration(
             color: Colors.white, // Fondo del diálogo
             borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
           ),
           child: Column(
             children: [
-              // Botón de cerrar (superior derecho)
               Align(
                 alignment: Alignment.topLeft,
                 child: IconButton(
-                  icon: Icon(Icons.close, color: AllowedColors.black, size: 24),
+                  icon: Icon(Icons.close, color: AllowedColors.red, size: 24),
                   onPressed: () {
                     _videoController?.pause();
                     Navigator.pop(context);
                   },
                 ),
               ),
-
-              // Video en pantalla completa
               Expanded(
                 child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: 8),
                   child: buildVideoPlayer(_videoController, _chewieController),
                 ),
               ),
-
               SizedBox(height: 20),
-
-              // Botón "Entendido"
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16),
                 child: CustomButton(
@@ -552,7 +567,6 @@ class _ChatbotPageState extends State<Chat> {
                   label: "Entendido",
                 ),
               ),
-
               SizedBox(height: 16),
             ],
           ),
@@ -562,33 +576,15 @@ class _ChatbotPageState extends State<Chat> {
   }
 
   void showPdfDialog(BuildContext context, String nombreArchivo) async {
-    String? base64String =
-        await ArchivoService.getArchivo(context, nombreArchivo);
-
-    if (base64String == null) return;
-
-    Uint8List pdfBytes = base64Decode(base64String);
-
-    PdfControllerPinch pdfController = PdfControllerPinch(
-      document: PdfDocument.openData(pdfBytes),
-    );
-
     showDialog(
       context: context,
-      barrierDismissible: false, // No se puede cerrar tocando fuera del diálogo
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return Dialog.fullscreen(
-          backgroundColor: Colors.black, // Fondo oscuro para resaltar el PDF
+          backgroundColor: Colors.black,
           child: Stack(
             children: [
-              // Vista del PDF
-              Positioned.fill(
-                child: PdfViewPinch(
-                  controller: pdfController,
-                  onDocumentError: (error) => _log.severe(error),
-                ),
-              ),
-              // Botón de cierre en la parte superior derecha
+              Positioned.fill(child: PDFViewer(pdfName: nombreArchivo)),
               Positioned(
                 top: 20,
                 right: 20,
@@ -598,75 +594,6 @@ class _ChatbotPageState extends State<Chat> {
                 ),
               ),
             ],
-          ),
-        );
-      },
-    );
-  }
-
-  void showImageDialog(BuildContext context, String nombreArchivo) async {
-    String? base64String =
-        await ArchivoService.getArchivo(context, nombreArchivo);
-
-    if (base64String == null) return;
-
-    Uint8List imageBytes = base64Decode(base64String);
-
-    PdfControllerPinch pdfController = PdfControllerPinch(
-      document: PdfDocument.openData(imageBytes),
-    );
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Dialog(
-          backgroundColor: AllowedColors.white,
-          insetPadding: EdgeInsets.zero, // Elimina los márgenes del diálogo
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              double screenHeight = MediaQuery.of(context).size.height;
-              double screenWidth = MediaQuery.of(context).size.width;
-
-              return Container(
-                width: screenWidth, // Ocupar todo el ancho de la pantalla
-                height: screenHeight * 0.95, // 90% del alto de la pantalla
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Stack(
-                  children: [
-                    Expanded(
-                      child: nombreArchivo.isNotEmpty
-                          ? PdfViewPinch(
-                              controller: pdfController,
-                              onDocumentError: (error) => _log.severe(error),
-                            )
-                          : const Center(
-                              child: Text(
-                                "No se encontró el PDF",
-                                style: TextStyle(
-                                    fontSize: 12, color: AllowedColors.red),
-                              ),
-                            ),
-                    ),
-                    //Center(
-                    //  child: Image.memory(imageBytes, fit: BoxFit.contain),
-                    //),
-                    Positioned(
-                      top: 20,
-                      right: 20,
-                      child: IconButton(
-                        icon: Icon(Icons.close,
-                            color: AllowedColors.red, size: 30),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
           ),
         );
       },

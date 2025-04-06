@@ -5,14 +5,15 @@ class CustomButton extends StatelessWidget {
   final Color color;
   final VoidCallback? onPressed;
   final String label;
+  final double? size;
 
   const CustomButton(
-      {super.key, required this.color, this.onPressed, required this.label});
+      {super.key, required this.color, this.onPressed, required this.label, this.size});
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 300,
+      width: size ?? 300,
       height: 50,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
@@ -23,6 +24,7 @@ class CustomButton extends StatelessWidget {
         ),
         onPressed: onPressed,
         child: Text(
+          textAlign: TextAlign.center,
           label,
           style: TextStyle(fontWeight: FontWeight.bold, color: AllowedColors.white),
         ),

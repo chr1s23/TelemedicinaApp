@@ -1,21 +1,24 @@
 import 'package:chatbot/model/requests/dispositivo_request.dart';
+import 'package:chatbot/model/storage/storage.dart';
 import 'package:chatbot/service/paciente_service.dart';
 import 'package:chatbot/view/screens/dashboard.dart';
 import 'package:chatbot/view/widgets/custom_button.dart';
+import 'package:chatbot/view/widgets/custom_loading_button.dart';
 import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 class Scanner extends StatefulWidget {
-  Scanner({super.key, this.deviceRegister = false});
+  const Scanner({super.key, this.deviceRegister = false});
 
-  bool deviceRegister;
+  final bool deviceRegister;
 
   @override
   State<Scanner> createState() => _QRScannerPageState();
 }
 
 class _QRScannerPageState extends State<Scanner> {
+  bool _isLoading = false;
   final MobileScannerController _scannerController = MobileScannerController();
 
   void _onQRScanned(BarcodeCapture capture) {
@@ -26,8 +29,41 @@ class _QRScannerPageState extends State<Scanner> {
     }
   }
 
+  void registerDevice(device) async {
+    FocusScope.of(context).unfocus();
+    if (_isLoading) return; // Evita múltiples clics
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    if (widget.deviceRegister) {
+      bool? registered = await PacienteService.registrarDispositivo(
+          context, DispositivoRequest(device));
+      if (registered != null && registered) {
+        secureStorage.write(key: "user_device", value: device);
+      }
+    } else {
+      //TODO: Logica para recolectar las preguntas del formulario y guardarlas en el servidor
+      //inicio y fin deben ser de la forma 2025-03-10T10:30:00
+      //cuentaPublicId es el id del usuario
+      //contenido es un string con todo el contenido del chat
+      //se requiere la informacion sexual del formulario SaludSexualRequest obligatoriamente
+      //await SesionChatService.registrarInfoExamen(context, SesionChatRequest(cuentaPublicId, inicio, fin, contenido, SaludSexualRequest));
+    }
+
+    if (mounted) {
+      Navigator.pop(context);
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (context) => Dashboard()));
+    }
+
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
   void _showQRResultDialog(String qrData) {
-    bool isLoading = false;
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -36,11 +72,9 @@ class _QRScannerPageState extends State<Scanner> {
         insetPadding: EdgeInsets.zero,
         child: Container(
           width: MediaQuery.of(context).size.width * 0.9,
-          //height: MediaQuery.of(context).size.height * 0.9,
           padding: EdgeInsets.all(16),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            //mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
                 "Dispositivo de Autmouestreo escaneado correctamente!",
@@ -64,7 +98,9 @@ class _QRScannerPageState extends State<Scanner> {
               ),
               SizedBox(height: 25),
               Text(
-                "✅ Todo listo!\nRecuerda entregar el dispositivo de Automuestreo en el GAD más cercano.",
+                widget.deviceRegister
+                    ? "Presiona el botón 'Aceptar' para registrar el dispositivo de Automuestreo!."
+                    : "✅ Todo listo!\nPresiona el botón 'Aceptar' para terminar el proceso.\nRecuerda entregar el dispositivo de Automuestreo en el GAD más cercano.",
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
               ),
@@ -77,58 +113,17 @@ class _QRScannerPageState extends State<Scanner> {
                   },
                   label: "Escanear de nuevo"),
               SizedBox(height: 15),
-              SizedBox(
-                width: 300,
-                height: 50,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AllowedColors.blue,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                  ),
-                  onPressed: isLoading
+              CustomLoadingButton(
+                  color: AllowedColors.blue,
+                  label: "Aceptar",
+                  loading: _isLoading,
+                  onPressed: _isLoading
                       ? null
-                      : () async {
-                          setState(() {
-                            isLoading = true; // Activa el estado de carga
-                          });
-
-                          if (widget.deviceRegister) {
-                            await PacienteService.registrarDispositivo(
-                                context, DispositivoRequest(qrData));
-                          } else {
-                            //TODO: Logica para recolectar las preguntas del formulario y guardarlas en el servidor
-                            //inicio y fin deben ser de la forma 2025-03-10T10:30:00
-                            //cuentaPublicId es el id del usuario
-                            //contenido es un string con todo el contenido del chat
-                            //se requiere la informacion sexual del formulario SaludSexualRequest obligatoriamente
-                            //await SesionChatService.registrarInfoExamen(context, SesionChatRequest(cuentaPublicId, inicio, fin, contenido, SaludSexualRequest));
+                      : () {
+                          if (qrData != "Código QR no válido") {
+                            registerDevice(qrData);
                           }
-
-                          if (context.mounted) {
-                            Navigator.pop(context);
-                            Navigator.pop(context,
-                                qrData); // Devuelve el resultado a la pantalla anterior
-                            Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => Dashboard()));
-                          }
-                          setState(() {
-                            isLoading = false; // Desactiva el estado de carga
-                          });
-                        },
-                  child: isLoading
-                      ? CircularProgressIndicator(color: AllowedColors.white)
-                      : Text(
-                          "Aceptar",
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: AllowedColors.white),
-                        ),
-                ),
-              )
+                        })
             ],
           ),
         ),
@@ -167,19 +162,18 @@ class _QRScannerPageState extends State<Scanner> {
         ),
       ),
       centerTitle: true,
-      //actions: [
-      //  IconButton(
-      //    icon: CircleAvatar(
-      //      backgroundImage:
-      //          AssetImage('assets/images/avatar.png'), // Imagen del avatar
-      //      radius: 15,
-      //    ),
-      //    onPressed: () {
-      // Acción del perfil
-      //      _showQRResultDialog("pruebas de codigo qr");
-      //    },
-      //  ),
-      //],
+      actions: [
+        IconButton(
+          icon: CircleAvatar(
+            backgroundImage:
+                AssetImage('assets/images/avatar.png'), // Imagen del avatar
+            radius: 15,
+          ),
+          onPressed: () {
+            _showQRResultDialog("pruebas de codigo qr");
+          },
+        ),
+      ],
     );
   }
 

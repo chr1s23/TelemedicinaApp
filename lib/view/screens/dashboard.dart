@@ -1,3 +1,4 @@
+import 'package:chatbot/model/storage/storage.dart';
 import 'package:chatbot/view/screens/chat.dart';
 import 'package:chatbot/view/screens/notifications.dart';
 import 'package:chatbot/view/screens/resources.dart';
@@ -23,8 +24,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
   VideoPlayerController? _videoController;
   ChewieController? _chewieController;
   int _currentIndex = 0;
-  bool deviceRegistered = false; //TODO: Agregar la logica para cambiar la variable cuando se registre el dispositivo y habilidar el boton
-
+  bool deviceRegistered = false;
   @override
   void initState() {
     _initializePlayer();
@@ -32,11 +32,17 @@ class _AutoSamplingPageState extends State<Dashboard> {
   }
 
   Future<void> _initializePlayer() async {
-    var (video, chewie) = await initializeVideoPlayer('assets/videos/automuestreo.mp4', 
-      autoPlay: true, 
+    String? dispositivo = await secureStorage.read(key: "user_device");
+
+    var (video, chewie) = await initializeVideoPlayer(
+      'assets/videos/automuestreo.mp4',
+      autoPlay: true,
     );
 
     setState(() {
+      if (dispositivo != null) {
+        deviceRegistered = true;
+      }
       _videoController = video;
       _chewieController = chewie;
     });
@@ -62,12 +68,15 @@ class _AutoSamplingPageState extends State<Dashboard> {
           shape: const CircleBorder(),
           elevation: 0,
           heroTag: "chatbot",
-          child: SvgPicture.asset("assets/icons/chatbot.svg", height: 50, width: 50),
+          child: SvgPicture.asset("assets/icons/chatbot.svg",
+              height: 50, width: 50),
           onPressed: () => Navigator.push(
               context, MaterialPageRoute(builder: (context) => Chat())),
         ),
       ),
-      appBar: const CustomAppBar(helpButton: true,),
+      appBar: const CustomAppBar(
+        helpButton: true,
+      ),
       endDrawer: const CustomDrawer(), // Drawer que se desliza desde la derecha
       body: <Widget?>[
         _buildBody(),
@@ -102,28 +111,34 @@ class _AutoSamplingPageState extends State<Dashboard> {
                 buildVideoPlayer(_videoController, _chewieController),
                 const SizedBox(height: 20),
                 CustomButton(
-                    color: deviceRegistered ? AllowedColors.blue : AllowedColors.gray,
+                    color: deviceRegistered
+                        ? AllowedColors.blue
+                        : AllowedColors.gray,
                     label: "Iniciar proceso de Automuestreo",
-                    onPressed: deviceRegistered ? () {
-                      // funciona para ir a la ventana del chat, automáticamente se conecta mediante sockets
-                      // por defecto cuando se inicia enviar un mensaje al chatbot para iniciar el proceso, por ejemplo "comenzar proceso"
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => Chat(autoStart: true)));
-                    } : null),
+                    onPressed: deviceRegistered
+                        ? () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        Chat(autoStart: true)));
+                          }
+                        : null, size: 340),
                 const SizedBox(height: 20),
                 CustomButton(
-                    color: deviceRegistered ? AllowedColors.gray : AllowedColors.blue,
+                    color: deviceRegistered
+                        ? AllowedColors.gray
+                        : AllowedColors.blue,
                     label: "Registrar dispositivo de Automuestreo",
-                    onPressed: deviceRegistered ? null : () {
-                      // Acción de registrar el dispositivo, llevar a la pagina de escanear el dispositivo y guardar la información en el servidor
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  Scanner(deviceRegister: true)));
-                    }),
+                    onPressed: deviceRegistered
+                        ? null
+                        : () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        Scanner(deviceRegister: true)));
+                          }, size: 340),
                 const SizedBox(height: 15),
                 Text(
                     "Este video explica el proceso de automuestreo. Sigue los pasos descritos para completar el procedimiento correctamente.",

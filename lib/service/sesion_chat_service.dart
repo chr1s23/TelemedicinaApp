@@ -39,7 +39,7 @@ sealed class SesionChatService {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
                 content:
-                    Text('No se pudo registrar la información del examen VPH')),
+                    Text('No se pudo registrar la información del Automuestreo VPH')),
           );
         }
       }
