@@ -28,22 +28,46 @@ class AboutUs extends StatelessWidget {
                     Text(
                       "Acerca de",
                       style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                          color: AllowedColors.black),
+                    ),
+                    Text(
+                      "VERSIÓN BETA",
+                      style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
                           color: AllowedColors.black),
                     ),
                     const SizedBox(height: 20),
                     Container(
-                      height: 400, // Espacio grande para los términos
+                      //height: 400, // Espacio grande para los términos
                       decoration: BoxDecoration(
                         border: Border.all(color: AllowedColors.gray, width: 1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       padding: const EdgeInsets.all(12),
-                      child: SingleChildScrollView(
-                        child: Text(TermsConditions.aboutUs,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            TermsConditions.aboutUs,
                             style: TextStyle(
-                                fontSize: 12, color: AllowedColors.black)),
+                                fontSize: 12, color: AllowedColors.black),
+                          ),
+                          const SizedBox(height: 20),
+                          Image.asset(
+                            'assets/images/clias.jpg',
+                            height: 150,
+                            fit: BoxFit.contain,
+                          ),
+                          const SizedBox(height: 10),
+                          Image.asset(
+                            'assets/images/idrc.png',
+                            height: 150,
+                            fit: BoxFit.contain,
+                          ),
+                        ],
                       ),
                     ),
                   ],

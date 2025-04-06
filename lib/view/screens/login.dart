@@ -38,7 +38,7 @@ class _LoginState extends State<Login> {
       _isLoading = true;
     });
 
-    User user = User("", usernameController.value.text, passwordController.value.text);
+    User user = User("", usernameController.value.text, passwordController.value.text, null);
     UserResponse? userLogged = await AuthService.login(context, user);
 
     if (userLogged != null) {

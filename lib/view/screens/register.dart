@@ -141,7 +141,8 @@ class Register extends StatelessWidget {
                             User.setCurrentUser(User(
                                 _nameController.text,
                                 _usernameController.text,
-                                _passwordController.text));
+                                _passwordController.text,
+                                null));
 
                             Navigator.push(
                                 context,

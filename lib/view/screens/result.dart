@@ -3,39 +3,11 @@ import 'package:chatbot/view/widgets/custom_input_decoration.dart';
 import 'package:chatbot/view/widgets/pdf_viewer.dart';
 import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
-import 'dart:io';
-import 'dart:async';
 
-class Result extends StatefulWidget {
-  final String pdfPath; // Ruta del PDF
+class Result extends StatelessWidget {
+  final String pdfName; // Nombre del pdf resultado del usuario
 
-  const Result({super.key, required this.pdfPath});
-
-  @override
-  State<Result> createState() => _ResultPageState();
-}
-
-class _ResultPageState extends State<Result> {
-  bool isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _checkFileExists();
-  }
-
-  Future<void> _checkFileExists() async {
-    File file = File(widget.pdfPath);
-    if (await file.exists()) {
-      setState(() {
-        isLoading = false;
-      });
-    } else {
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
+  const Result({super.key, required this.pdfName});
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +18,7 @@ class _ResultPageState extends State<Result> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildTitle(),
+            Center(child: _buildTitle()),
             const SizedBox(height: 15),
             _buildPdfViewer(),
             const SizedBox(height: 20),
@@ -61,9 +33,8 @@ class _ResultPageState extends State<Result> {
   Widget _buildTitle() {
     return Text(
       "Resultado",
-      textAlign: TextAlign.center,
       style: TextStyle(
-        fontSize: 15,
+        fontSize: 17,
         fontWeight: FontWeight.bold,
         color: AllowedColors.black,
       ),
@@ -72,17 +43,14 @@ class _ResultPageState extends State<Result> {
 
   Widget _buildPdfViewer() {
     return Expanded(
-      child: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : widget.pdfPath.isNotEmpty
-              ? PDFViewer(assetPath: widget.pdfPath)
-              : const Center(
-                  child: Text(
-                    "No se encontró el PDF",
-                    style: TextStyle(
-                        fontSize: 12, color: AllowedColors.red),
-                  ),
-                ),
+      child: pdfName.isNotEmpty
+          ? PDFViewer(pdfName: pdfName)
+          : const Center(
+              child: Text(
+                "No se pudo cargar el PDF",
+                style: TextStyle(fontSize: 12, color: AllowedColors.red),
+              ),
+            ),
     );
   }
 
