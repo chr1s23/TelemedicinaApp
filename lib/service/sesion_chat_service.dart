@@ -29,17 +29,25 @@ sealed class SesionChatService {
   static Future<bool?> registrarInfoExamen(
       BuildContext context, SesionChatRequest sesion) async {
     try {
+      _log.fine(sesion.toJson());
       final response =
           await getDio().post("/sesion-chat/usuario", data: sesion.toJson());
 
       if (response.statusCode == 200) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text(
+                    'Proceso de Automuestreo terminado correctamente!.')),
+          );
+        }
         return true;
       } else {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-                content:
-                    Text('No se pudo registrar la información del Automuestreo VPH')),
+                content: Text(
+                    'No se pudo registrar la información del Automuestreo VPH')),
           );
         }
       }
@@ -48,7 +56,7 @@ sealed class SesionChatService {
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error de conexión con el servidor')),
+          SnackBar(content: Text('Ocurrió un error inesperado.')),
         );
       }
     } catch (e) {

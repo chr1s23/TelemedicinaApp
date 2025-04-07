@@ -53,7 +53,7 @@ sealed class PacienteService {
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error de conexión con el servidor')),
+          SnackBar(content: Text('Ocurrió un error inesperado.')),
         );
       }
     } catch (e) {

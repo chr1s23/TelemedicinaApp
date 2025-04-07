@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:chatbot/model/requests/message_request.dart';
+import 'package:chatbot/model/requests/salud_sexual_request.dart';
+import 'package:chatbot/model/requests/sesion_chat_request.dart';
 import 'package:chatbot/service/archivo_service.dart';
 import 'package:chatbot/view/screens/scanner.dart';
 import 'package:chatbot/service/chat_service.dart';
@@ -44,7 +46,10 @@ class Chat extends StatefulWidget {
 }
 
 class _ChatbotPageState extends State<Chat> {
+  SesionChatRequest? sesionChat;
+  SaludSexualRequest? saludSexual;
   bool completeForm = false;
+  bool colectInformation = false;
   final focusNode = FocusNode();
   final ChatService chatService = ChatService();
   final TextEditingController _messageController = TextEditingController();
@@ -86,6 +91,10 @@ class _ChatbotPageState extends State<Chat> {
     }
   }
 
+  void initSesionChat() async {
+    sesionChat = SesionChatRequest(await getUserId(), null, null);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -104,6 +113,11 @@ class _ChatbotPageState extends State<Chat> {
           _loadingTimer?.cancel(); // Detener animación
           _messages.removeWhere((msg) => msg["loading"] == true);
           if (data.containsKey('text')) {
+            if (data["text"].toString().startsWith(
+                "📋 **¡Comenzemos con el proceso de Automuestreo!**")) {
+              colectInformation = true;
+              saludSexual = SaludSexualRequest();
+            }
             _messages.add({"text": "${data['text']}", "isBot": true});
           }
 
@@ -159,6 +173,28 @@ class _ChatbotPageState extends State<Chat> {
     String message =
         dataPayload?['title'] ?? _messageController.value.text.trim();
     if (message.isNotEmpty) {
+      if (colectInformation) {
+        if (_messages.last["text"].toString().startsWith(
+            "Todo listo! Hemos determinado que **sí eres apta para realizarte el Automuestreo**.")) {
+          saludSexual!.fechaUltimaMenstruacion =
+              dataPayload?['payload'] ?? message;
+        } else if (_messages.last["text"] ==
+            "¿Hace cuánto fué tu útltimo examen de Papanicolaou (Pap)?") {
+          saludSexual!.ultimoExamenPap = dataPayload?['payload'];
+        } else if (_messages.last["text"] ==
+            "¿Cuándo fué tu última prueba de Virus del Papiloma Humano (VPH)?") {
+          saludSexual!.tiempoPruebaVph = dataPayload?['payload'];
+        } else if (_messages.last["text"].toString().startsWith(
+            "Por favor, indica el número de parejas sexuales que has tenido")) {
+          saludSexual!.numParejasSexuales = int.parse(message);
+        } else if (_messages.last["text"].toString().startsWith(
+            "¿Ha sido diagnosticado o sospecha de tener alguna Infección de Transmisión Sexual")) {
+          saludSexual!.tieneEts = message;
+        } else if (_messages.last["text"].toString().startsWith(
+            "Por favor, indica el nombre de la Infección de Transmisión Sexual (ITS) que tienes")) {
+          saludSexual!.nombreEts = message;
+        }
+      }
       setState(() {
         if (inputNumber) {
           inputNumber = false;
@@ -206,6 +242,7 @@ class _ChatbotPageState extends State<Chat> {
 
   @override
   Widget build(BuildContext context) {
+    initSesionChat();
     if (widget.autoStart) {
       _sendMessage({"title": "Iniciar proceso", "payload:": "Iniciar proceso"});
       widget.autoStart = false;
@@ -228,8 +265,7 @@ class _ChatbotPageState extends State<Chat> {
         final bool shouldPop = await modalYesNoDialog(
               context: context,
               title: "¿Salir del chat?",
-              message:
-                  "Se perderá todo el contenido del chat.",
+              message: "Se perderá todo el contenido del chat.",
               onYes: () async {
                 chatService.reset(await getUserId());
               },
@@ -303,9 +339,14 @@ class _ChatbotPageState extends State<Chat> {
               color: completeForm ? AllowedColors.blue : AllowedColors.gray),
           onPressed: completeForm
               ? () {
+                  sesionChat!.fin =
+                      DateTime.now().toIso8601String().split('.').first;
+                  sesionChat!.contenido = jsonEncode(_messages);
                   Navigator.push(
-                      context, //TODO: Agregar el request con toda la informacion del chat y formulario
-                      MaterialPageRoute(builder: (context) => Scanner()));
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              Scanner(sesion: sesionChat, salud: saludSexual)));
                 }
               : null,
         ),
@@ -377,9 +418,14 @@ class _ChatbotPageState extends State<Chat> {
                   } else if (answer["title"] == "Ver video") {
                     showVideoDialog(context);
                   } else if (answer["title"] == "¡Escanear dispositivo!") {
+                    sesionChat!.fin =
+                        DateTime.now().toIso8601String().split('.').first;
+                    sesionChat!.contenido = jsonEncode(_messages);
                     Navigator.push(
-                        context, //TODO: Agregar el request con toda la infor del formulario y chat
-                        MaterialPageRoute(builder: (context) => Scanner()));
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => Scanner(
+                                sesion: sesionChat, salud: saludSexual)));
                   } else if (answer["title"] == "Ver imagen") {
                     showPdfDialog(context, answer["payload"]);
                     //_quickReplies = null;
