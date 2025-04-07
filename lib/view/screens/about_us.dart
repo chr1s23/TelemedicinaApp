@@ -56,12 +56,24 @@ class AboutUs extends StatelessWidget {
                                 fontSize: 12, color: AllowedColors.black),
                           ),
                           const SizedBox(height: 20),
-                          Image.asset(
-                            'assets/images/clias.jpg',
-                            height: 150,
-                            fit: BoxFit.contain,
+                          Text(
+                            "Con el apoyo del CLIAS:",
+                            style: TextStyle(
+                                fontSize: 12, color: AllowedColors.black),
                           ),
-                          const SizedBox(height: 10),
+                          Center(
+                            child: Image.asset(
+                              'assets/images/clias.jpg',
+                              height: 150,
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                          const SizedBox(height: 15),
+                          Text(
+                            "Con el financiamiento del IDRC:",
+                            style: TextStyle(
+                                fontSize: 12, color: AllowedColors.black),
+                          ),
                           Image.asset(
                             'assets/images/idrc.png',
                             height: 150,

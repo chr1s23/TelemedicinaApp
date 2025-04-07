@@ -1,24 +1,13 @@
 class SaludSexualRequest {
-  bool estaEmbarazada;
-  String fechaUltimaMenstruacion;
-  String ultimoExamenPap;
-  String tiempoPruebaVph;
-  int numParejasSexuales;
-  String tieneEts;
+  bool estaEmbarazada = false;
+  String? fechaUltimaMenstruacion;
+  String? ultimoExamenPap;
+  String? tiempoPruebaVph;
+  int? numParejasSexuales;
+  String? tieneEts;
   String? nombreEts;
-  String enfermedadAutoinmune;
-  String? nombreAutoinmune;
 
-  SaludSexualRequest(
-      this.estaEmbarazada,
-      this.fechaUltimaMenstruacion,
-      this.ultimoExamenPap,
-      this.tiempoPruebaVph,
-      this.numParejasSexuales,
-      this.tieneEts,
-      this.nombreEts,
-      this.enfermedadAutoinmune,
-      this.nombreAutoinmune);
+  SaludSexualRequest();
 
   Map<String, String> rangoTiempo = {
     "Menos de 1 año": "MENOS_1_ANIO",
@@ -27,11 +16,7 @@ class SaludSexualRequest {
     "Nunca": "NUNCA"
   };
 
-  Map<String, String> opciones = {
-    "No": "NO",
-    "Nose": "NOSE",
-    "Si": "SI"
-  };
+  Map<String, String> opciones = {"No": "NO", "Nose": "NOSE", "Si": "SI"};
 
   Map<String, dynamic> toJson() {
     return {
@@ -41,9 +26,7 @@ class SaludSexualRequest {
       "tiempoPruebaVph": rangoTiempo[tiempoPruebaVph],
       "numParejasSexuales": numParejasSexuales,
       "tieneEts": opciones[tieneEts],
-      "nombreEts": nombreEts,
-      "enfermedadAutoinmune": opciones[enfermedadAutoinmune],
-      "nombreAutoinmune": nombreAutoinmune
+      "nombreEts": nombreEts
     };
   }
 }

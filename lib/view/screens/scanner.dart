@@ -1,6 +1,11 @@
 import 'package:chatbot/model/requests/dispositivo_request.dart';
+import 'package:chatbot/model/requests/examen_vph_request.dart';
+import 'package:chatbot/model/requests/salud_sexual_request.dart';
+import 'package:chatbot/model/requests/sesion_chat_request.dart';
 import 'package:chatbot/model/storage/storage.dart';
+import 'package:chatbot/service/chat_service.dart';
 import 'package:chatbot/service/paciente_service.dart';
+import 'package:chatbot/service/sesion_chat_service.dart';
 import 'package:chatbot/view/screens/dashboard.dart';
 import 'package:chatbot/view/widgets/custom_button.dart';
 import 'package:chatbot/view/widgets/custom_loading_button.dart';
@@ -9,9 +14,11 @@ import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 class Scanner extends StatefulWidget {
-  const Scanner({super.key, this.deviceRegister = false});
+  const Scanner({super.key, this.deviceRegister = false, this.sesion, this.salud});
 
   final bool deviceRegister;
+  final SesionChatRequest? sesion;
+  final SaludSexualRequest? salud;
 
   @override
   State<Scanner> createState() => _QRScannerPageState();
@@ -19,12 +26,17 @@ class Scanner extends StatefulWidget {
 
 class _QRScannerPageState extends State<Scanner> {
   bool _isLoading = false;
+  ExamenVphRequest? examen;
   final MobileScannerController _scannerController = MobileScannerController();
 
   void _onQRScanned(BarcodeCapture capture) {
     if (capture.barcodes.isNotEmpty) {
       String qrData = capture.barcodes.first.rawValue ?? "Código QR no válido";
       _scannerController.stop();
+      if (!widget.deviceRegister) {
+        examen = ExamenVphRequest(qrData, widget.salud!);
+        widget.sesion!.examenVph = examen;
+      }
       _showQRResultDialog(qrData);
     }
   }
@@ -44,12 +56,8 @@ class _QRScannerPageState extends State<Scanner> {
         secureStorage.write(key: "user_device", value: device);
       }
     } else {
-      //TODO: Logica para recolectar las preguntas del formulario y guardarlas en el servidor
-      //inicio y fin deben ser de la forma 2025-03-10T10:30:00
-      //cuentaPublicId es el id del usuario
-      //contenido es un string con todo el contenido del chat
-      //se requiere la informacion sexual del formulario SaludSexualRequest obligatoriamente
-      //await SesionChatService.registrarInfoExamen(context, SesionChatRequest(cuentaPublicId, inicio, fin, contenido, SaludSexualRequest));
+      await SesionChatService.registrarInfoExamen(context, widget.sesion!);
+      ChatService().reset(widget.sesion!.cuentaPublicId);
     }
 
     if (mounted) {
@@ -152,29 +160,16 @@ class _QRScannerPageState extends State<Scanner> {
 
   AppBar _buildAppBar() {
     return AppBar(
-      elevation: 0,
-      title: Text(
-        "SISA",
-        style: TextStyle(
-          fontSize: 22,
-          fontWeight: FontWeight.bold,
-          color: AllowedColors.red,
-        ),
-      ),
-      centerTitle: true,
-      actions: [
-        IconButton(
-          icon: CircleAvatar(
-            backgroundImage:
-                AssetImage('assets/images/avatar.png'), // Imagen del avatar
-            radius: 15,
+        elevation: 0,
+        title: Text(
+          "SISA",
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: AllowedColors.red,
           ),
-          onPressed: () {
-            _showQRResultDialog("pruebas de codigo qr");
-          },
         ),
-      ],
-    );
+        centerTitle: true);
   }
 
   Widget _buildSubtitle() {
