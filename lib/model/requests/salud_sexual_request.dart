@@ -22,8 +22,8 @@ class SaludSexualRequest {
     return {
       "estaEmbarazada": estaEmbarazada,
       "fechaUltimaMenstruacion": fechaUltimaMenstruacion,
-      "ultimoExamenPap": rangoTiempo[ultimoExamenPap],
-      "tiempoPruebaVph": rangoTiempo[tiempoPruebaVph],
+      "ultimoExamenPap": ultimoExamenPap,
+      "tiempoPruebaVph": tiempoPruebaVph,
       "numParejasSexuales": numParejasSexuales,
       "tieneEts": opciones[tieneEts],
       "nombreEts": nombreEts

@@ -14,7 +14,8 @@ import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 class Scanner extends StatefulWidget {
-  const Scanner({super.key, this.deviceRegister = false, this.sesion, this.salud});
+  const Scanner(
+      {super.key, this.deviceRegister = false, this.sesion, this.salud});
 
   final bool deviceRegister;
   final SesionChatRequest? sesion;
@@ -36,7 +37,7 @@ class _QRScannerPageState extends State<Scanner> {
       if (!widget.deviceRegister) {
         examen = ExamenVphRequest(qrData, widget.salud!);
         widget.sesion!.examenVph = examen;
-      }
+      } //TODO: Cambiar el dialogo por una ventana aparte, tal como esta en el prototipo
       _showQRResultDialog(qrData);
     }
   }
@@ -59,16 +60,14 @@ class _QRScannerPageState extends State<Scanner> {
       await SesionChatService.registrarInfoExamen(context, widget.sesion!);
       ChatService().reset(widget.sesion!.cuentaPublicId);
     }
-
+    setState(() {
+      _isLoading = false;
+    });
     if (mounted) {
       Navigator.pop(context);
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (context) => Dashboard()));
     }
-
-    setState(() {
-      _isLoading = false;
-    });
   }
 
   void _showQRResultDialog(String qrData) {
