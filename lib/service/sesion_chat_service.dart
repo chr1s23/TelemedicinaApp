@@ -29,7 +29,6 @@ sealed class SesionChatService {
   static Future<bool?> registrarInfoExamen(
       BuildContext context, SesionChatRequest sesion) async {
     try {
-      _log.fine(sesion.toJson());
       final response =
           await getDio().post("/sesion-chat/usuario", data: sesion.toJson());
 
@@ -37,8 +36,8 @@ sealed class SesionChatService {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-                content: Text(
-                    'Proceso de Automuestreo terminado correctamente!.')),
+                content:
+                    Text('Proceso de Automuestreo terminado correctamente!.')),
           );
         }
         return true;
