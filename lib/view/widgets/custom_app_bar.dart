@@ -6,9 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
 class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
-  const CustomAppBar({super.key, this.helpButton = false});
+  const CustomAppBar({super.key, this.helpButton = false, this.profileButton = true});
 
   final bool helpButton;
+  final bool profileButton;
 
   @override
   State<StatefulWidget> createState() {
@@ -82,7 +83,7 @@ class CustomAppBarState extends State<CustomAppBar> {
             color: AllowedColors.red),
       ),
       centerTitle: true,
-      actions: [
+      actions: widget.profileButton ? [
         IconButton(
           icon: CircleAvatar(
             backgroundImage:
@@ -95,7 +96,7 @@ class CustomAppBarState extends State<CustomAppBar> {
                 .openEndDrawer(); // Abre el Drawer desde la derecha
           },
         ),
-      ],
+      ] : null,
     );
   }
 
