@@ -1,11 +1,13 @@
-import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
 
 class CustomInkWell extends StatelessWidget {
   final String label;
   final VoidCallback? onTap;
+  final Color color;
+  final bool underline;
 
-  const CustomInkWell({super.key, required this.label, this.onTap});
+  const CustomInkWell(
+      {super.key, required this.label, this.onTap, required this.color, this.underline = false});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +21,8 @@ class CustomInkWell extends StatelessWidget {
             label,
             style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: AllowedColors.red),
+                color: color,
+                decoration: underline ? TextDecoration.underline : null),
           ),
         ),
       ),

@@ -38,7 +38,7 @@ class Register extends StatelessWidget {
               Text(
                 "Crea una cuenta",
                 style: TextStyle(
-                    fontSize: 15,
+                    fontSize: 17,
                     fontWeight: FontWeight.bold,
                     color: AllowedColors.black),
               ),
@@ -153,11 +153,13 @@ class Register extends StatelessWidget {
                       }),
                   const SizedBox(height: 15),
                   CustomInkWell(
-                      label: "Iniciar Sesión",
-                      onTap: () {
-                        Navigator.pushReplacement(context,
-                            MaterialPageRoute(builder: (context) => Login()));
-                      })
+                    label: "Iniciar Sesión",
+                    onTap: () {
+                      Navigator.pushReplacement(context,
+                          MaterialPageRoute(builder: (context) => Login()));
+                    },
+                    color: AllowedColors.red,
+                  )
                 ],
               )
             ],

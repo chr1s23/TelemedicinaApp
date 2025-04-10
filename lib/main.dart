@@ -2,6 +2,7 @@ import 'package:chatbot/model/requests/user.dart';
 import 'package:chatbot/model/storage/storage.dart';
 import 'package:chatbot/providers/auth_provider.dart';
 import 'package:chatbot/providers/chat_provider.dart';
+import 'package:chatbot/service/auth_service.dart';
 import 'package:chatbot/view/screens/dashboard.dart';
 import 'package:chatbot/view/screens/presentation.dart';
 import 'package:chatbot/view/widgets/utils.dart';
@@ -62,19 +63,27 @@ class SplashScreenState extends State<SplashScreen>
   Future<void> _checkAuth() async {
     String? token = await secureStorage.read(key: "user_token");
     User? user = await User.loadUser();
-
+    String? valid;
     // Animar fade-out antes de navegar
     setState(() {
       _opacity = 0.0;
     });
+
+    if (!mounted) return;
+
+    if (token != null && token.isNotEmpty) {
+      valid = await AuthService.refreshToken(context, token);
+    }
 
     // Esperar a que se complete la animación
     await Future.delayed(const Duration(milliseconds: 1000));
 
     if (!mounted) return;
 
-    if (token != null && token.isNotEmpty && user != null) {
+    if (valid != null && user != null) {
       User.setCurrentUser(user, save: false);
+
+      secureStorage.write(key: "user_token", value: valid);
 
       _log.fine("User info found in secure storage. Skipping login.");
 

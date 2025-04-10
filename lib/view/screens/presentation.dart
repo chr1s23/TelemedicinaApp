@@ -61,7 +61,7 @@ class Presentation extends StatelessWidget {
                     onTap: () {
                       Navigator.push(context,
                           MaterialPageRoute(builder: (context) => Register()));
-                    }),
+                    }, color: AllowedColors.red,),
               ],
             ),
             const SizedBox(height: 30),

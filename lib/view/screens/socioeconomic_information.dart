@@ -178,7 +178,7 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
                   context,
                   MaterialPageRoute(
                       builder: (context) => TermsAndConditions()));
-            })
+            }, color: AllowedColors.red,)
       ],
     );
   }

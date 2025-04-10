@@ -51,7 +51,7 @@ class _QRScannerPageState extends State<Scanner> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBar(),
+      appBar: const CustomAppBar(profileButton: false),
       body: Column(
         children: [
           _buildSubtitle(),
