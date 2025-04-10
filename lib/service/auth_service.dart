@@ -131,6 +131,11 @@ sealed class AuthService {
       }
     } catch (e) {
       _log.severe("Validate token failed: $e");
+      if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Tu sesión ha caducado.')),
+          );
+        }
     }
     return null;
   }

@@ -76,7 +76,7 @@ class SplashScreenState extends State<SplashScreen>
     }
 
     // Esperar a que se complete la animación
-    await Future.delayed(const Duration(milliseconds: 1000));
+    await Future.delayed(const Duration(milliseconds: 600));
 
     if (!mounted) return;
 
