@@ -46,6 +46,7 @@ class ChatService {
   }
 
   void sendMessage(String message, String senderId) {
+    _log.fine(senderId);
     if (message.isEmpty) return;
 
     socket.emit('user_uttered', {

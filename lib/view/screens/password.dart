@@ -1,37 +1,32 @@
-import 'package:chatbot/model/responses/user_response.dart';
+import 'package:chatbot/model/requests/user.dart';
 import 'package:chatbot/service/auth_service.dart';
-import 'package:chatbot/view/screens/password.dart';
-import 'package:chatbot/view/widgets/custom_ink_well.dart';
+import 'package:chatbot/view/screens/login.dart';
 import 'package:chatbot/view/widgets/custom_input_field.dart';
 import 'package:chatbot/view/widgets/custom_loading_button.dart';
 import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
 
-import 'dashboard.dart';
-import 'register.dart';
-import '../../model/requests/user.dart';
-
-class Login extends StatefulWidget {
-  const Login({super.key});
+class Password extends StatefulWidget {
+  const Password({super.key});
 
   @override
-  State<Login> createState() => _LoginState();
+  State<Password> createState() => _PasswordState();
 }
 
-class _LoginState extends State<Login> {
-  final TextEditingController usernameController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-  bool _isLoading = false;
+class _PasswordState extends State<Password> {
+  final _usernameController = TextEditingController();
+  final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  bool _isLoading = false;
 
   @override
   void dispose() {
-    usernameController.dispose();
-    passwordController.dispose();
+    _usernameController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
-  void login() async {
+  void confirmChange() async {
     FocusScope.of(context).unfocus();
     if (_isLoading) return; // Evita múltiples clics
 
@@ -39,16 +34,13 @@ class _LoginState extends State<Login> {
       _isLoading = true;
     });
 
-    User user = User(
-        "", usernameController.value.text, passwordController.value.text, null);
-    UserResponse? userLogged = await AuthService.login(context, user);
+    User user = User("", _usernameController.value.text,
+        _passwordController.value.text, null);
+    await AuthService.changePassword(context, user);
 
-    if (userLogged != null) {
-      Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => Dashboard()),
-          (route) => false);
-    }
+    if (!mounted) return;
+
+    Navigator.pop(context, MaterialPageRoute(builder: (context) => Login()));
 
     setState(() {
       _isLoading = false;
@@ -60,11 +52,24 @@ class _LoginState extends State<Login> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        centerTitle: true, // Asegura que la imagen esté centrada
+        centerTitle: true,
         title: Image.asset(
-          'assets/images/logo_ucuenca_top.png', // Ruta de la imagen en la carpeta assets
-          height: 50, // Ajusta la altura según necesites
+          'assets/images/logo_ucuenca_top.png',
+          height: 50,
         ),
+        actions: [
+          TextButton(
+              onPressed: () {
+                modalYesNoDialog(
+                  context: context,
+                  title: "¿Cancelar?",
+                  message: "¿Desea cancelar el cambio de contraseña?",
+                  onYes: () => Navigator.of(context)..pop(),
+                );
+              },
+              child: Text("Cancelar",
+                  style: TextStyle(color: AllowedColors.red, fontSize: 12))),
+        ],
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -74,14 +79,14 @@ class _LoginState extends State<Login> {
               child: Column(
                 children: [
                   Text(
-                    "Hola, ¡Bienvenido de nuevo!",
+                    "Cambio de contraseña",
                     style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.bold,
                         color: AllowedColors.black),
                   ),
                   Text(
-                    "Ingresa a tu cuenta para continuar",
+                    "Ingresa a tu nombre de usuario para el cambio de contraseña.",
                     style: TextStyle(fontSize: 13, color: AllowedColors.black),
                   ),
                   SizedBox(
@@ -94,7 +99,7 @@ class _LoginState extends State<Login> {
                             TextStyle(fontSize: 12, color: AllowedColors.gray)),
                   ),
                   CustomInputField(
-                      controller: usernameController,
+                      controller: _usernameController,
                       hint: 'Ingresa tu número de teléfono',
                       obscureText: false,
                       errorMessage: "El número de teléfono está vacío",
@@ -105,13 +110,13 @@ class _LoginState extends State<Login> {
                   Align(
                     alignment: Alignment.topLeft,
                     child: Text(
-                      "Contraseña*",
+                      "Contraseña nueva*",
                       style: TextStyle(fontSize: 12, color: AllowedColors.gray),
                     ),
                   ),
                   CustomInputField(
-                      controller: passwordController,
-                      hint: 'Ingresa tu contraseña',
+                      controller: _passwordController,
+                      hint: 'Ingresa tu contraseña nueva (min. 6 caracteres)',
                       obscureText: true,
                       errorMessage: "Contraseña vacía",
                       isNumber: false),
@@ -122,38 +127,24 @@ class _LoginState extends State<Login> {
                     children: [
                       CustomLoadingButton(
                           color: AllowedColors.blue,
-                          label: "Iniciar Sesión",
+                          label: "Cambiar contraseña",
                           loading: _isLoading,
                           onPressed: _isLoading
                               ? null
                               : () {
                                   if (_formKey.currentState?.validate() ??
                                       false) {
-                                    login();
+                                    if (_passwordController.text.length < 6) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(SnackBar(
+                                              content: Text(
+                                                  "La contraseña debe tener al menos 6 caracteres.")));
+                                      return;
+                                    }
+                                    confirmChange();
                                   }
                                 }),
-                      const SizedBox(height: 30),
-                      CustomInkWell(
-                          label: "Crear una cuenta",
-                          onTap: () {
-                            Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => Register()));
-                          },
-                          color: AllowedColors.red),
-                      const SizedBox(height: 60),
-                      CustomInkWell(
-                        label: "Olvidé mi contraseña",
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => Password()));
-                        },
-                        color: AllowedColors.gray,
-                        underline: true,
-                      )
+                      const SizedBox(height: 15)
                     ],
                   )
                 ],

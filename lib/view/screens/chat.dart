@@ -24,13 +24,11 @@ Logger _log = Logger('Chat');
 String? userId;
 
 Future<String> getUserId() async {
-  if (userId == null) {
-    userId = await secureStorage.read(key: "user_id");
-    if (userId != null) {
-      _log.fine("Clean user ID: $userId");
-    } else {
-      _log.severe("User ID not found in secure storage.");
-    }
+  userId = await secureStorage.read(key: "user_id");
+  if (userId != null) {
+    _log.fine("Clean user ID: $userId");
+  } else {
+    _log.severe("User ID not found in secure storage.");
   }
 
   return userId!;
