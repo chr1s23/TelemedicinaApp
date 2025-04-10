@@ -170,7 +170,7 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
                       builder: (context) => TermsAndConditions()));
             },
             label: "Continuar"),
-        const SizedBox(height: 15),
+        const SizedBox(height: 20),
         CustomInkWell(
             label: "En otro momento",
             onTap: () {
