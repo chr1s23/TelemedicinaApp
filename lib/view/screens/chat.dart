@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'package:chatbot/model/requests/message_request.dart';
 import 'package:chatbot/model/requests/salud_sexual_request.dart';
 import 'package:chatbot/model/requests/sesion_chat_request.dart';
-import 'package:chatbot/service/archivo_service.dart';
 import 'package:chatbot/view/screens/scanner.dart';
 import 'package:chatbot/service/chat_service.dart';
 import 'package:chatbot/view/widgets/custom_button.dart';
@@ -16,7 +15,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:chatbot/model/storage/storage.dart';
 import 'package:logging/logging.dart';
-import 'package:pdfx/pdfx.dart';
 import 'package:video_player/video_player.dart';
 
 Logger _log = Logger('Chat');
