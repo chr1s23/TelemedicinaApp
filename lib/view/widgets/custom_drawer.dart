@@ -1,4 +1,6 @@
+import 'package:chatbot/model/requests/paciente_request.dart';
 import 'package:chatbot/model/requests/user.dart';
+import 'package:chatbot/service/auth_service.dart';
 import 'package:chatbot/view/screens/about_us.dart';
 import 'package:chatbot/view/screens/personal_data_form.dart';
 import 'package:chatbot/view/screens/presentation.dart';
@@ -33,15 +35,15 @@ class CustomDrawer extends StatelessWidget {
           const SizedBox(height: 30),
 
           // Botones de Opciones
-          _buildDrawerButton(Icons.person, "Perfil (¡Próximamente!)", null
-          // Disabled for now. TODO: Re-enable after it's implemented
-          // () {
-          //   Navigator.pop(context); // Cierra el Drawer
-          //   // Navegar a la pantalla de perfil
-          //   Navigator.push(
-          //       context, //TODO: Agregar la logica para editar la informacion del usuario
-          //       MaterialPageRoute(builder: (context) => PersonalDataForm()));
-          // }
+          _buildDrawerButton(Icons.person, "Perfil",
+            () async {
+              PacienteRequest? pacienteRequest = await AuthService.getPaciente(context);
+
+              if (pacienteRequest == null || !context.mounted) return;
+
+              Navigator.pop(context); // Cierra el Drawer
+              Navigator.push(context, MaterialPageRoute(builder: (context) => PersonalDataForm(pacienteRequest: pacienteRequest)));
+            }
           ),
           _buildDrawerButton(Icons.info, "Acerca de", () {
             Navigator.pop(context); // Cierra el Drawer

@@ -36,19 +36,19 @@ Future<bool?> modalYesNoDialog({required BuildContext context, required String t
             style: TextButton.styleFrom(textStyle: Theme.of(context).textTheme.labelLarge),
             child: const Text('Sí'),
             onPressed: () {
-              onYes();
               Navigator.of(context).pop(true);
+              onYes();
             },
           ),
           TextButton(
             style: TextButton.styleFrom(textStyle: Theme.of(context).textTheme.labelLarge),
             child: const Text('No'),
             onPressed: () {
+              Navigator.of(context).pop(false);
+              
               if (onNo != null) {
                 onNo();
               }
-
-              Navigator.of(context).pop(false);
             },
           ),
         ],
@@ -158,5 +158,11 @@ Widget buildVideoPlayer(VideoPlayerController? playerController, ChewieControlle
       aspectRatio: playerController.value.aspectRatio,
       child: Chewie(controller: chewieController),
     );
+  }
+}
+
+void showSnackBar(BuildContext context, String message) {
+  if (context.mounted) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 }

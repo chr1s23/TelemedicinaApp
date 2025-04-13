@@ -61,64 +61,68 @@ class ScannerResultPageState extends State<ScannerResultPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const CustomAppBar(profileButton: false),
-      body: Center(
-        child: Container(
-          width: MediaQuery.of(context).size.width * 0.9,
-          padding: EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                "Dispositivo de Autmouestreo escaneado correctamente!",
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 20),
-              Container(
-                padding: EdgeInsets.all(15),
-                decoration: BoxDecoration(
-                  color: AllowedColors.gray.withAlpha(50), // Fondo más opaco
-                  borderRadius: BorderRadius.circular(8),
-                  border:
-                      Border.all(color: Colors.black, width: 1), // Borde negro
-                ),
-                child: Text(
-                  widget.qrData,
+    return PopScope(
+      onPopInvokedWithResult: (didPop, result) {
+        widget.restartScanner();
+      },
+      child: Scaffold(
+        appBar: const CustomAppBar(profileButton: false),
+        body: Center(
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.9,
+            padding: EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  "Dispositivo de Autmouestreo escaneado correctamente!",
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 14),
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
-              ),
-              SizedBox(height: 25),
-              Text(
-                widget.deviceRegister
-                    ? "Presiona el botón 'Aceptar' para registrar el dispositivo de Automuestreo!."
-                    : "✅ Todo listo!\nPresiona el botón 'Aceptar' para terminar el proceso.\nRecuerda entregar el dispositivo de Automuestreo en el GAD más cercano.",
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-              ),
-              SizedBox(height: 25),
-              CustomButton(
-                  color: AllowedColors.red,
-                  onPressed: () {
-                    widget.restartScanner();
-                    Navigator.pop(context);
-                  },
-                  label: "Escanear de nuevo"),
-              SizedBox(height: 15),
-              CustomLoadingButton(
-                  color: AllowedColors.blue,
-                  label: "Aceptar",
-                  loading: _isLoading,
-                  onPressed: _isLoading
+                SizedBox(height: 20),
+                Container(
+                  padding: EdgeInsets.all(15),
+                  decoration: BoxDecoration(
+                    color: AllowedColors.gray.withAlpha(50), // Fondo más opaco
+                    borderRadius: BorderRadius.circular(8),
+                    border:
+                        Border.all(color: Colors.black, width: 1), // Borde negro
+                  ),
+                  child: Text(
+                    widget.qrData,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 14),
+                  ),
+                ),
+                SizedBox(height: 25),
+                Text(
+                  widget.deviceRegister
+                      ? "Presiona el botón 'Aceptar' para registrar el dispositivo de Automuestreo!."
+                      : "✅ Todo listo!\nPresiona el botón 'Aceptar' para terminar el proceso.\nRecuerda entregar el dispositivo de Automuestreo en el GAD más cercano.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                ),
+                SizedBox(height: 25),
+                CustomButton(
+                    color: AllowedColors.red,
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    label: "Escanear de nuevo"),
+                SizedBox(height: 15),
+                CustomLoadingButton(
+                    color: AllowedColors.blue,
+                    label: "Aceptar",
+                    loading: _isLoading,
+                    onPressed: _isLoading
                       ? null
                       : () {
                           if (widget.qrData != "Código QR no válido") {
                             _registerDevice(widget.qrData);
                           }
                         })
-            ],
+              ],
+            ),
           ),
         ),
       ),

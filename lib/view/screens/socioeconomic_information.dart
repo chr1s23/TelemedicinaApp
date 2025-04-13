@@ -1,5 +1,6 @@
 import 'package:chatbot/model/requests/inf_socioeconomica_request.dart';
 import 'package:chatbot/model/requests/user_request.dart';
+import 'package:chatbot/service/auth_service.dart';
 import 'package:chatbot/view/screens/terms_and_conditions.dart';
 import 'package:chatbot/view/widgets/custom_button.dart';
 import 'package:chatbot/view/widgets/custom_ink_well.dart';
@@ -7,7 +8,9 @@ import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
 
 class SocioeconomicInformation extends StatefulWidget {
-  const SocioeconomicInformation({super.key});
+  const SocioeconomicInformation({super.key, this.infoSocioeconomicaRequest});
+
+  final InfSocioeconomicaRequest? infoSocioeconomicaRequest;
 
   @override
   State<SocioeconomicInformation> createState() =>
@@ -22,6 +25,18 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
   String? _selectedWorkStatus;
   String? _selectedBonus;
   final TextEditingController _occupationController = TextEditingController();
+
+  @override
+  void initState() {
+    if (widget.infoSocioeconomicaRequest != null) {
+      _selectedEducationLevel = widget.infoSocioeconomicaRequest!.instruccion;
+      _selectedIncome = widget.infoSocioeconomicaRequest!.ingresos;
+      _selectedWorkStatus = widget.infoSocioeconomicaRequest!.trabajoRemunerado;
+      _selectedBonus = widget.infoSocioeconomicaRequest!.recibeBono;
+      _occupationController.text = widget.infoSocioeconomicaRequest!.ocupacion ?? "";
+    }
+    super.initState();
+  }
 
   final List<String> _educationLevels = [
     "NINGUNO",
@@ -65,8 +80,7 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
                     ..pop(),
                 );
               },
-              child: Text("Cancelar",
-                  style: TextStyle(color: AllowedColors.red, fontSize: 12))),
+              child: Text("Cancelar", style: TextStyle(color: AllowedColors.red, fontSize: 12))),
         ],
       ),
       body: SingleChildScrollView(
@@ -88,11 +102,11 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
               // Nivel de instrucción
               buildLabel("Nivel de instrucción"),
               buildDropdown(_educationLevels, _selectedEducationLevel,
-                  (newValue) {
-                setState(() {
-                  _selectedEducationLevel = newValue;
-                });
-              }, 'Elija una opción'),
+                (newValue) {
+                  setState(() {
+                    _selectedEducationLevel = newValue;
+                  });
+                }, 'Elija una opción'),
 
               const SizedBox(height: 20),
 
@@ -135,7 +149,7 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
                 });
               }, 'Elija una opción'),
               const SizedBox(height: 30),
-              Center(child: _buildButtons())
+              Center(child: _buildButtons(context))
             ],
           ),
         ),
@@ -143,7 +157,7 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
     );
   }
 
-  Widget _buildButtons() {
+  Widget _buildButtons(BuildContext context) {
     return Column(
       children: [
         CustomButton(
@@ -152,8 +166,7 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
               UserRequest? user = UserRequest.getUserRequest();
 
               if (user != null) {
-                InfSocioeconomicaRequest socioeconomica =
-                    InfSocioeconomicaRequest(
+                InfSocioeconomicaRequest socioeconomica = InfSocioeconomicaRequest(
                   _selectedEducationLevel,
                   _selectedIncome,
                   _selectedWorkStatus,
@@ -162,23 +175,36 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
                 );
 
                 user.paciente.infoSocioeconomica = socioeconomica;
-              }
 
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => TermsAndConditions()));
+                if (widget.infoSocioeconomicaRequest != null) {
+                  final doneLoading = modalLoadingDialog(context: context);
+
+                  AuthService.update(context, user.paciente).then((value) {
+                    doneLoading();
+
+                    if (context.mounted) {
+                      Navigator.of(context).popUntil((route) => route.isFirst);
+                    }
+                  });
+                } else {
+                  Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => TermsAndConditions())
+                  );
+                }
+              }
             },
             label: "Continuar"),
         const SizedBox(height: 20),
-        CustomInkWell(
+        if(widget.infoSocioeconomicaRequest == null) 
+          CustomInkWell(
             label: "En otro momento",
             onTap: () {
               Navigator.push(
                   context,
                   MaterialPageRoute(
                       builder: (context) => TermsAndConditions()));
-            }, color: AllowedColors.red,)
+            }, color: AllowedColors.red,
+          )
       ],
     );
   }

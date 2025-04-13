@@ -32,4 +32,16 @@ class InfSocioeconomicaRequest {
       "recibeBono": recibeBono
     };
   }
+
+  static InfSocioeconomicaRequest? fromJson(Map<String, dynamic>? json) {
+    if (json == null) return null;
+
+    return InfSocioeconomicaRequest(
+      json["instruccion"],
+      json["ingresos"],
+      json["trabajoRemunerado"],
+      json["ocupacion"],
+      json["recibeBono"]
+    );
+  }
 }

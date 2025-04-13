@@ -7,7 +7,9 @@ import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
 
 class PersonalDataForm extends StatefulWidget {
-  const PersonalDataForm({super.key});
+  const PersonalDataForm({super.key, this.pacienteRequest});
+
+  final PacienteRequest? pacienteRequest;
 
   @override
   State<PersonalDataForm> createState() => _PersonalDataFormState();
@@ -47,12 +49,23 @@ class _PersonalDataFormState extends State<PersonalDataForm> {
   @override
   void initState() {
     super.initState();
-    setState(() {
-      _selectedCountry = _countries[0];
-      _selectedLanguage = _languages[0];
-      _selectedMaritalStatus = _maritalStatusOptions[0];
-      _selectedGender = _genders[1];
-    });
+
+    if (widget.pacienteRequest != null) {
+      setState(() {
+        _selectedCountry = widget.pacienteRequest!.pais;
+        _selectedLanguage = widget.pacienteRequest!.lenguaMaterna;
+        _selectedMaritalStatus = widget.pacienteRequest!.estadoCivil;
+        _selectedGender = widget.pacienteRequest!.sexo;
+        dateController.text = widget.pacienteRequest!.fechaNacimiento;
+      });
+    } else {
+      setState(() {
+        _selectedCountry = _countries[0];
+        _selectedLanguage = _languages[0];
+        _selectedMaritalStatus = _maritalStatusOptions[0];
+        _selectedGender = _genders[1];
+      });
+    }
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -91,9 +104,7 @@ class _PersonalDataFormState extends State<PersonalDataForm> {
                   title: "¿Cancelar?",
                   message:
                       "¿Desea cancelar la creación de su cuenta? Se perderán todos los datos ingresados.",
-                  onYes: () => Navigator.of(context)
-                    ..pop()
-                    ..pop(),
+                  onYes: () => Navigator.of(context).popUntil((route) => route.isFirst),
                 );
               },
               child: Text("Cancelar",
@@ -189,25 +200,44 @@ class _PersonalDataFormState extends State<PersonalDataForm> {
                   onPressed: () {
                     if (_formKey.currentState?.validate() ?? false) {
                       User user = User.getCurrentUser();
-                      //TODO: Handle edit
-                      UserRequest.setUserRequest(UserRequest(
+                      if (widget.pacienteRequest != null) {
+                        UserRequest.setUserRequest(UserRequest("", "", "", 
+                          true, 
+                          PacienteRequest(
+                            user.nombre, 
+                            dateController.text, 
+                            _selectedCountry!, 
+                            _selectedLanguage!, 
+                            _selectedMaritalStatus!, 
+                            _selectedGender!, 
+                            widget.pacienteRequest!.infoSocioeconomica
+                          )
+                        ));
+                        
+                      } else {
+                        UserRequest.setUserRequest(UserRequest(
                           user.nombreUsuario,
                           user.contrasena,
                           "USER",
                           false,
                           PacienteRequest(
-                              user.nombre,
-                              dateController.text,
-                              _selectedCountry!,
-                              _selectedLanguage!,
-                              _selectedMaritalStatus!,
-                              _selectedGender!,
-                              null)));
+                            user.nombre,
+                            dateController.text,
+                            _selectedCountry!,
+                            _selectedLanguage!,
+                            _selectedMaritalStatus!,
+                            _selectedGender!,
+                            null
+                          )
+                        ));
+                      }
+                      
                       Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  SocioeconomicInformation()));
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SocioeconomicInformation()
+                        )
+                      );
                     }
                   },
                   label: "Continuar")
