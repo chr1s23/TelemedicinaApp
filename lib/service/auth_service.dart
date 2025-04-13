@@ -1,6 +1,11 @@
+// ignore_for_file: use_build_context_synchronously
+// showSnackBar guards calls on context with [mounted]
+
+import 'package:chatbot/model/requests/paciente_request.dart';
 import 'package:chatbot/model/requests/user.dart';
 import 'package:chatbot/model/requests/user_request.dart';
 import 'package:chatbot/model/responses/user_response.dart';
+import 'package:chatbot/view/widgets/utils.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -42,37 +47,22 @@ sealed class AuthService {
 
         return userResponse;
       } else {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Usuario o contraseña incorrectos')),
-          );
-        }
+        showSnackBar(context, "Usuario o contraseña incorrectos");
       }
     } on DioException catch (e) {
       _log.severe('Server connection error: $e');
 
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Usuario o contraseña incorrectos')),
-        );
-      }
+      showSnackBar(context, "Usuario o contraseña incorrectos");
     } catch (e) {
       _log.severe("Login failed: $e");
 
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Inicio de sesión fallido'),
-          ),
-        );
-      }
+      showSnackBar(context, "Inicio de sesión fallido");
     }
 
     return null;
   }
 
-  static Future<UserResponse?> signUp(
-      BuildContext context, UserRequest user) async {
+  static Future<UserResponse?> signUp(BuildContext context, UserRequest user) async {
     try {
       var request = user.toJson();
       _log.fine(request);
@@ -90,23 +80,11 @@ sealed class AuthService {
         _log.severe(
             "Unexpected server response during signup: ${response.data}");
 
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('No se pudo registrar el usuario'),
-            ),
-          );
-        }
+        showSnackBar(context, "No se pudo registrar el usuario");
       }
     } catch (e) {
       _log.severe("Signup failed: $e");
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Registro de usuario fallido'),
-          ),
-        );
-      }
+      showSnackBar(context, "Registro de usuario fallido");
     }
     return null;
   }
@@ -131,11 +109,7 @@ sealed class AuthService {
       }
     } catch (e) {
       _log.severe("Validate token failed: $e");
-      if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Tu sesión ha caducado.')),
-          );
-        }
+      showSnackBar(context, "Tu sesión ha caducado");
     }
     return null;
   }
@@ -150,36 +124,68 @@ sealed class AuthService {
 
       if (response.statusCode == 200) {
         _log.fine("Password changed sucess: User - ${user.nombreUsuario} ");
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Contraseña cambiada correctamente.')),
-          );
-        }
+        showSnackBar(context, "Contraseña cambiada correctamente");
       } else {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Verifique el nombre de usuario.')),
-          );
-        }
+        showSnackBar(context, "Verifique el nombre de usuario");
       }
     } on DioException catch (e) {
       _log.severe('Server connection error: $e');
 
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('No se pudo cambiar la contraseña.')),
-        );
-      }
+      showSnackBar(context, "No se pudo cambiar la contraseña");
     } catch (e) {
       _log.severe("Login failed: $e");
 
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Cambio de contraseña fallido'),
-          ),
-        );
-      }
+      showSnackBar(context, "Cambio de contraseña fallido");
     }
+  }
+
+  static Future<bool> update(BuildContext context, PacienteRequest request) async {
+    final id = await secureStorage.read(key: "user_id");
+    try {
+      final response = await getDio().put("/paciente/editar/$id", data: request.toJson());
+
+      if (response.statusCode == 200) {
+        _log.fine("User data updated");
+        
+        showSnackBar(context, "Datos actualizados correctamente");
+
+        return true;
+      } else {
+        _log.severe("User data update failed: ${response.data}");
+
+        showSnackBar(context, "Actualización fallida");
+
+        return false;
+      }
+    } on DioException catch (e) {
+      _log.severe('Server connection error: $e');
+
+      showSnackBar(context, "Ocurrió un error inesperado");
+
+      return false;
+    }
+  }
+
+  static Future<PacienteRequest?> getPaciente(BuildContext context) async {
+    final id = await secureStorage.read(key: "user_id");
+    try {
+      final response = await getDio().get("/paciente/usuario/$id");
+
+      if (response.statusCode == 200) {
+        final paciente = PacienteRequest.fromJsonMap(response.data);
+
+        return paciente;
+      } else {
+        _log.severe("Paciente data update failed: ${response.data}");
+
+        showSnackBar(context, "Error al obtener la información");
+      }
+    } on DioException catch (e) {
+      _log.severe('Server connection error: $e');
+
+      showSnackBar(context, "Error de conexión con el servidor");
+    }
+
+    return null;
   }
 }

@@ -37,4 +37,16 @@ class PacienteRequest {
       "infoSocioeconomica": infoSocioeconomica?.toJson()
     };
   }
+
+  static PacienteRequest fromJsonMap(Map<String, dynamic> map) {
+    return PacienteRequest(
+      map["nombre"],
+      map["fechaNacimiento"],
+      map["pais"],
+      map["lenguaMaterna"],
+      map["estadoCivil"],
+      map["sexo"],
+      InfSocioeconomicaRequest.fromJson(map["infoSocioeconomica"]),
+    );
+  }
 }
