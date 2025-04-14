@@ -1,6 +1,6 @@
 import 'package:chatbot/model/requests/paciente_request.dart';
 import 'package:chatbot/model/requests/user.dart';
-import 'package:chatbot/service/auth_service.dart';
+import 'package:chatbot/service/paciente_service.dart';
 import 'package:chatbot/view/screens/about_us.dart';
 import 'package:chatbot/view/screens/personal_data_form.dart';
 import 'package:chatbot/view/screens/presentation.dart';
@@ -37,7 +37,7 @@ class CustomDrawer extends StatelessWidget {
           // Botones de Opciones
           _buildDrawerButton(Icons.person, "Perfil",
             () async {
-              PacienteRequest? pacienteRequest = await AuthService.getPaciente(context);
+              PacienteRequest? pacienteRequest = await PacienteService.getPaciente(context);
 
               if (pacienteRequest == null || !context.mounted) return;
 

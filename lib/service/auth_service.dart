@@ -1,7 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 // showSnackBar guards calls on context with [mounted]
 
-import 'package:chatbot/model/requests/paciente_request.dart';
 import 'package:chatbot/model/requests/user.dart';
 import 'package:chatbot/model/requests/user_request.dart';
 import 'package:chatbot/model/responses/user_response.dart';
@@ -137,55 +136,5 @@ sealed class AuthService {
 
       showSnackBar(context, "Cambio de contraseña fallido");
     }
-  }
-
-  static Future<bool> update(BuildContext context, PacienteRequest request) async {
-    final id = await secureStorage.read(key: "user_id");
-    try {
-      final response = await getDio().put("/paciente/editar/$id", data: request.toJson());
-
-      if (response.statusCode == 200) {
-        _log.fine("User data updated");
-        
-        showSnackBar(context, "Datos actualizados correctamente");
-
-        return true;
-      } else {
-        _log.severe("User data update failed: ${response.data}");
-
-        showSnackBar(context, "Actualización fallida");
-
-        return false;
-      }
-    } on DioException catch (e) {
-      _log.severe('Server connection error: $e');
-
-      showSnackBar(context, "Ocurrió un error inesperado");
-
-      return false;
-    }
-  }
-
-  static Future<PacienteRequest?> getPaciente(BuildContext context) async {
-    final id = await secureStorage.read(key: "user_id");
-    try {
-      final response = await getDio().get("/paciente/usuario/$id");
-
-      if (response.statusCode == 200) {
-        final paciente = PacienteRequest.fromJsonMap(response.data);
-
-        return paciente;
-      } else {
-        _log.severe("Paciente data update failed: ${response.data}");
-
-        showSnackBar(context, "Error al obtener la información");
-      }
-    } on DioException catch (e) {
-      _log.severe('Server connection error: $e');
-
-      showSnackBar(context, "Error de conexión con el servidor");
-    }
-
-    return null;
   }
 }
