@@ -1,6 +1,6 @@
 import 'package:chatbot/model/requests/inf_socioeconomica_request.dart';
 import 'package:chatbot/model/requests/user_request.dart';
-import 'package:chatbot/service/auth_service.dart';
+import 'package:chatbot/service/paciente_service.dart';
 import 'package:chatbot/view/screens/terms_and_conditions.dart';
 import 'package:chatbot/view/widgets/custom_button.dart';
 import 'package:chatbot/view/widgets/custom_ink_well.dart';
@@ -179,7 +179,7 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
                 if (widget.infoSocioeconomicaRequest != null) {
                   final doneLoading = modalLoadingDialog(context: context);
 
-                  AuthService.update(context, user.paciente).then((value) {
+                  PacienteService.update(context, user.paciente).then((value) {
                     doneLoading();
 
                     if (context.mounted) {

@@ -35,6 +35,8 @@ class _LoginState extends State<Login> {
     FocusScope.of(context).unfocus();
     if (_isLoading) return; // Evita múltiples clics
 
+    final doneLoading = modalLoadingDialog(context: context);
+
     setState(() {
       _isLoading = true;
     });
@@ -44,6 +46,7 @@ class _LoginState extends State<Login> {
     UserResponse? userLogged = await AuthService.login(context, user);
 
     if (userLogged != null) {
+      doneLoading();
       Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (context) => Dashboard()),
