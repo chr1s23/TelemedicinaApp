@@ -92,7 +92,7 @@ sealed class PacienteService {
       final response = await getDio().get("/paciente/usuario/$id");
 
       if (response.statusCode == 200) {
-        final paciente = PacienteRequest.fromJsonMap(response.data);
+        final paciente = PacienteRequest.fromJson(response.data);
 
         return paciente;
       } else {
