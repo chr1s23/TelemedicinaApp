@@ -42,7 +42,10 @@ class CustomDrawer extends StatelessWidget {
               if (pacienteRequest == null || !context.mounted) return;
 
               Navigator.pop(context); // Cierra el Drawer
-              Navigator.push(context, MaterialPageRoute(builder: (context) => PersonalDataForm(pacienteRequest: pacienteRequest)));
+              Navigator.push(
+                context, 
+                MaterialPageRoute(builder: (context) => PersonalDataForm(pacienteRequest: pacienteRequest, edit: true))
+              );
             }
           ),
           _buildDrawerButton(Icons.info, "Acerca de", () {

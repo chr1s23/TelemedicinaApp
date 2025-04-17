@@ -45,14 +45,16 @@ class _LoginState extends State<Login> {
         "", usernameController.value.text, passwordController.value.text, null);
     UserResponse? userLogged = await AuthService.login(context, user);
 
+    doneLoading();
+
     if (userLogged != null) {
       Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => Dashboard()),
-          (route) => false);
+        context,
+        MaterialPageRoute(builder: (context) => Dashboard()),
+        (route) => false
+      );
     }
 
-    doneLoading();
     setState(() {
       _isLoading = false;
     });
