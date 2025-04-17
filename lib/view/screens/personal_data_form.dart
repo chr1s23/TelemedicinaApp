@@ -7,9 +7,10 @@ import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
 
 class PersonalDataForm extends StatefulWidget {
-  const PersonalDataForm({super.key, this.pacienteRequest});
+  const PersonalDataForm({super.key, this.pacienteRequest, this.edit = false});
 
   final PacienteRequest? pacienteRequest;
+  final bool edit;
 
   @override
   State<PersonalDataForm> createState() => _PersonalDataFormState();
@@ -103,7 +104,9 @@ class _PersonalDataFormState extends State<PersonalDataForm> {
                   context: context,
                   title: "¿Cancelar?",
                   message:
-                      "¿Desea cancelar la creación de su cuenta? Se perderán todos los datos ingresados.",
+                    widget.edit ?
+                    "¿Desea cancelar la edición de su cuenta? Se perderán todos los datos ingresados." :
+                    "¿Desea cancelar la creación de su cuenta? Se perderán todos los datos ingresados.",
                   onYes: () => Navigator.of(context).popUntil((route) => route.isFirst),
                 );
               },
@@ -200,7 +203,7 @@ class _PersonalDataFormState extends State<PersonalDataForm> {
                   onPressed: () {
                     if (_formKey.currentState?.validate() ?? false) {
                       User user = User.getCurrentUser();
-                      if (widget.pacienteRequest != null) {
+                      if (widget.edit) {
                         UserRequest.setUserRequest(UserRequest("", "", "", 
                           true, 
                           PacienteRequest(
@@ -235,7 +238,10 @@ class _PersonalDataFormState extends State<PersonalDataForm> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => SocioeconomicInformation()
+                          builder: (context) => SocioeconomicInformation(
+                            infoSocioeconomicaRequest: widget.pacienteRequest?.infoSocioeconomica,
+                            edit: widget.edit,
+                          )
                         )
                       );
                     }

@@ -83,13 +83,10 @@ class SplashScreenState extends State<SplashScreen>
 
       _log.fine("User info found in secure storage. Skipping login.");
 
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (_) => Dashboard()));
+      Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => Dashboard()), (_) => false);
     } else {
-      _log.fine(
-          "Some or all user information is missing. Redirecting to login.");
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (_) => Presentation()));
+      _log.fine("Some or all user information is missing. Redirecting to login.");
+      Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => Presentation()), (_) => false);
     }
   }
 
