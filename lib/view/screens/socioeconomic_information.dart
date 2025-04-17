@@ -8,9 +8,10 @@ import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
 
 class SocioeconomicInformation extends StatefulWidget {
-  const SocioeconomicInformation({super.key, this.infoSocioeconomicaRequest});
+  const SocioeconomicInformation({super.key, this.infoSocioeconomicaRequest, this.edit = false});
 
   final InfSocioeconomicaRequest? infoSocioeconomicaRequest;
+  final bool edit;
 
   @override
   State<SocioeconomicInformation> createState() =>
@@ -73,7 +74,9 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
                   context: context,
                   title: "¿Cancelar?",
                   message:
-                      "¿Desea cancelar la creación de su cuenta? Se perderán todos los datos ingresados.",
+                    widget.edit ?
+                    "¿Desea cancelar la edición de su cuenta? Se perderán todos los datos ingresados." :
+                    "¿Desea cancelar la creación de su cuenta? Se perderán todos los datos ingresados.",
                   onYes: () => Navigator.of(context)
                     ..pop()
                     ..pop()
@@ -176,7 +179,7 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
 
                 user.paciente.infoSocioeconomica = socioeconomica;
 
-                if (widget.infoSocioeconomicaRequest != null) {
+                if (widget.edit) {
                   final doneLoading = modalLoadingDialog(context: context);
 
                   PacienteService.update(context, user.paciente).then((value) {
@@ -184,6 +187,11 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
 
                     if (context.mounted) {
                       Navigator.of(context).popUntil((route) => route.isFirst);
+                    }
+
+                    if (value) {
+                      // ignore: use_build_context_synchronously
+                      showSnackBar(context, "Edición exitosa");
                     }
                   });
                 } else {
@@ -193,9 +201,9 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
                 }
               }
             },
-            label: "Continuar"),
+            label: widget.edit ? "Guardar" : "Continuar"),
         const SizedBox(height: 20),
-        if(widget.infoSocioeconomicaRequest == null) 
+        if(!widget.edit) 
           CustomInkWell(
             label: "En otro momento",
             onTap: () {
