@@ -1,4 +1,5 @@
 import 'package:chatbot/model/storage/storage.dart';
+import 'package:chatbot/utils/connectivity_listener.dart';
 import 'package:chatbot/view/screens/chat.dart';
 import 'package:chatbot/view/screens/notifications.dart';
 import 'package:chatbot/view/screens/resources.dart';
@@ -71,7 +72,11 @@ class _AutoSamplingPageState extends State<Dashboard> {
           child: SvgPicture.asset("assets/icons/chatbot.svg",
               height: 50, width: 50),
           onPressed: () => Navigator.push(
-              context, MaterialPageRoute(builder: (context) => Chat())),
+              context,
+              MaterialPageRoute(
+                  builder: (context) => ConnectivityListener(
+                        child: Chat(),
+                      ))),
         ),
       ),
       appBar: const CustomAppBar(
@@ -123,7 +128,8 @@ class _AutoSamplingPageState extends State<Dashboard> {
                                     builder: (context) =>
                                         Chat(autoStart: true)));
                           }
-                        : null, size: 340),
+                        : null,
+                    size: 340),
                 const SizedBox(height: 20),
                 CustomButton(
                     color: deviceRegistered
@@ -138,7 +144,8 @@ class _AutoSamplingPageState extends State<Dashboard> {
                                 MaterialPageRoute(
                                     builder: (context) =>
                                         Scanner(deviceRegister: true)));
-                          }, size: 340),
+                          },
+                    size: 340),
                 const SizedBox(height: 15),
                 Text(
                     "Este video explica el proceso de automuestreo. Sigue los pasos descritos para completar el procedimiento correctamente.",

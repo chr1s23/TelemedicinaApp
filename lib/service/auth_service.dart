@@ -51,7 +51,7 @@ sealed class AuthService {
     } on DioException catch (e) {
       _log.severe('Server connection error: $e');
 
-      showSnackBar(context, "Usuario o contraseña incorrectos");
+      showSnackBar(context, "Inicio de sesión fallido");
     } catch (e) {
       _log.severe("Login failed: $e");
 

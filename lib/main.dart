@@ -1,7 +1,6 @@
 import 'package:chatbot/model/requests/user.dart';
 import 'package:chatbot/model/storage/storage.dart';
 import 'package:chatbot/providers/auth_provider.dart';
-import 'package:chatbot/providers/chat_provider.dart';
 import 'package:chatbot/service/auth_service.dart';
 import 'package:chatbot/view/screens/dashboard.dart';
 import 'package:chatbot/view/screens/presentation.dart';
@@ -24,10 +23,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => ChatProvider()),
-        ChangeNotifierProvider(create: (_) => AuthProvider())
-      ],
+      providers: [ChangeNotifierProvider(create: (_) => AuthProvider())],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         locale: Locale("es", "EC"),
