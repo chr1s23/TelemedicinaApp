@@ -15,7 +15,9 @@ import 'package:video_player/video_player.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class Dashboard extends StatefulWidget {
-  const Dashboard({super.key});
+  const Dashboard({super.key, this.hasInternet = true});
+
+  final bool hasInternet;
 
   @override
   State<Dashboard> createState() => _AutoSamplingPageState();
@@ -26,6 +28,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
   ChewieController? _chewieController;
   int _currentIndex = 0;
   bool deviceRegistered = false;
+
   @override
   void initState() {
     _initializePlayer();
@@ -82,7 +85,9 @@ class _AutoSamplingPageState extends State<Dashboard> {
       appBar: const CustomAppBar(
         helpButton: true,
       ),
-      endDrawer: const CustomDrawer(), // Drawer que se desliza desde la derecha
+      endDrawer: widget.hasInternet
+          ? const CustomDrawer()
+          : null, // Drawer que se desliza desde la derecha
       body: <Widget?>[
         _buildBody(),
         Resources(),
@@ -120,7 +125,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
                         ? AllowedColors.blue
                         : AllowedColors.gray,
                     label: "Iniciar proceso de Automuestreo",
-                    onPressed: deviceRegistered
+                    onPressed: deviceRegistered && widget.hasInternet
                         ? () {
                             Navigator.push(
                                 context,
@@ -136,7 +141,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
                         ? AllowedColors.gray
                         : AllowedColors.blue,
                     label: "Registrar dispositivo de Automuestreo",
-                    onPressed: deviceRegistered
+                    onPressed: deviceRegistered || !widget.hasInternet
                         ? null
                         : () {
                             Navigator.push(

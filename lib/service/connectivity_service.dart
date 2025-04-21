@@ -1,13 +1,18 @@
-import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:dio/dio.dart';
 
 class ConnectivityService {
-  static final Connectivity _connectivity = Connectivity();
-
-  static Stream<List<ConnectivityResult>> get connectivityStream =>
-      _connectivity.onConnectivityChanged;
-
-  static Future<bool> isConnected() async {
-    final result = await _connectivity.checkConnectivity();
-    return !result.contains(ConnectivityResult.none);
+  static Future<bool> hasInternetConnection() async {
+    try {
+      final response = await Dio().get(
+        "https://www.google.com/generate_204",
+        options: Options(
+          receiveTimeout: Duration(seconds: 3),
+          sendTimeout: Duration(seconds: 3),
+        ),
+      );
+      return response.statusCode == 204 || response.statusCode == 200;
+    } catch (_) {
+      return false;
+    }
   }
 }
