@@ -1,6 +1,8 @@
 import 'package:chatbot/model/requests/paciente_request.dart';
 import 'package:chatbot/model/requests/user.dart';
 import 'package:chatbot/model/requests/user_request.dart';
+import 'package:chatbot/view/screens/dashboard.dart';
+import 'package:chatbot/view/screens/presentation.dart';
 import 'package:chatbot/view/screens/socioeconomic_information.dart';
 import 'package:chatbot/view/widgets/custom_button.dart';
 import 'package:chatbot/view/widgets/utils.dart';
@@ -107,7 +109,11 @@ class _PersonalDataFormState extends State<PersonalDataForm> {
                     widget.edit ?
                     "¿Desea cancelar la edición de su cuenta? Se perderán todos los datos ingresados." :
                     "¿Desea cancelar la creación de su cuenta? Se perderán todos los datos ingresados.",
-                  onYes: () => Navigator.of(context).popUntil((route) => route.isFirst),
+                  onYes: () => Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => widget.edit ? const Dashboard() : const Presentation()),
+                    (route) => false
+                  )
                 );
               },
               child: Text("Cancelar",

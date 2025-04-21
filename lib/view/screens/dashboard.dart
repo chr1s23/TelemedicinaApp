@@ -1,4 +1,5 @@
 import 'package:chatbot/model/storage/storage.dart';
+import 'package:chatbot/utils/connectivity_listener.dart';
 import 'package:chatbot/view/screens/chat.dart';
 import 'package:chatbot/view/screens/notifications.dart';
 import 'package:chatbot/view/screens/resources.dart';
@@ -14,7 +15,9 @@ import 'package:video_player/video_player.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class Dashboard extends StatefulWidget {
-  const Dashboard({super.key});
+  const Dashboard({super.key, this.hasInternet = true});
+
+  final bool hasInternet;
 
   @override
   State<Dashboard> createState() => _AutoSamplingPageState();
@@ -25,6 +28,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
   ChewieController? _chewieController;
   int _currentIndex = 0;
   bool deviceRegistered = false;
+
   @override
   void initState() {
     _initializePlayer();
@@ -71,13 +75,19 @@ class _AutoSamplingPageState extends State<Dashboard> {
           child: SvgPicture.asset("assets/icons/chatbot.svg",
               height: 50, width: 50),
           onPressed: () => Navigator.push(
-              context, MaterialPageRoute(builder: (context) => Chat())),
+              context,
+              MaterialPageRoute(
+                  builder: (context) => ConnectivityListener(
+                        child: Chat(),
+                      ))),
         ),
       ),
       appBar: const CustomAppBar(
         helpButton: true,
       ),
-      endDrawer: const CustomDrawer(), // Drawer que se desliza desde la derecha
+      endDrawer: widget.hasInternet
+          ? const CustomDrawer()
+          : null, // Drawer que se desliza desde la derecha
       body: <Widget?>[
         _buildBody(),
         Resources(),
@@ -115,7 +125,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
                         ? AllowedColors.blue
                         : AllowedColors.gray,
                     label: "Iniciar proceso de Automuestreo",
-                    onPressed: deviceRegistered
+                    onPressed: deviceRegistered && widget.hasInternet
                         ? () {
                             Navigator.push(
                                 context,
@@ -123,14 +133,15 @@ class _AutoSamplingPageState extends State<Dashboard> {
                                     builder: (context) =>
                                         Chat(autoStart: true)));
                           }
-                        : null, size: 340),
+                        : null,
+                    size: 340),
                 const SizedBox(height: 20),
                 CustomButton(
                     color: deviceRegistered
                         ? AllowedColors.gray
                         : AllowedColors.blue,
                     label: "Registrar dispositivo de Automuestreo",
-                    onPressed: deviceRegistered
+                    onPressed: deviceRegistered || !widget.hasInternet
                         ? null
                         : () {
                             Navigator.push(
@@ -138,7 +149,8 @@ class _AutoSamplingPageState extends State<Dashboard> {
                                 MaterialPageRoute(
                                     builder: (context) =>
                                         Scanner(deviceRegister: true)));
-                          }, size: 340),
+                          },
+                    size: 340),
                 const SizedBox(height: 15),
                 Text(
                     "Este video explica el proceso de automuestreo. Sigue los pasos descritos para completar el procedimiento correctamente.",

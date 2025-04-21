@@ -1,12 +1,7 @@
 import 'package:chatbot/model/requests/salud_sexual_request.dart';
 
 class ExamenVphRequest {
-  String fecha = DateTime.now()
-      .toIso8601String()
-      .split("T")[0]
-      .split("-")
-      .reversed
-      .join("/");
+  String fecha = DateTime.now().toIso8601String().split('.').first;
   String dispositivo;
   SaludSexualRequest saludSexual;
 

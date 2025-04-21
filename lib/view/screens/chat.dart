@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'package:chatbot/model/requests/message_request.dart';
 import 'package:chatbot/model/requests/salud_sexual_request.dart';
 import 'package:chatbot/model/requests/sesion_chat_request.dart';
+import 'package:chatbot/service/connectivity_service.dart';
+import 'package:chatbot/view/screens/dashboard.dart';
 import 'package:chatbot/view/screens/scanner.dart';
 import 'package:chatbot/service/chat_service.dart';
 import 'package:chatbot/view/widgets/custom_button.dart';
@@ -42,6 +44,8 @@ class Chat extends StatefulWidget {
 }
 
 class _ChatbotPageState extends State<Chat> {
+  bool isChecking = true;
+  bool isOnline = false;
   SesionChatRequest? sesionChat;
   SaludSexualRequest? saludSexual;
   bool completeForm = false;
@@ -94,6 +98,7 @@ class _ChatbotPageState extends State<Chat> {
   @override
   void initState() {
     super.initState();
+    _checkInternet();
     chatService.connect();
     chatService.socket.on('bot_uttered', (data) {
       if (mounted) {
@@ -150,6 +155,15 @@ class _ChatbotPageState extends State<Chat> {
         });
       }
     });
+  }
+
+  Future<void> _checkInternet() async {
+    setState(() => isChecking = true);
+    isOnline = await ConnectivityService.hasInternetConnection();
+    setState(() => isChecking = false);
+    if (mounted && !isOnline) {
+      showSnackBar(context, "Sin conexión a internet");
+    }
   }
 
   void _initVideoPlayer() async {
@@ -269,7 +283,11 @@ class _ChatbotPageState extends State<Chat> {
             false;
 
         if (context.mounted && shouldPop) {
-          Navigator.pop(context);
+          //Navigator.pop(context);
+          Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => Dashboard()),
+              (_) => false);
         }
       },
       child: Scaffold(
@@ -525,43 +543,55 @@ class _ChatbotPageState extends State<Chat> {
   Widget _buildMessageInput() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: _messageController,
-              keyboardType:
-                  inputNumber ? TextInputType.number : TextInputType.text,
-              inputFormatters: [
-                inputNumber
-                    ? FilteringTextInputFormatter.digitsOnly
-                    : FilteringTextInputFormatter.singleLineFormatter
+      child: isChecking
+          ? Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: const [
+                CircularProgressIndicator(strokeWidth: 2),
+                SizedBox(width: 10),
+                Text("Verificando conexión..."),
               ],
-              decoration: InputDecoration(
-                hintText: "Escribe un mensaje...",
-                hintStyle: TextStyle(color: AllowedColors.gray, fontSize: 13),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30),
-                  borderSide: BorderSide.none,
+            )
+          : Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _messageController,
+                    enabled: isOnline,
+                    keyboardType:
+                        inputNumber ? TextInputType.number : TextInputType.text,
+                    inputFormatters: [
+                      inputNumber
+                          ? FilteringTextInputFormatter.digitsOnly
+                          : FilteringTextInputFormatter.singleLineFormatter
+                    ],
+                    decoration: InputDecoration(
+                      hintText: "Escribe un mensaje...",
+                      hintStyle:
+                          TextStyle(color: AllowedColors.gray, fontSize: 13),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: BorderSide.none,
+                      ),
+                      filled: true,
+                      fillColor: AllowedColors.white,
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 15, vertical: 10),
+                    ),
+                  ),
                 ),
-                filled: true,
-                fillColor: AllowedColors.white,
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-              ),
+                const SizedBox(width: 10),
+                CircleAvatar(
+                  backgroundColor:
+                      isOnline ? AllowedColors.blue : AllowedColors.gray,
+                  radius: 25,
+                  child: IconButton(
+                    icon: const Icon(Icons.send, color: AllowedColors.white),
+                    onPressed: isOnline ? _sendMessage : null,
+                  ),
+                ),
+              ],
             ),
-          ),
-          const SizedBox(width: 10),
-          CircleAvatar(
-            backgroundColor: AllowedColors.blue,
-            radius: 25,
-            child: IconButton(
-              icon: const Icon(Icons.send, color: AllowedColors.white),
-              onPressed: _sendMessage,
-            ),
-          ),
-        ],
-      ),
     );
   }
 

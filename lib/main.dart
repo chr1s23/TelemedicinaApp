@@ -1,14 +1,12 @@
 import 'package:chatbot/model/requests/user.dart';
 import 'package:chatbot/model/storage/storage.dart';
-import 'package:chatbot/providers/auth_provider.dart';
-import 'package:chatbot/providers/chat_provider.dart';
 import 'package:chatbot/service/auth_service.dart';
+import 'package:chatbot/service/connectivity_service.dart';
 import 'package:chatbot/view/screens/dashboard.dart';
 import 'package:chatbot/view/screens/presentation.dart';
 import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:provider/provider.dart';
 import 'log_utils.dart';
 
 final _log = Logger('Main');
@@ -23,20 +21,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => ChatProvider()),
-        ChangeNotifierProvider(create: (_) => AuthProvider())
-      ],
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        locale: Locale("es", "EC"),
-        theme: ThemeData(
-            useMaterial3: true,
-            colorSchemeSeed: AllowedColors.blue,
-            fontFamily: "ArialNarrow"),
-        home: SplashScreen(),
-      ),
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      locale: Locale("es", "EC"),
+      theme: ThemeData(
+          useMaterial3: true,
+          colorSchemeSeed: AllowedColors.blue,
+          fontFamily: "ArialNarrow"),
+      home: SplashScreen(),
     );
   }
 }
@@ -55,42 +47,63 @@ class SplashScreenState extends State<SplashScreen>
   @override
   void initState() {
     super.initState();
-    //_checkAuth();
     Future.delayed(
         const Duration(milliseconds: 600), _checkAuth); // pequeño delay visual
   }
 
   Future<void> _checkAuth() async {
-    String? token = await secureStorage.read(key: "user_token");
-    User? user = await User.loadUser();
-    String? valid;
+    bool hasInternet = await ConnectivityService.hasInternetConnection();
+
     // Animar fade-out antes de navegar
     setState(() {
       _opacity = 0.0;
     });
 
-    if (!mounted) return;
+    if (!hasInternet) {
+      await Future.delayed(const Duration(milliseconds: 600));
 
-    if (token != null && token.isNotEmpty) {
-      valid = await AuthService.refreshToken(context, token);
-    }
+      if (!mounted) return;
+      _log.fine(
+          "User has not internet connection. Redirecting to dasboard offline mode.");
 
-    // Esperar a que se complete la animación
-    await Future.delayed(const Duration(milliseconds: 600));
-
-    if (!mounted) return;
-
-    if (valid != null && user != null) {
-      User.setCurrentUser(user, save: false);
-
-      secureStorage.write(key: "user_token", value: valid);
-
-      _log.fine("User info found in secure storage. Skipping login.");
-
-      Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => Dashboard()), (_) => false);
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+              builder: (_) => Dashboard(
+                    hasInternet: false,
+                  )),
+          (_) => false);
     } else {
-      _log.fine("Some or all user information is missing. Redirecting to login.");
-      Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => Presentation()), (_) => false);
+      String? token = await secureStorage.read(key: "user_token");
+      User? user = await User.loadUser();
+      String? valid;
+
+      if (!mounted) return;
+
+      if (token != null && token.isNotEmpty) {
+        valid = await AuthService.refreshToken(context, token);
+      }
+
+      // Esperar a que se complete la animación
+      await Future.delayed(const Duration(milliseconds: 600));
+
+      if (!mounted) return;
+
+      if (valid != null && user != null) {
+        User.setCurrentUser(user, save: false);
+
+        secureStorage.write(key: "user_token", value: valid);
+
+        _log.fine("User info found in secure storage. Skipping login.");
+
+        Navigator.pushAndRemoveUntil(context,
+            MaterialPageRoute(builder: (_) => Dashboard()), (_) => false);
+      } else {
+        _log.fine(
+            "Some or all user information is missing. Redirecting to login.");
+        Navigator.pushAndRemoveUntil(context,
+            MaterialPageRoute(builder: (_) => Presentation()), (_) => false);
+      }
     }
   }
 
