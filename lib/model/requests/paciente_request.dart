@@ -60,7 +60,7 @@ class PacienteRequest {
       _lenguasReverse[json["lenguaMaterna"]]!,
       _estadosCivilesReverse[json["estadoCivil"]]!,
       json["sexo"],
-      InfSocioeconomicaRequest.fromJson(json["infoSocioeconomica"]),
+      InfSocioeconomicaRequest.fromJson(json["informacionSocioeconomica"]),
     );
   }
 }
