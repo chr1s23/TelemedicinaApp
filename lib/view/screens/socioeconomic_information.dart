@@ -1,6 +1,7 @@
 import 'package:chatbot/model/requests/inf_socioeconomica_request.dart';
 import 'package:chatbot/model/requests/user_request.dart';
 import 'package:chatbot/service/paciente_service.dart';
+import 'package:chatbot/view/screens/dashboard.dart';
 import 'package:chatbot/view/screens/terms_and_conditions.dart';
 import 'package:chatbot/view/widgets/custom_button.dart';
 import 'package:chatbot/view/widgets/custom_ink_well.dart';
@@ -185,13 +186,11 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
                   PacienteService.update(context, user.paciente).then((value) {
                     doneLoading();
 
-                    if (context.mounted) {
-                      Navigator.of(context).popUntil((route) => route.isFirst);
-                    }
-
-                    if (value) {
-                      // ignore: use_build_context_synchronously
-                      showSnackBar(context, "Edición exitosa");
+                    if (context.mounted && value) {
+                      Navigator.pushAndRemoveUntil(context, 
+                        MaterialPageRoute(builder: (context) => const Dashboard()), 
+                        (route) => false
+                      );
                     }
                   });
                 } else {
