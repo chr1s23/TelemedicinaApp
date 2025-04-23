@@ -1,7 +1,8 @@
 import 'package:chatbot/model/storage/storage.dart';
 import 'package:chatbot/utils/connectivity_listener.dart';
 import 'package:chatbot/view/screens/chat.dart';
-import 'package:chatbot/view/screens/notifications.dart';
+import 'package:chatbot/view/screens/form_chat.dart';
+//import 'package:chatbot/view/screens/notifications.dart';
 import 'package:chatbot/view/screens/resources.dart';
 import 'package:chatbot/view/screens/scanner.dart';
 import 'package:chatbot/view/screens/wip.dart';
@@ -125,13 +126,12 @@ class _AutoSamplingPageState extends State<Dashboard> {
                         ? AllowedColors.blue
                         : AllowedColors.gray,
                     label: "Iniciar proceso de Automuestreo",
-                    onPressed: deviceRegistered && widget.hasInternet
+                    onPressed: deviceRegistered
                         ? () {
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) =>
-                                        Chat(autoStart: true)));
+                                    builder: (context) => FormChat()));
                           }
                         : null,
                     size: 340),
@@ -141,7 +141,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
                         ? AllowedColors.gray
                         : AllowedColors.blue,
                     label: "Registrar dispositivo de Automuestreo",
-                    onPressed: deviceRegistered || !widget.hasInternet
+                    onPressed: deviceRegistered
                         ? null
                         : () {
                             Navigator.push(

@@ -53,3 +53,4 @@ flutter:
     - assets/images/idrc.png
     - assets/images/logo_clias.png
     - assets/offline_messages.json
+    - assets/offline_form.json

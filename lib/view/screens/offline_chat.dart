@@ -85,7 +85,7 @@ class _ChatbotPageState extends State<OfflineChat> {
 
       _startLoadingAnimation();
 
-      await Future.delayed(Duration(seconds: 2));
+      await Future.delayed(Duration(seconds: 1));
 
       setState(() {
         _isLoading = false;
