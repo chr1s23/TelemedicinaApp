@@ -1,5 +1,9 @@
+import 'dart:convert';
+
 import 'package:chatbot/model/requests/sesion_chat_request.dart';
 import 'package:chatbot/model/storage/storage.dart';
+import 'package:chatbot/service/connectivity_service.dart';
+import 'package:chatbot/view/widgets/utils.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -28,48 +32,48 @@ Dio getDio() {
 sealed class SesionChatService {
   static Future<bool?> registrarInfoExamen(
       BuildContext context, SesionChatRequest sesion) async {
-    try {
-      final response =
-          await getDio().post("/sesion-chat/usuario", data: sesion.toJson());
+    bool hasInternet = await ConnectivityService.hasInternetConnection();
 
-      if (response.statusCode == 200) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content:
-                    Text('Proceso de Automuestreo terminado correctamente!.')),
-          );
+    if (hasInternet) {
+      try {
+        final response =
+            await getDio().post("/sesion-chat/usuario", data: sesion.toJson());
+
+        if (response.statusCode == 200 && context.mounted) {
+          showSnackBar(
+              context, 'Proceso de Automuestreo terminado correctamente!.');
+          secureStorage.delete(key: "form_request");
+          return true;
+        } else {
+          if (context.mounted) {
+            showSnackBar(context,
+                'No se pudo registrar la información del Automuestreo VPH');
+          }
         }
-        return true;
-      } else {
+      } on DioException catch (e) {
+        _log.severe('Server connection error: $e');
+
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content: Text(
-                    'No se pudo registrar la información del Automuestreo VPH')),
-          );
+          showSnackBar(context, 'Ocurrió un error inesperado.');
+        }
+      } catch (e) {
+        _log.severe("Login failed: $e");
+
+        if (context.mounted) {
+          showSnackBar(context, 'Registro de examen VPH fallido');
         }
       }
-    } on DioException catch (e) {
-      _log.severe('Server connection error: $e');
 
+      return null;
+    } else {
+      _log.warning("Writing form information to pending request");
+      secureStorage.write(
+          key: "form_request", value: jsonEncode(sesion));
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Ocurrió un error inesperado.')),
-        );
+        showSnackBar(
+            context, 'Proceso de Automuestreo terminado correctamente!.');
       }
-    } catch (e) {
-      _log.severe("Login failed: $e");
-
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Registro de examen VPH fallido'),
-          ),
-        );
-      }
+      return true;
     }
-
-    return null;
   }
 }

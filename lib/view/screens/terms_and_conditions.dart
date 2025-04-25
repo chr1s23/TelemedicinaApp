@@ -1,6 +1,7 @@
 import 'package:chatbot/model/requests/user_request.dart';
 import 'package:chatbot/model/responses/user_response.dart';
 import 'package:chatbot/service/auth_service.dart';
+import 'package:chatbot/utils/dashboard_listener.dart';
 import 'package:chatbot/utils/terms_conditions.dart';
 import 'package:chatbot/view/screens/dashboard.dart';
 import 'package:chatbot/view/widgets/utils.dart';
@@ -31,10 +32,11 @@ class _TermsAndConditionsPageState extends State<TermsAndConditions> {
         doneLoading();
 
         if (userLogged != null) {
-          if (!mounted) return ;
+          if (!mounted) return;
           Navigator.pushAndRemoveUntil(
               context,
-              MaterialPageRoute(builder: (context) => Dashboard()),
+              MaterialPageRoute(
+                  builder: (context) => DashboardListener(child: Dashboard())),
               (route) => false);
         }
       } else {

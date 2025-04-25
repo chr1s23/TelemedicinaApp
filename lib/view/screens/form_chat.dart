@@ -39,7 +39,7 @@ class FormChat extends StatefulWidget {
 
 class _ChatbotPageState extends State<FormChat> {
   SesionChatRequest? sesionChat;
-  SaludSexualRequest saludSexual = SaludSexualRequest();
+  SaludSexualRequest saludSexual = SaludSexualRequest(false, null, null, null, null, null, null);
   bool completeForm = false;
   bool colectInformation = false;
   final focusNode = FocusNode();
@@ -81,7 +81,7 @@ class _ChatbotPageState extends State<FormChat> {
   }
 
   void initSesionChat() async {
-    sesionChat = SesionChatRequest(await getUserId(), null, null);
+    sesionChat = SesionChatRequest(await getUserId(), null, null, DateTime.now().toIso8601String().split('.').first, null);
   }
 
   @override

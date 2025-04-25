@@ -1,6 +1,7 @@
 import 'package:chatbot/model/requests/paciente_request.dart';
 import 'package:chatbot/model/requests/user.dart';
 import 'package:chatbot/model/requests/user_request.dart';
+import 'package:chatbot/utils/dashboard_listener.dart';
 import 'package:chatbot/view/screens/dashboard.dart';
 import 'package:chatbot/view/screens/presentation.dart';
 import 'package:chatbot/view/screens/socioeconomic_information.dart';
@@ -103,18 +104,18 @@ class _PersonalDataFormState extends State<PersonalDataForm> {
           TextButton(
               onPressed: () {
                 modalYesNoDialog(
-                  context: context,
-                  title: "¿Cancelar?",
-                  message:
-                    widget.edit ?
-                    "¿Desea cancelar la edición de su cuenta? Se perderán todos los datos ingresados." :
-                    "¿Desea cancelar la creación de su cuenta? Se perderán todos los datos ingresados.",
-                  onYes: () => Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (context) => widget.edit ? const Dashboard() : const Presentation()),
-                    (route) => false
-                  )
-                );
+                    context: context,
+                    title: "¿Cancelar?",
+                    message: widget.edit
+                        ? "¿Desea cancelar la edición de su cuenta? Se perderán todos los datos ingresados."
+                        : "¿Desea cancelar la creación de su cuenta? Se perderán todos los datos ingresados.",
+                    onYes: () => Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => widget.edit
+                                ? const DashboardListener(child: Dashboard())
+                                : const Presentation()),
+                        (route) => false));
               },
               child: Text("Cancelar",
                   style: TextStyle(color: AllowedColors.red, fontSize: 12))),
@@ -210,46 +211,43 @@ class _PersonalDataFormState extends State<PersonalDataForm> {
                     if (_formKey.currentState?.validate() ?? false) {
                       User user = User.getCurrentUser();
                       if (widget.edit) {
-                        UserRequest.setUserRequest(UserRequest("", "", "", 
-                          true, 
-                          PacienteRequest(
-                            user.nombre, 
-                            dateController.text, 
-                            _selectedCountry!, 
-                            _selectedLanguage!, 
-                            _selectedMaritalStatus!, 
-                            _selectedGender!, 
-                            widget.pacienteRequest!.infoSocioeconomica
-                          )
-                        ));
-                        
+                        UserRequest.setUserRequest(UserRequest(
+                            "",
+                            "",
+                            "",
+                            true,
+                            PacienteRequest(
+                                user.nombre,
+                                dateController.text,
+                                _selectedCountry!,
+                                _selectedLanguage!,
+                                _selectedMaritalStatus!,
+                                _selectedGender!,
+                                widget.pacienteRequest!.infoSocioeconomica)));
                       } else {
                         UserRequest.setUserRequest(UserRequest(
-                          user.nombreUsuario,
-                          user.contrasena,
-                          "USER",
-                          false,
-                          PacienteRequest(
-                            user.nombre,
-                            dateController.text,
-                            _selectedCountry!,
-                            _selectedLanguage!,
-                            _selectedMaritalStatus!,
-                            _selectedGender!,
-                            null
-                          )
-                        ));
+                            user.nombreUsuario,
+                            user.contrasena,
+                            "USER",
+                            false,
+                            PacienteRequest(
+                                user.nombre,
+                                dateController.text,
+                                _selectedCountry!,
+                                _selectedLanguage!,
+                                _selectedMaritalStatus!,
+                                _selectedGender!,
+                                null)));
                       }
-                      
+
                       Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => SocioeconomicInformation(
-                            infoSocioeconomicaRequest: widget.pacienteRequest?.infoSocioeconomica,
-                            edit: widget.edit,
-                          )
-                        )
-                      );
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => SocioeconomicInformation(
+                                    infoSocioeconomicaRequest: widget
+                                        .pacienteRequest?.infoSocioeconomica,
+                                    edit: widget.edit,
+                                  )));
                     }
                   },
                   label: "Continuar")

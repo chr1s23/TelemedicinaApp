@@ -3,6 +3,7 @@ import 'package:chatbot/model/requests/sesion_chat_request.dart';
 import 'package:chatbot/model/storage/storage.dart';
 import 'package:chatbot/service/paciente_service.dart';
 import 'package:chatbot/service/sesion_chat_service.dart';
+import 'package:chatbot/utils/dashboard_listener.dart';
 import 'package:chatbot/view/screens/dashboard.dart';
 import 'package:chatbot/view/widgets/custom_app_bar.dart';
 import 'package:chatbot/view/widgets/custom_button.dart';
@@ -54,7 +55,8 @@ class ScannerResultPageState extends State<ScannerResultPage> {
       Navigator.pop(context);
       Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => Dashboard()),
+          MaterialPageRoute(
+              builder: (context) => DashboardListener(child: Dashboard())),
           (route) => false);
     }
   }
@@ -85,8 +87,8 @@ class ScannerResultPageState extends State<ScannerResultPage> {
                   decoration: BoxDecoration(
                     color: AllowedColors.gray.withAlpha(50), // Fondo más opaco
                     borderRadius: BorderRadius.circular(8),
-                    border:
-                        Border.all(color: Colors.black, width: 1), // Borde negro
+                    border: Border.all(
+                        color: Colors.black, width: 1), // Borde negro
                   ),
                   child: Text(
                     widget.qrData,
@@ -115,12 +117,12 @@ class ScannerResultPageState extends State<ScannerResultPage> {
                     label: "Aceptar",
                     loading: _isLoading,
                     onPressed: _isLoading
-                      ? null
-                      : () {
-                          if (widget.qrData != "Código QR no válido") {
-                            _registerDevice(widget.qrData);
-                          }
-                        })
+                        ? null
+                        : () {
+                            if (widget.qrData != "Código QR no válido") {
+                              _registerDevice(widget.qrData);
+                            }
+                          })
               ],
             ),
           ),

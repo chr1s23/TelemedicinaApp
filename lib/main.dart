@@ -2,6 +2,7 @@ import 'package:chatbot/model/requests/user.dart';
 import 'package:chatbot/model/storage/storage.dart';
 import 'package:chatbot/service/auth_service.dart';
 import 'package:chatbot/service/connectivity_service.dart';
+import 'package:chatbot/utils/dashboard_listener.dart';
 import 'package:chatbot/view/screens/dashboard.dart';
 import 'package:chatbot/view/screens/presentation.dart';
 import 'package:chatbot/view/widgets/utils.dart';
@@ -53,6 +54,7 @@ class SplashScreenState extends State<SplashScreen>
 
   Future<void> _checkAuth() async {
     bool hasInternet = await ConnectivityService.hasInternetConnection();
+    String? token = await secureStorage.read(key: "user_token");
 
     // Animar fade-out antes de navegar
     setState(() {
@@ -63,18 +65,24 @@ class SplashScreenState extends State<SplashScreen>
       await Future.delayed(const Duration(milliseconds: 600));
 
       if (!mounted) return;
-      _log.fine(
-          "User has not internet connection. Redirecting to dasboard offline mode.");
 
-      Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(
-              builder: (_) => Dashboard(
-                    hasInternet: false,
-                  )),
-          (_) => false);
+      if (token != null) {
+        _log.fine(
+            "User has not internet connection. Redirecting to dasboard offline mode.");
+
+        Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+                builder: (_) => DashboardListener(
+                        child: Dashboard(
+                      hasInternet: false,
+                    ))),
+            (_) => false);
+      } else {
+        Navigator.pushAndRemoveUntil(context,
+            MaterialPageRoute(builder: (_) => Presentation()), (_) => false);
+      }
     } else {
-      String? token = await secureStorage.read(key: "user_token");
       User? user = await User.loadUser();
       String? valid;
 
@@ -96,8 +104,11 @@ class SplashScreenState extends State<SplashScreen>
 
         _log.fine("User info found in secure storage. Skipping login.");
 
-        Navigator.pushAndRemoveUntil(context,
-            MaterialPageRoute(builder: (_) => Dashboard()), (_) => false);
+        Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+                builder: (_) => DashboardListener(child: Dashboard())),
+            (_) => false);
       } else {
         _log.fine(
             "Some or all user information is missing. Redirecting to login.");

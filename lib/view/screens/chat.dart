@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:chatbot/model/requests/message_request.dart';
 import 'package:chatbot/service/connectivity_service.dart';
+import 'package:chatbot/utils/dashboard_listener.dart';
 import 'package:chatbot/view/screens/dashboard.dart';
 import 'package:chatbot/service/chat_service.dart';
 import 'package:chatbot/view/widgets/pdf_viewer.dart';
@@ -150,7 +151,8 @@ class _ChatbotPageState extends State<Chat> {
         if (context.mounted && shouldPop) {
           Navigator.pushAndRemoveUntil(
               context,
-              MaterialPageRoute(builder: (context) => Dashboard()),
+              MaterialPageRoute(
+                  builder: (context) => DashboardListener(child: Dashboard())),
               (_) => false);
         }
       },

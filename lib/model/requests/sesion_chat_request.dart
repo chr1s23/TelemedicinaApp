@@ -7,7 +7,17 @@ class SesionChatRequest {
   String? contenido;
   ExamenVphRequest? examenVph;
 
-  SesionChatRequest(this.cuentaPublicId, this.fin, this.contenido);
+  SesionChatRequest(this.cuentaPublicId, this.fin, this.contenido, this.inicio, this.examenVph);
+
+  factory SesionChatRequest.fromJson(Map<String, dynamic> json) {
+    return SesionChatRequest(
+      json["cuentaPublicId"],
+      json["fin"],
+      json["contenido"],
+      json["inicio"],
+      ExamenVphRequest.fromJson(json["examenVph"])
+    );
+  }
 
   Map<String, dynamic> toJson() {
     return {
