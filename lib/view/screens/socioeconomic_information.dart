@@ -1,6 +1,7 @@
 import 'package:chatbot/model/requests/inf_socioeconomica_request.dart';
 import 'package:chatbot/model/requests/user_request.dart';
 import 'package:chatbot/service/paciente_service.dart';
+import 'package:chatbot/utils/dashboard_listener.dart';
 import 'package:chatbot/view/screens/dashboard.dart';
 import 'package:chatbot/view/screens/terms_and_conditions.dart';
 import 'package:chatbot/view/widgets/custom_button.dart';
@@ -9,7 +10,8 @@ import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
 
 class SocioeconomicInformation extends StatefulWidget {
-  const SocioeconomicInformation({super.key, this.infoSocioeconomicaRequest, this.edit = false});
+  const SocioeconomicInformation(
+      {super.key, this.infoSocioeconomicaRequest, this.edit = false});
 
   final InfSocioeconomicaRequest? infoSocioeconomicaRequest;
   final bool edit;
@@ -35,7 +37,8 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
       _selectedIncome = widget.infoSocioeconomicaRequest!.ingresos;
       _selectedWorkStatus = widget.infoSocioeconomicaRequest!.trabajoRemunerado;
       _selectedBonus = widget.infoSocioeconomicaRequest!.recibeBono;
-      _occupationController.text = widget.infoSocioeconomicaRequest!.ocupacion ?? "";
+      _occupationController.text =
+          widget.infoSocioeconomicaRequest!.ocupacion ?? "";
     }
     super.initState();
   }
@@ -74,17 +77,17 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
                 modalYesNoDialog(
                   context: context,
                   title: "¿Cancelar?",
-                  message:
-                    widget.edit ?
-                    "¿Desea cancelar la edición de su cuenta? Se perderán todos los datos ingresados." :
-                    "¿Desea cancelar la creación de su cuenta? Se perderán todos los datos ingresados.",
+                  message: widget.edit
+                      ? "¿Desea cancelar la edición de su cuenta? Se perderán todos los datos ingresados."
+                      : "¿Desea cancelar la creación de su cuenta? Se perderán todos los datos ingresados.",
                   onYes: () => Navigator.of(context)
                     ..pop()
                     ..pop()
                     ..pop(),
                 );
               },
-              child: Text("Cancelar", style: TextStyle(color: AllowedColors.red, fontSize: 12))),
+              child: Text("Cancelar",
+                  style: TextStyle(color: AllowedColors.red, fontSize: 12))),
         ],
       ),
       body: SingleChildScrollView(
@@ -106,11 +109,11 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
               // Nivel de instrucción
               buildLabel("Nivel de instrucción"),
               buildDropdown(_educationLevels, _selectedEducationLevel,
-                (newValue) {
-                  setState(() {
-                    _selectedEducationLevel = newValue;
-                  });
-                }, 'Elija una opción'),
+                  (newValue) {
+                setState(() {
+                  _selectedEducationLevel = newValue;
+                });
+              }, 'Elija una opción'),
 
               const SizedBox(height: 20),
 
@@ -170,7 +173,8 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
               UserRequest? user = UserRequest.getUserRequest();
 
               if (user != null) {
-                InfSocioeconomicaRequest socioeconomica = InfSocioeconomicaRequest(
+                InfSocioeconomicaRequest socioeconomica =
+                    InfSocioeconomicaRequest(
                   _selectedEducationLevel,
                   _selectedIncome,
                   _selectedWorkStatus,
@@ -187,22 +191,25 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
                     doneLoading();
 
                     if (context.mounted && value) {
-                      Navigator.pushAndRemoveUntil(context, 
-                        MaterialPageRoute(builder: (context) => const Dashboard()), 
-                        (route) => false
-                      );
+                      Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  const DashboardListener(child: Dashboard())),
+                          (route) => false);
                     }
                   });
                 } else {
-                  Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => TermsAndConditions())
-                  );
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => TermsAndConditions()));
                 }
               }
             },
             label: widget.edit ? "Guardar" : "Continuar"),
         const SizedBox(height: 20),
-        if(!widget.edit) 
+        if (!widget.edit)
           CustomInkWell(
             label: "En otro momento",
             onTap: () {
@@ -210,7 +217,8 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
                   context,
                   MaterialPageRoute(
                       builder: (context) => TermsAndConditions()));
-            }, color: AllowedColors.red,
+            },
+            color: AllowedColors.red,
           )
       ],
     );

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:chatbot/model/requests/message_request.dart';
+import 'package:chatbot/utils/dashboard_listener.dart';
 import 'package:chatbot/view/screens/dashboard.dart';
 import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
@@ -27,6 +28,7 @@ class _ChatbotPageState extends State<OfflineChat> {
     {"title": "¿Qué es el VPH?", "payload": ""},
     {"title": "¿Qué es el Cáncer de Cuello Uterino?", "payload": ""},
     {"title": "¿Qué es el Automuestreo?", "payload": ""},
+    {"title": "Violencia de Género", "payload": ""}
   ];
 
   @override
@@ -57,6 +59,8 @@ class _ChatbotPageState extends State<OfflineChat> {
       dataPayload = offlineMessages[message];
     } else if (message == "¿Qué es el Automuestreo?") {
       dataPayload = offlineMessages[message];
+    } else if (message == "Violencia de Género") {
+      dataPayload = offlineMessages[message];
     } else if (message == "Regresar") {
       _messages.clear();
       _messages.add({
@@ -68,10 +72,9 @@ class _ChatbotPageState extends State<OfflineChat> {
         {"title": "¿Qué es el VPH?", "payload": ""},
         {"title": "¿Qué es el Cáncer de Cuello Uterino?", "payload": ""},
         {"title": "¿Qué es el Automuestreo?", "payload": ""},
+        {"title": "Violencia de Género", "payload": ""}
       ];
-      setState(() {
-        
-      });
+      setState(() {});
       return;
     }
     if (message.isNotEmpty) {
@@ -85,7 +88,7 @@ class _ChatbotPageState extends State<OfflineChat> {
 
       _startLoadingAnimation();
 
-      await Future.delayed(Duration(seconds: 2));
+      await Future.delayed(Duration(seconds: 1));
 
       setState(() {
         _isLoading = false;
@@ -140,10 +143,13 @@ class _ChatbotPageState extends State<OfflineChat> {
             false;
 
         if (context.mounted && shouldPop) {
-          //Navigator.pop(context);
           Navigator.pushAndRemoveUntil(
               context,
-              MaterialPageRoute(builder: (context) => Dashboard(hasInternet: false,)),
+              MaterialPageRoute(
+                  builder: (context) => DashboardListener(
+                          child: Dashboard(
+                        hasInternet: false,
+                      ))),
               (_) => false);
         }
       },
@@ -258,6 +264,7 @@ class _ChatbotPageState extends State<OfflineChat> {
       children: answers
           .map((answer) => ElevatedButton(
                 child: Text(
+                  textAlign: TextAlign.center,
                   answer["title"]!,
                   style: const TextStyle(fontSize: 15),
                 ),

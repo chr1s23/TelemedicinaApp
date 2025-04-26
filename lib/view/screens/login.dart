@@ -1,5 +1,6 @@
 import 'package:chatbot/model/responses/user_response.dart';
 import 'package:chatbot/service/auth_service.dart';
+import 'package:chatbot/utils/dashboard_listener.dart';
 import 'package:chatbot/view/screens/password.dart';
 import 'package:chatbot/view/widgets/custom_ink_well.dart';
 import 'package:chatbot/view/widgets/custom_input_field.dart';
@@ -47,12 +48,12 @@ class _LoginState extends State<Login> {
 
     doneLoading();
 
-    if (userLogged != null) {
+    if (userLogged != null && mounted) {
       Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => Dashboard()),
-        (route) => false
-      );
+          context,
+          MaterialPageRoute(
+              builder: (context) => DashboardListener(child: Dashboard())),
+          (route) => false);
     }
 
     setState(() {

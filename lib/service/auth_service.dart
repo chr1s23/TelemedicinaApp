@@ -108,7 +108,7 @@ sealed class AuthService {
       }
     } catch (e) {
       _log.severe("Validate token failed: $e");
-      showSnackBar(context, "Tu sesión ha caducado");
+      showSnackBar(context, "Tu sesión ha caducado. Vuelve a iniciar sesión.");
     }
     return null;
   }

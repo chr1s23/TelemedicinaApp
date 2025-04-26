@@ -117,7 +117,7 @@ class Register extends StatelessWidget {
                 children: [
                   CustomButton(
                       color: AllowedColors.blue,
-                      label: "Crear una cuenta",
+                      label: "Continuar",
                       onPressed: () {
                         if (_formKey.currentState?.validate() ?? false) {
                           if (_usernameController.text.length < 7) {

@@ -4,6 +4,7 @@
 import 'package:chatbot/model/requests/dispositivo_request.dart';
 import 'package:chatbot/model/requests/paciente_request.dart';
 import 'package:chatbot/model/storage/storage.dart';
+import 'package:chatbot/service/connectivity_service.dart';
 import 'package:chatbot/view/widgets/utils.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -34,34 +35,46 @@ Dio getDio() {
 sealed class PacienteService {
   static Future<bool?> registrarDispositivo(
       BuildContext context, DispositivoRequest dispositivo) async {
-    try {
-      final publicId = await secureStorage.read(key: "user_id");
-      final response = await getDio().put("/paciente/registrar-dispositivo/$publicId",
-          data: dispositivo.toJson());
+    bool hasInternet = await ConnectivityService.hasInternetConnection();
 
-      if (response.statusCode == 200) {
-        showSnackBar(context, "Dispositivo registrado correctamente");
-        return true;
-      } else {
-        showSnackBar(context, "No se pudo registrar el dispositivo");
+    if (hasInternet) {
+      try {
+        final publicId = await secureStorage.read(key: "user_id");
+        final response = await getDio().put(
+            "/paciente/registrar-dispositivo/$publicId",
+            data: dispositivo.toJson());
+
+        if (response.statusCode == 200) {
+          showSnackBar(context, "Dispositivo registrado correctamente");
+          secureStorage.delete(key: "pending_device");
+          return true;
+        } else {
+          showSnackBar(context, "No se pudo registrar el dispositivo");
+        }
+      } on DioException catch (e) {
+        _log.severe('Server connection error: $e');
+
+        showSnackBar(context, "Ocurrió un error inesperado");
+      } catch (e) {
+        _log.severe("Login failed: $e");
+
+        showSnackBar(context, "Registro de dispositivo fallido");
       }
-    } on DioException catch (e) {
-      _log.severe('Server connection error: $e');
 
-      showSnackBar(context, "Ocurrió un error inesperado");
-    } catch (e) {
-      _log.severe("Login failed: $e");
-
-      showSnackBar(context, "Registro de dispositivo fallido");
+      return null;
+    } else {
+      secureStorage.write(key: "pending_device", value: "true");
+      showSnackBar(context, "Dispositivo registrado correctamente");
+      return true;
     }
-
-    return null;
   }
 
-  static Future<bool> update(BuildContext context, PacienteRequest request) async {
+  static Future<bool> update(
+      BuildContext context, PacienteRequest request) async {
     final id = await secureStorage.read(key: "user_id");
     try {
-      final response = await getDio().put("/paciente/editar/$id", data: request.toJson());
+      final response =
+          await getDio().put("/paciente/editar/$id", data: request.toJson());
 
       if (response.statusCode == 200) {
         _log.fine("User data updated");

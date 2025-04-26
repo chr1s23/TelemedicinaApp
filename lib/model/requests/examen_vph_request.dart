@@ -5,7 +5,12 @@ class ExamenVphRequest {
   String dispositivo;
   SaludSexualRequest saludSexual;
 
-  ExamenVphRequest(this.dispositivo, this.saludSexual);
+  ExamenVphRequest(this.dispositivo, this.saludSexual, this.fecha);
+
+  factory ExamenVphRequest.fromJson(Map<String, dynamic> json) {
+    return ExamenVphRequest(json["dispositivo"],
+        SaludSexualRequest.fromJson(json["saludSexual"]), json["fecha"]);
+  }
 
   Map<String, dynamic> toJson() {
     return {

@@ -1,0 +1,309 @@
+{
+  "Iniciar proceso": {
+    "title": "Iniciar proceso de Automuestreo",
+    "response": "📋 **¡Comenzemos con el proceso de Automuestreo!**\nPrimero debemos asegurarnos de que **eres apta para realizarte el Automuestreo** en este momento.\nPor favor, ¡responde a las siguientes preguntas con sinceridad!.\n¿Tu edad está entre los 30 y 65 años?",
+    "isBot": true,
+    "quick_replies": [
+      {
+        "title": "Si",
+        "response": "¿Tienes o has tenido vida sexual activa?",
+        "isBot": true,
+        "quick_replies": [
+          {
+            "title": "Si",
+            "response": "¿Has tenido relaciones sexuales en las últimas 48 horas?",
+            "isBot": true,
+            "quick_replies": [
+              {
+                "title": "Si",
+                "response": "Lo sentimos, para realizarte el Automuestreo **no debes tener relaciones sexuales en las últimas 48 horas**. Puedes intentar otro día.",
+                "isBot": true,
+                "quick_replies": []
+              },
+              {
+                "title": "No",
+                "response": "¿Comprende de qué trata este estudio, para qué se realiza y si podría implicar algún riesgo para usted? ¿Está de acuerdo en participar dando su consentimiento?",
+                "isBot": true,
+                "quick_replies": [
+                  {
+                    "title": "Si",
+                    "response": "¿Eres capaz de comunicarte en español?",
+                    "isBot": true,
+                    "quick_replies": [
+                      {
+                        "title": "Si",
+                        "response": "¿Estás embarazada?",
+                        "isBot": true,
+                        "quick_replies": [
+                          {
+                            "title": "Si",
+                            "response": "Para realizarte el Automuestreo **es necesario que no te encuentres embarazada**. No puedes ser parte del estudio en este momento. Sin embargo, **es importante que puedas hacerlo cuando ya no estés embarazada** 😊!.",
+                            "isBot": true,
+                            "quick_replies": []
+                          },
+                          {
+                            "title": "No",
+                            "response": "¿Has tenido un tratamiento previo del cuello uterino (quimioterapia, LEEP, LLETZ) en los últimos 6 meses?",
+                            "isBot": true,
+                            "quick_replies": [
+                              {
+                                "title": "Si",
+                                "response": "Lo sentimos, **es necesario que no hayas tenido tratamientos previos en los últimos 6 meses**. En este momento no eres apta para el Automuestreo, **es importante que pruebes en otra ocasión** 😊!.",
+                                "isBot": true,
+                                "quick_replies": []
+                              },
+                              {
+                                "title": "No",
+                                "response": "¿Has utilizado algún medicamento intravaginal en la última semana?",
+                                "isBot": true,
+                                "quick_replies": [
+                                  {
+                                    "title": "Si",
+                                    "response": "Lo sentimos, no puedes realizarte el automuestreo en este momento. Es **importante que lo intentes en otro momento**!.",
+                                    "isBot": true,
+                                    "quick_replies": []
+                                  },
+                                  {
+                                    "title": "No",
+                                    "response": "¿Estás con tu período menstrual en este momento?",
+                                    "isBot": true,
+                                    "quick_replies": [
+                                      {
+                                        "title": "Si",
+                                        "response": "Lo sentimos, **debes esperar hasta que termine tu período menstrual** para realizar el Automuestreo 😊.",
+                                        "isBot": true,
+                                        "quick_replies": []
+                                      },
+                                      {
+                                        "title": "No",
+                                        "response": "Todo listo! Hemos determinado que **sí eres apta para realizarte el Automuestreo**. Por favor, responde estas preguntas con **sinceridad** para continuar!.\n¿Fecha del primer día de su última menstruación?",
+                                        "isBot": true,
+                                        "selector_fecha": true,
+                                        "quick_replies": [
+                                          {
+                                            "title": "Entre 3 a 6 meses",
+                                            "response": "¿Hace cuánto fué tu útltimo examen de Papanicolaou (Pap)?",
+                                            "payload": "ENTRE_3_6_MESES",
+                                            "isBot": true,
+                                            "quick_replies": []
+                                          },
+                                          {
+                                            "title": "Entre 6 a 12 meses",
+                                            "response": "¿Hace cuánto fué tu útltimo examen de Papanicolaou (Pap)?",
+                                            "payload": "ENTRE_6_12_MESES",
+                                            "isBot": true,
+                                            "quick_replies": []
+                                          },
+                                          {
+                                            "title": "Más de 12 meses",
+                                            "response": "¿Hace cuánto fué tu útltimo examen de Papanicolaou (Pap)?",
+                                            "payload": "MAS_12_MESES",
+                                            "isBot": true,
+                                            "quick_replies": []
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "title": "No",
+                        "response": "El proceso **solo está disponible en Español**. Sin embargo, es importante que acudas a tu **Centro de Salud más cercano** para hacerte pruebas de Papanocolaou y VPH!.",
+                        "isBot": true,
+                        "quick_replies": []
+                      }
+                    ]
+                  },
+                  {
+                    "title": "No",
+                    "response": "Lo sentimos, **es necesario que te encuentres bien de tu salud mental** para realizarte el Automuestreo en este momento.",
+                    "isBot": true,
+                    "quick_replies": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "title": "No",
+            "response": "No es necesario que te realices el **Automuestreo** en este momento **si no has tenido relaciones sexuales**. ¡Recuerda cuidar de tu salud!.",
+            "isBot": true,
+            "quick_replies": []
+          }
+        ]
+      },
+      {
+        "title": "No",
+        "response": "Lo sentimos, no puedes ser parte del estudio porque **no cumples con la edad requerida (30 - 65 años)**. Sin embargo, es importante que te realices exámenes de Papanicolaou (Pap) y pruebas de Virus del Papiloma Humano (VPH) regularmente.",
+        "isBot": true,
+        "quick_replies": []
+      }
+    ]
+  },
+  "selecciono_fecha": {
+    "response": "¿Hace cuánto fué tu útltimo examen de Papanicolaou (Pap)?",
+    "isBot": true,
+    "quick_replies": [
+      {
+        "title": "Menos de 1 año",
+        "response": "¿Cuándo fué tu última prueba de Virus del Papiloma Humano (VPH)?",
+        "payload": "MENOS_1_ANIO",
+        "isBot": true,
+        "quick_replies": []
+      },
+      {
+        "title": "De 1 a 3 años",
+        "response": "¿Cuándo fué tu última prueba de Virus del Papiloma Humano (VPH)?",
+        "payload": "DE_1_A_3_ANIOS",
+        "isBot": true,
+        "quick_replies": []
+      },
+      {
+        "title": "Más 3 años",
+        "response": "¿Cuándo fué tu última prueba de Virus del Papiloma Humano (VPH)?",
+        "payload": "MAS_3_ANIOS",
+        "isBot": true,
+        "quick_replies": []
+      },
+      {
+        "title": "Nunca",
+        "response": "¿Cuándo fué tu última prueba de Virus del Papiloma Humano (VPH)?",
+        "payload": "NUNCA",
+        "isBot": true,
+        "quick_replies": []
+      }
+    ]
+  },
+  "ultimo_pap": {
+    "response": "¿Cuándo fué tu última prueba de Virus del Papiloma Humano (VPH)?",
+    "isBot": true,
+    "quick_replies": [
+      {
+        "title": "Menos de 1 año",
+        "response": "Por favor, indica el número de parejas sexuales que has tenido. (Ejemplo: 2)",
+        "payload": "MENOS_1_ANIO",
+        "isBot": true,
+        "teclado_numerico": true
+      },
+      {
+        "title": "De 1 a 3 años",
+        "response": "Por favor, indica el número de parejas sexuales que has tenido. (Ejemplo: 2)",
+        "payload": "DE_1_A_3_ANIOS",
+        "isBot": true,
+        "teclado_numerico": true
+      },
+      {
+        "title": "Más 3 años",
+        "response": "Por favor, indica el número de parejas sexuales que has tenido. (Ejemplo: 2)",
+        "payload": "MAS_3_ANIOS",
+        "isBot": true,
+        "teclado_numerico": true
+      },
+      {
+        "title": "Nunca",
+        "response": "Por favor, indica el número de parejas sexuales que has tenido. (Ejemplo: 2)",
+        "payload": "NUNCA",
+        "isBot": true,
+        "teclado_numerico": true
+      }
+    ]
+  },
+  "teclado_numerico": {
+    "response": "¿Ha sido diagnosticado o sospecha de tener alguna Infección de Transmisión Sexual (ITS)?",
+    "isBot": true,
+    "quick_replies": [
+      {
+        "title": "Si",
+        "response": "Por favor, indica el nombre de la Infección de Transmisión Sexual (ITS) que tienes o has tenido.",
+        "isBot": true,
+        "quick_replies": [
+          {
+            "title": "Virus de Papiloma Humano",
+            "payload": "Virus de Papiloma Humano",
+            "response": "formulario_completo",
+            "isBot": true,
+            "quick_replies": []
+          },
+          {
+            "title": "Clamidia",
+            "payload": "Clamidia",
+            "response": "formulario_completo",
+            "isBot": true,
+            "quick_replies": []
+          },
+          {
+            "title": "Gonorrea",
+            "payload": "Gonorrea",
+            "response": "formulario_completo",
+            "isBot": true,
+            "quick_replies": []
+          },
+          {
+            "title": "Sifilis",
+            "payload": "Sifilis",
+            "response": "formulario_completo",
+            "isBot": true,
+            "quick_replies": []
+          },
+          {
+            "title": "Herpes",
+            "payload": "Herpes",
+            "response": "formulario_completo",
+            "isBot": true,
+            "quick_replies": []
+          },
+          {
+            "title": "VIH/SIDA",
+            "payload": "VIH/SIDA",
+            "response": "formulario_completo",
+            "isBot": true,
+            "quick_replies": []
+          },
+          {
+            "title": "Tricomona",
+            "payload": "Tricomona",
+            "response": "formulario_completo",
+            "isBot": true,
+            "quick_replies": []
+          },
+          {
+            "title": "Otra",
+            "payload": "Otra",
+            "response": "formulario_completo",
+            "isBot": true,
+            "quick_replies": []
+          }
+        ]
+      },
+      {
+        "title": "No",
+        "response": "formulario_completo",
+        "isBot": true,
+        "quick_replies": []
+      },
+      {
+        "title": "Más información",
+        "response": "Las **Infecciones de Transmisión Sexual** (ITS) se transmiten principalmente a través del **contacto sexual sin protección**, ya sea vaginal, anal u oral. Son causadas por virus, bacterias, hongos o parásitos. Algunas ITS comunes incluyen el **Virus del Papiloma Humano (VPH), VIH, sífilis, gonorrea y clamidia**.\nEl diagnóstico de una ITS se realiza mediante exámenes médicos como **pruebas de sangre, orina o hisopados en las zonas afectadas**. En algunos casos, los síntomas pueden ser evidentes (úlceras, secreciones, dolor), pero **muchas ITS pueden ser asintomáticas**, por lo que es clave **realizar chequeos regulares**, especialmente si se tiene una vida sexual activa.\nLa prevención incluye el **uso correcto del preservativo, pruebas periódicas y vacunación** (como contra el Virus del Papiloma Humano). Si se detecta una ITS, **es fundamental seguir el tratamiento adecuado y comunicarlo a la pareja** para evitar su propagación.",
+        "isBot": true,
+        "quick_replies": []
+      }
+    ]
+  },
+  "formulario_completo": {
+    "response": "✅ ¡Listo! **Cumples con todos los criterios** para realizarte la prueba de Automuestreo.\nRecuerda que **debes realizar la toma de muestra en este momento**, ya que tienes **30 minutos para completar el procedimiento**.\n👉 Ahora, por favor **presiona el botón que aparece en pantalla para que puedas escanear el dispositivo**.\n🔴 Importante:\nUna vez hayas tomado la muestra, **no olvides entregar el dispositivo en el GAD más cercano**.\nSi no completas el proceso en el tiempo indicado, tendrás que **volver a iniciar desde cero respondiendo nuevamente todas las preguntas**.\n🕒 ¡Tienes 30 minutos! Comienza ahora presionando el botón.",
+    "isBot": true,
+    "quick_replies": [
+      {
+        "title": "¡Escanear dispositivo!"
+      },
+      {
+        "title": "Ver video"
+      }
+    ]
+  }
+}
