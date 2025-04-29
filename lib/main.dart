@@ -74,7 +74,8 @@ class SplashScreenState extends State<SplashScreen>
             context,
             MaterialPageRoute(
                 builder: (_) => DashboardListener(
-                        child: Dashboard(
+                    wasOffline: true,
+                    child: Dashboard(
                       hasInternet: false,
                     ))),
             (_) => false);
@@ -107,7 +108,8 @@ class SplashScreenState extends State<SplashScreen>
         Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(
-                builder: (_) => DashboardListener(child: Dashboard())),
+                builder: (_) =>
+                    DashboardListener(wasOffline: false, child: Dashboard())),
             (_) => false);
       } else {
         _log.fine(

@@ -16,8 +16,10 @@ final _log = Logger('DasboardListener');
 
 class DashboardListener extends StatefulWidget {
   final Widget child;
+  final bool wasOffline;
 
-  const DashboardListener({super.key, required this.child});
+  const DashboardListener(
+      {super.key, required this.child, required this.wasOffline});
 
   @override
   State<DashboardListener> createState() => _ConnectivityListenerState();
@@ -25,10 +27,12 @@ class DashboardListener extends StatefulWidget {
 
 class _ConnectivityListenerState extends State<DashboardListener> {
   Timer? _timer;
+  bool _wasOffline = false;
 
   @override
   void initState() {
     super.initState();
+    _wasOffline = widget.wasOffline;
     _startMonitoring();
   }
 
@@ -40,6 +44,9 @@ class _ConnectivityListenerState extends State<DashboardListener> {
         String? pending = await secureStorage.read(key: "pending_device");
         String? formRequest = await secureStorage.read(key: "form_request");
         if (!mounted) return;
+        if (_wasOffline) {
+          _checkAuth(context, null, null);
+        }
         if (pending != null || formRequest != null) {
           _log.fine("Cheking auth, requests are pending");
           _checkAuth(context, pending, formRequest);
@@ -76,6 +83,9 @@ class _ConnectivityListenerState extends State<DashboardListener> {
         SesionChatRequest sesion =
             SesionChatRequest.fromJson(jsonDecode(formRequest));
         SesionChatService.registrarInfoExamen(context, sesion);
+      }
+      if (_wasOffline) {
+        _wasOffline = false;
       }
     } else {
       _showSessionExpiredDialog(context);

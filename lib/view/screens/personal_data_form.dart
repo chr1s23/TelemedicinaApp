@@ -113,7 +113,7 @@ class _PersonalDataFormState extends State<PersonalDataForm> {
                         context,
                         MaterialPageRoute(
                             builder: (context) => widget.edit
-                                ? const DashboardListener(child: Dashboard())
+                                ? const DashboardListener(wasOffline: false, child: Dashboard())
                                 : const Presentation()),
                         (route) => false));
               },
