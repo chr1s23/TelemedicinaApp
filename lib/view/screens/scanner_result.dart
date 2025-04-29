@@ -56,7 +56,7 @@ class ScannerResultPageState extends State<ScannerResultPage> {
       Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
-              builder: (context) => DashboardListener(child: Dashboard())),
+              builder: (context) => DashboardListener(wasOffline: false, child: Dashboard())),
           (route) => false);
     }
   }

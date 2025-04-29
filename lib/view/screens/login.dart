@@ -52,7 +52,7 @@ class _LoginState extends State<Login> {
       Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
-              builder: (context) => DashboardListener(child: Dashboard())),
+              builder: (context) => DashboardListener(wasOffline: false, child: Dashboard())),
           (route) => false);
     }
 

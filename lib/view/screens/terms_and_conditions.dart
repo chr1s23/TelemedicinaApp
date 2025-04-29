@@ -36,7 +36,7 @@ class _TermsAndConditionsPageState extends State<TermsAndConditions> {
           Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(
-                  builder: (context) => DashboardListener(child: Dashboard())),
+                  builder: (context) => DashboardListener(wasOffline: false, child: Dashboard())),
               (route) => false);
         }
       } else {

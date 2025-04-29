@@ -147,7 +147,8 @@ class _ChatbotPageState extends State<OfflineChat> {
               context,
               MaterialPageRoute(
                   builder: (context) => DashboardListener(
-                          child: Dashboard(
+                      wasOffline: true,
+                      child: Dashboard(
                         hasInternet: false,
                       ))),
               (_) => false);
