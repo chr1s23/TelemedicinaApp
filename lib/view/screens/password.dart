@@ -36,11 +36,16 @@ class _PasswordState extends State<Password> {
 
     User user = User("", _usernameController.value.text,
         _passwordController.value.text, null);
-    await AuthService.changePassword(context, user);
+    bool success = await AuthService.changePassword(context, user);
 
     if (!mounted) return;
 
-    Navigator.pop(context, MaterialPageRoute(builder: (context) => Login()));
+    if (success) {
+      Navigator.pop(context, MaterialPageRoute(builder: (context) => Login()));
+    } else {
+      _usernameController.clear();
+      _passwordController.clear();
+    }
 
     setState(() {
       _isLoading = false;

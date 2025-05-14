@@ -29,6 +29,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
   ChewieController? _chewieController;
   int _currentIndex = 0;
   bool deviceRegistered = false;
+  bool videoComplete = false;
 
   @override
   void initState() {
@@ -38,15 +39,26 @@ class _AutoSamplingPageState extends State<Dashboard> {
 
   Future<void> _initializePlayer() async {
     String? dispositivo = await secureStorage.read(key: "user_device");
+    String? autoPlay = await secureStorage.read(key: "auto_play");
 
-    var (video, chewie) = await initializeVideoPlayer(
-      'assets/videos/automuestreo.mp4',
-      autoPlay: true,
-    );
+    var (video, chewie) =
+        await initializeVideoPlayer('assets/videos/automuestreo.mp4');
+
+    // Listener para saber si terminó el video
+    video.addListener(() {
+      if (video.value.position >= video.value.duration && !videoComplete) {
+        setState(() {
+          videoComplete = true;
+        });
+      }
+    });
 
     setState(() {
       if (dispositivo != null) {
         deviceRegistered = true;
+      }
+      if (autoPlay == "off") {
+        videoComplete = true;
       }
       _videoController = video;
       _chewieController = chewie;
@@ -137,19 +149,23 @@ class _AutoSamplingPageState extends State<Dashboard> {
                     size: 340),
                 const SizedBox(height: 20),
                 CustomButton(
-                    color: deviceRegistered
+                    color: !videoComplete
                         ? AllowedColors.gray
-                        : AllowedColors.blue,
+                        : deviceRegistered
+                            ? AllowedColors.gray
+                            : AllowedColors.blue,
                     label: "Registrar dispositivo de Automuestreo",
-                    onPressed: deviceRegistered
+                    onPressed: !videoComplete
                         ? null
-                        : () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        Scanner(deviceRegister: true)));
-                          },
+                        : deviceRegistered
+                            ? null
+                            : () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            Scanner(deviceRegister: true)));
+                              },
                     size: 340),
                 const SizedBox(height: 15),
                 Text(

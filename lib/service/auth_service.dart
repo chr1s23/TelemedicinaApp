@@ -35,50 +35,52 @@ sealed class AuthService {
 
         secureStorage.write(key: "user_id", value: userResponse.publicId);
         secureStorage.write(key: "user_token", value: userResponse.token);
-        secureStorage.write(
-            key: "user_device", value: userResponse.dispositivo);
+        secureStorage.write(key: "user_device", value: userResponse.dispositivo);
 
-        User.setCurrentUser(User(userResponse.nombre,
-            userResponse.nombreUsuario, "*****", userResponse.dispositivo));
+        User.setCurrentUser(User(userResponse.nombre, userResponse.nombreUsuario, "*****", userResponse.dispositivo));
 
-        _log.fine(
-            "Saved to storage: ID - ${userResponse.publicId} | Token - ${userResponse.token}");
+        _log.fine("Saved to storage: ID - ${userResponse.publicId} | Token - ${userResponse.token}");
+
+        String? autoPlay = await secureStorage.read(key: "auto_play");
+
+        if (autoPlay == null) {
+          secureStorage.write(key: "auto_play", value: "on");
+        }
 
         return userResponse;
-      } else {
-        showSnackBar(context, "Usuario o contraseña incorrectos");
       }
     } on DioException catch (e) {
       _log.severe('Server connection error: $e');
-
       showSnackBar(context, "Usuario o contraseña incorrectos");
     } catch (e) {
       _log.severe("Login failed: $e");
-
       showSnackBar(context, "Inicio de sesión fallido");
     }
 
     return null;
   }
 
-  static Future<UserResponse?> signUp(BuildContext context, UserRequest user) async {
+  static Future<UserResponse?> signUp(
+      BuildContext context, UserRequest user) async {
     try {
       var request = user.toJson();
-      _log.fine(request);
       final response = await getDio().post("/usuarios/registro", data: request);
       if (response.statusCode == 200) {
         UserResponse userResponse = UserResponse.fromJsonMap(response.data);
 
         secureStorage.write(key: "user_id", value: userResponse.publicId);
         secureStorage.write(key: "user_token", value: userResponse.token);
-        secureStorage.write(
-            key: "user_device", value: userResponse.dispositivo);
+        secureStorage.write(key: "user_device", value: userResponse.dispositivo);
+        secureStorage.write(key: "auto_play", value: "on");
 
         return userResponse;
+      }
+    } on DioException catch (e) {
+      _log.severe('Server connection error: $e');
+      final errorMessage = e.response?.data["mensaje"];
+      if (errorMessage != null) {
+        showSnackBar(context, errorMessage.toString());
       } else {
-        _log.severe(
-            "Unexpected server response during signup: ${response.data}");
-
         showSnackBar(context, "No se pudo registrar el usuario");
       }
     } catch (e) {
@@ -113,7 +115,7 @@ sealed class AuthService {
     return null;
   }
 
-  static Future<dynamic> changePassword(BuildContext context, User user) async {
+  static Future<bool> changePassword(BuildContext context, User user) async {
     try {
       final response =
           await getDio().put("/usuarios/cambiar-contrasena", data: {
@@ -124,17 +126,21 @@ sealed class AuthService {
       if (response.statusCode == 200) {
         _log.fine("Password changed sucess: User - ${user.nombreUsuario} ");
         showSnackBar(context, "Contraseña cambiada correctamente");
-      } else {
-        showSnackBar(context, "Verifique el nombre de usuario");
+        return true;
       }
     } on DioException catch (e) {
       _log.severe('Server connection error: $e');
-
-      showSnackBar(context, "No se pudo cambiar la contraseña");
+      final errorMessage = e.response?.data["mensaje"];
+      if (errorMessage != null) {
+        showSnackBar(context, errorMessage.toString());
+      } else {
+        showSnackBar(context, "No se pudo cambiar la contraseña");
+      }
     } catch (e) {
-      _log.severe("Login failed: $e");
+      _log.severe("Password change failed: $e");
 
       showSnackBar(context, "Cambio de contraseña fallido");
     }
+    return false;
   }
 }

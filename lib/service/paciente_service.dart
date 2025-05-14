@@ -48,16 +48,17 @@ sealed class PacienteService {
           showSnackBar(context, "Dispositivo registrado correctamente");
           secureStorage.delete(key: "pending_device");
           return true;
-        } else {
-          showSnackBar(context, "No se pudo registrar el dispositivo");
         }
       } on DioException catch (e) {
         _log.severe('Server connection error: $e');
-
-        showSnackBar(context, "Ocurrió un error inesperado");
+        final errorMessage = e.response?.data["mensaje"];
+        if (errorMessage != null) {
+          showSnackBar(context, errorMessage.toString());
+        } else {
+          showSnackBar(context, "No se pudo registrar el dispositivo");
+        }
       } catch (e) {
-        _log.severe("Login failed: $e");
-
+        _log.severe("Request failed: $e");
         showSnackBar(context, "Registro de dispositivo fallido");
       }
 
@@ -78,25 +79,26 @@ sealed class PacienteService {
 
       if (response.statusCode == 200) {
         _log.fine("User data updated");
-        
-        
         showSnackBar(context, "Datos actualizados correctamente");
 
         return true;
-      } else {
-        _log.severe("User data update failed: ${response.data}");
-
-        showSnackBar(context, "Actualización fallida");
-
-        return false;
       }
     } on DioException catch (e) {
       _log.severe('Server connection error: $e');
+      final errorMessage = e.response?.data["mensaje"];
+      if (errorMessage != null) {
+        showSnackBar(context, errorMessage.toString());
+      } else {
+        showSnackBar(context, "Actualización fallida");
+      }
+    } catch (e) {
+      _log.severe("Request failed: $e");
 
-      showSnackBar(context, "Ocurrió un error inesperado");
-
-      return false;
+      if (context.mounted) {
+        showSnackBar(context, 'Ocurrió un error inesperado.');
+      }
     }
+    return false;
   }
 
   static Future<PacienteRequest?> getPaciente(BuildContext context) async {
@@ -108,15 +110,21 @@ sealed class PacienteService {
         final paciente = PacienteRequest.fromJson(response.data);
 
         return paciente;
-      } else {
-        _log.severe("Paciente data update failed: ${response.data}");
-
-        showSnackBar(context, "Error al obtener la información");
       }
     } on DioException catch (e) {
       _log.severe('Server connection error: $e');
+      final errorMessage = e.response?.data["mensaje"];
+      if (errorMessage != null) {
+        showSnackBar(context, errorMessage.toString());
+      } else {
+        showSnackBar(context, "Error al obtener la información");
+      }
+    } catch (e) {
+      _log.severe("Request failed: $e");
 
-      showSnackBar(context, "Error de conexión con el servidor");
+      if (context.mounted) {
+        showSnackBar(context, 'Ocurrió un error inesperado.');
+      }
     }
 
     return null;

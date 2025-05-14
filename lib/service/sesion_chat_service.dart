@@ -44,21 +44,20 @@ sealed class SesionChatService {
               context, 'Proceso de Automuestreo terminado correctamente!.');
           secureStorage.delete(key: "form_request");
           return true;
-        } else {
-          if (context.mounted) {
-            showSnackBar(context,
-                'No se pudo registrar la información del Automuestreo VPH');
-          }
         }
       } on DioException catch (e) {
         _log.severe('Server connection error: $e');
-
+        final errorMessage = e.response?.data["mensaje"];
         if (context.mounted) {
-          showSnackBar(context, 'Ocurrió un error inesperado.');
+          if (errorMessage != null) {
+            showSnackBar(context, errorMessage.toString());
+          } else {
+            showSnackBar(context,
+                "No se pudo registrar la información del Automuestreo VPH");
+          }
         }
       } catch (e) {
         _log.severe("Login failed: $e");
-
         if (context.mounted) {
           showSnackBar(context, 'Registro de examen VPH fallido');
         }
@@ -67,8 +66,7 @@ sealed class SesionChatService {
       return null;
     } else {
       _log.warning("Writing form information to pending request");
-      secureStorage.write(
-          key: "form_request", value: jsonEncode(sesion));
+      secureStorage.write(key: "form_request", value: jsonEncode(sesion));
       if (context.mounted) {
         showSnackBar(
             context, 'Proceso de Automuestreo terminado correctamente!.');
