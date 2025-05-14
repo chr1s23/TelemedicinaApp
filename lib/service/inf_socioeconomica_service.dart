@@ -1,6 +1,7 @@
 import 'package:chatbot/model/requests/inf_socioeconomica_request.dart';
 import 'package:chatbot/model/responses/info_socioeconomica_response.dart';
 import 'package:chatbot/model/storage/storage.dart';
+import 'package:chatbot/view/widgets/utils.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -37,31 +38,22 @@ sealed class InfSocioeconomicaService {
         final infoResponse =
             InfoSocioeconomicaResponse.fromJsonMap(response.data);
         return infoResponse;
-      } else {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('No se pudo obtener la información del usuario'),
-            ),
-          );
-        }
-        return null;
       }
     } on DioException catch (e) {
       _log.severe('Server connection error: $e');
-
+      final errorMessage = e.response?.data["mensaje"];
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Ocurrió un error inesperado.')),
-        );
+        if (errorMessage != null) {
+          showSnackBar(context, errorMessage.toString());
+        } else {
+          showSnackBar(
+              context, "No se pudo obtener la información del usuario");
+        }
       }
     } catch (e) {
+      _log.severe("Request failed: $e");
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Solicitud de información fallida'),
-          ),
-        );
+        showSnackBar(context, 'Solicitud de información fallida');
       }
     }
     return null;
@@ -76,30 +68,21 @@ sealed class InfSocioeconomicaService {
 
       if (response.statusCode == 200) {
         return true;
-      } else {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('No se pudo editar la información del usuario'),
-            ),
-          );
-        }
       }
     } on DioException catch (e) {
       _log.severe('Server connection error: $e');
-
+      final errorMessage = e.response?.data["mensaje"];
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error de conexión con el servidor')),
-        );
+        if (errorMessage != null) {
+          showSnackBar(context, errorMessage.toString());
+        } else {
+          showSnackBar(context, "No se pudo editar la información del usuario");
+        }
       }
     } catch (e) {
+      _log.severe("Request failed: $e");
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Edición de información fallido'),
-          ),
-        );
+        showSnackBar(context, 'Edición de información fallido');
       }
     }
     return null;
