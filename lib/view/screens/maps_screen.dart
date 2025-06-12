@@ -7,7 +7,7 @@ import '../../model/responses/ubicacion_response.dart';
 
 class MapsScreen extends StatefulWidget {
   final String
-      establecimiento; // Ej: 'CENTRO_SALUD', 'CENTRO_CONTRA_VIOLENCIA', 'CENTRO_ATENCION_PSICOLOGICA'
+      establecimiento; // Ej: 'CENTRO_SALUD', 'CENTRO_PROTECCION', 'CENTRO_ATENCION_PSICOLOGICA'
 
   const MapsScreen({super.key, required this.establecimiento});
 
@@ -29,12 +29,18 @@ class _MapsScreenState extends State<MapsScreen> {
   Future<void> _loadUbicaciones() async {
     try {
       final data = await UbicacionService.fetchUbicaciones(
-          establecimiento: widget.establecimiento);
+        establecimiento: widget.establecimiento,
+      );
+
+      if (!mounted) return; // Si el widget ya no está, no hacemos nada.
+
       setState(() {
         ubicaciones = data;
         isLoading = false;
       });
     } catch (e) {
+      if (!mounted) return; // Protección en el catch.
+
       setState(() {
         isLoading = false;
       });
@@ -157,7 +163,7 @@ class _MapsScreenState extends State<MapsScreen> {
   String _getTitleFromEstablecimiento(String establecimiento) {
     switch (establecimiento) {
       case 'CENTRO_SALUD':
-        return 'Centros de Salud';
+        return 'Centros de Salud y Hospitales';
       case 'CENTRO_PROTECCION':
         return 'Centros en contra de la Violencia';
       case 'ATENCION_PSICOLOGICA':
