@@ -32,7 +32,7 @@ class MapsMenuScreen extends StatelessWidget {
                   ),
                 );
               },
-              child: const Text('Mapa - Centros de Salud'),
+              child: const Text('Mapa - Centros de Salud y Hospitales'),
             ),
             const SizedBox(height: 10),
             ElevatedButton(
@@ -41,7 +41,7 @@ class MapsMenuScreen extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (context) => const MapsScreen(
-                        establecimiento: 'CENTRO_CONTRA_VIOLENCIA'),
+                        establecimiento: 'CENTRO_PROTECCION'),
                   ),
                 );
               },
@@ -54,7 +54,7 @@ class MapsMenuScreen extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (context) => const MapsScreen(
-                        establecimiento: 'CENTRO_ATENCION_PSICOLOGICA'),
+                        establecimiento: 'ATENCION_PSICOLOGICA'),
                   ),
                 );
               },

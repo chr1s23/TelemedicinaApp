@@ -151,16 +151,16 @@ class _MapsScreenState extends State<MapsScreen> {
 
   LatLng _getInitialCenter() {
     // Puedes personalizar el centro según la ciudad o región
-    return const LatLng(-2.9, -79.0); // uenca
+    return const LatLng(-2.9, -79.0); // Cuenca
   }
 
   String _getTitleFromEstablecimiento(String establecimiento) {
     switch (establecimiento) {
       case 'CENTRO_SALUD':
         return 'Centros de Salud';
-      case 'CENTRO_CONTRA_VIOLENCIA':
+      case 'CENTRO_PROTECCION':
         return 'Centros en contra de la Violencia';
-      case 'CENTRO_ATENCION_PSICOLOGICA':
+      case 'ATENCION_PSICOLOGICA':
         return 'Centros de Atención Psicológica';
       default:
         return 'Mapa';
