@@ -21,7 +21,9 @@ class Scanner extends StatefulWidget {
 
 class _QRScannerPageState extends State<Scanner> {
   ExamenVphRequest? examen;
-  final MobileScannerController _scannerController = MobileScannerController();
+  final MobileScannerController _scannerController = MobileScannerController(
+    formats: [BarcodeFormat.qrCode]
+  );
 
   void _onQRScanned(BarcodeCapture capture) {
     if (capture.barcodes.isNotEmpty) {
