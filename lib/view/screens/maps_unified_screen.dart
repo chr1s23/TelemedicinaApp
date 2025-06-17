@@ -3,6 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 //import 'package:geolocator/geolocator.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/gestures.dart';
 import '../../service/ubicacion_service.dart';
 import '../../model/responses/ubicacion_response.dart';
 
@@ -123,16 +124,51 @@ class _MapsUnifiedScreenState extends State<MapsUnifiedScreen> {
                     children: [
                       Text('Dirección: ${ubicacion.direccion}'),
                       const SizedBox(height: 4),
-                      Text('Teléfono: ${ubicacion.telefono}'),
+                      RichText(
+                        text: TextSpan(
+                          text: 'Teléfono: ',
+                          style: DefaultTextStyle.of(context)
+                              .style, // estilo por defecto
+                          children: [
+                            TextSpan(
+                              text: ubicacion.telefono,
+                              style: const TextStyle(
+                                color: Colors.blue,
+                                decoration: TextDecoration.underline,
+                              ),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () async {
+                                  final telefono = ubicacion.telefono.trim();
+                                  final Uri telUri =
+                                      Uri(scheme: 'tel', path: telefono);
+
+                                  if (await canLaunchUrl(telUri)) {
+                                    await launchUrl(telUri);
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                          content: Text(
+                                              'No se pudo abrir la app de llamadas')),
+                                    );
+                                  }
+                                },
+                            ),
+                          ],
+                        ),
+                      ),
                       const SizedBox(height: 4),
                       Text('Horario: ${ubicacion.horario}'),
                       const SizedBox(height: 4),
                       InkWell(
                         onTap: () async {
-                          final Uri url = Uri.parse(ubicacion.sitioWeb);
+                          final sitioWeb = ubicacion.sitioWeb
+                              .trim()
+                              .replaceAll('\n', '')
+                              .replaceAll('\r', '');
+                          final Uri url = Uri.parse(sitioWeb);
+
                           if (await canLaunchUrl(url)) {
-                            await launchUrl(url,
-                                mode: LaunchMode.externalApplication);
+                            launchUrl(url);
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
