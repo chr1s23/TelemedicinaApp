@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:geolocator/geolocator.dart';
+//import 'package:geolocator/geolocator.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../service/ubicacion_service.dart';
 import '../../model/responses/ubicacion_response.dart';
 
@@ -52,7 +53,7 @@ class _MapsUnifiedScreenState extends State<MapsUnifiedScreen> {
     }
   }
 
-  Future<Position?> _determinePosition() async {
+/*  Future<Position?> _determinePosition() async {
     bool serviceEnabled;
     LocationPermission permission;
 
@@ -100,7 +101,7 @@ class _MapsUnifiedScreenState extends State<MapsUnifiedScreen> {
         _userLocation = LatLng(position.latitude, position.longitude);
       });
     }
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -126,7 +127,28 @@ class _MapsUnifiedScreenState extends State<MapsUnifiedScreen> {
                       const SizedBox(height: 4),
                       Text('Horario: ${ubicacion.horario}'),
                       const SizedBox(height: 4),
-                      Text('Sitio web: ${ubicacion.sitioWeb}'),
+                      InkWell(
+                        onTap: () async {
+                          final Uri url = Uri.parse(ubicacion.sitioWeb);
+                          if (await canLaunchUrl(url)) {
+                            await launchUrl(url,
+                                mode: LaunchMode.externalApplication);
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content:
+                                      Text('No se pudo abrir el sitio web')),
+                            );
+                          }
+                        },
+                        child: Text(
+                          ubicacion.sitioWeb,
+                          style: const TextStyle(
+                            color: Colors.blue,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                   actions: [
@@ -170,7 +192,8 @@ class _MapsUnifiedScreenState extends State<MapsUnifiedScreen> {
                 runSpacing: 4.0, // espacio entre filas
                 children: [
                   _buildFilterButton('CENTRO_SALUD', 'Ginecología'),
-                  _buildFilterButton('CENTRO_PROTECCION', 'En caso de agresión'),
+                  _buildFilterButton(
+                      'CENTRO_PROTECCION', 'En caso de agresión'),
                   _buildFilterButton('ATENCION_PSICOLOGICA', 'Psicología'),
                 ],
               ),
@@ -193,21 +216,19 @@ class _MapsUnifiedScreenState extends State<MapsUnifiedScreen> {
                     ),
                     children: [
                       TileLayer(
-                        urlTemplate:
-                            'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                        subdomains: const ['a', 'b', 'c'],
-                      ),
+                          urlTemplate:
+                              'https://tile.openstreetmap.org/{z}/{x}/{y}.png'),
                       MarkerLayer(markers: markers),
                     ],
                   ),
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
+      /*floatingActionButton: FloatingActionButton(
         onPressed: _goToUserLocation,
         tooltip: 'Ir a mi ubicación',
         child: const Icon(Icons.my_location),
-      ),
+      ),*/
     );
   }
 
