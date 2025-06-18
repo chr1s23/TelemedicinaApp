@@ -2,6 +2,7 @@ import 'package:chatbot/model/storage/storage.dart';
 import 'package:chatbot/utils/connectivity_listener.dart';
 import 'package:chatbot/view/screens/chat.dart';
 import 'package:chatbot/view/screens/form_chat.dart';
+import 'package:chatbot/view/screens/notifications.dart';
 //import 'package:chatbot/view/screens/notifications.dart';
 import 'package:chatbot/view/screens/resources.dart';
 import 'package:chatbot/view/screens/scanner.dart';
@@ -105,8 +106,8 @@ class _AutoSamplingPageState extends State<Dashboard> {
         _buildBody(),
         Resources(),
         WIPScreen(),
-        WIPScreen(),
-        //Notifications(),
+        //WIPScreen(),
+        Notifications(),
       ][_currentIndex],
       bottomNavigationBar: _buildBottomNavigationBar(
           (index) => _currentIndex = index, () => _currentIndex),

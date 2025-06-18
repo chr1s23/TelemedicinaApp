@@ -1,3 +1,6 @@
+import 'package:chatbot/model/responses/notificacion_response.dart';
+import 'package:chatbot/model/storage/storage.dart';
+import 'package:chatbot/service/notification_service.dart';
 import 'package:chatbot/view/screens/result.dart';
 import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +16,7 @@ class _NotificationsPageState extends State<Notifications>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
+  /*
   final List<Map<String, dynamic>> _notifications = [
     {
       "icon": Icons.description,
@@ -44,11 +48,17 @@ class _NotificationsPageState extends State<Notifications>
       "isRead": true,
     },
   ];
+*/
+  List<NotificacionResponse> _notificaciones = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
+    debugSecureStorage();
+    print("------Init Notifications");
     _tabController = TabController(length: 3, vsync: this);
+    _cargarNotificaciones();
   }
 
   @override
@@ -69,6 +79,35 @@ class _NotificationsPageState extends State<Notifications>
     );
   }
 
+  Future<void> _cargarNotificaciones() async {
+     print("▶ Ejecutando _cargarNotificaciones");
+    final cuentaUsuarioId = await secureStorage.read(key: "user_id");
+    print("**** cuentaUsuarioPublicId = $cuentaUsuarioId");
+    if (cuentaUsuarioId != null) {
+      try {
+        final resultado =
+            await NotificationService.fetchNotifications(cuentaUsuarioId);
+        setState(() {
+          _notificaciones = resultado;
+          _isLoading = false;
+        });
+      } catch (e) {
+        print("Error al mostrar notificaciones: $e");
+      }
+    }else {
+      print("No se encontró el ID del paciente");
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+   void debugSecureStorage() async {
+  final all = await secureStorage.readAll();
+  print("*************************************************************** Contenido de secureStorage:");
+  all.forEach((key, value) => print("🔑 $key => $value"));
+}
+  
   Widget _buildTabBar() {
     return TabBar(
       controller: _tabController,
@@ -87,78 +126,60 @@ class _NotificationsPageState extends State<Notifications>
   }
 
   Widget _buildNotificationList() {
-    List<Map<String, dynamic>> filteredNotifications;
+    List<NotificacionResponse> filtered;
     switch (_tabController.index) {
       case 1: // Leídas
-        filteredNotifications =
-            _notifications.where((n) => n["isRead"]).toList();
+        filtered = _notificaciones.where((n) => n.leido).toList();
         break;
       case 2: // No leídas
-        filteredNotifications =
-            _notifications.where((n) => !n["isRead"]).toList();
+        filtered = _notificaciones.where((n) => !n.leido).toList();
         break;
-      default: // Todas
-        filteredNotifications = _notifications;
+      default:
+        filtered = _notificaciones;
+    }
+
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
     }
 
     return ListView.builder(
-      itemCount: filteredNotifications.length,
-      itemBuilder: (context, index) {
-        return _buildNotificationCard(filteredNotifications[index]);
-      },
+      itemCount: filtered.length,
+      itemBuilder: (context, index) => _buildNotificationCard(filtered[index]),
     );
   }
 
-  Widget _buildNotificationCard(Map<String, dynamic> notification) {
-    return Card(
-      elevation: 2,
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      child: ListTile(
-        leading: Icon(notification["icon"],
-            color: AllowedColors.blue, size: 30),
-        title: Text(
-          notification["description"],
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight:
-                notification["isRead"] ? FontWeight.normal : FontWeight.bold,
+  Widget _buildNotificationCard(NotificacionResponse notif) {
+    return GestureDetector(
+      onTap: () {
+        if (!notif.leido) {
+          setState(() {
+            notif.leido = true;
+          });
+          // Aquí puedes hacer una petición PUT para marcarla como leída en el backend si deseas
+        }
+      },
+      child: Card(
+        elevation: 2,
+        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+        color: notif.leido ? Colors.white : Colors.grey[200],
+        child: ListTile(
+          leading:
+              Icon(Icons.notifications, color: AllowedColors.blue, size: 30),
+          title: Text(
+            notif.titulo,
+            style: TextStyle(
+              fontWeight: notif.leido ? FontWeight.normal : FontWeight.bold,
+              fontSize: 14,
+            ),
           ),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (notification["attachments"].isNotEmpty)
-              _buildAttachments(notification["attachments"]),
-          ],
-        ),
-        trailing: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Text(
-              notification["date"],
-              style: TextStyle(
-                fontSize: 10, 
-                color: AllowedColors.gray,
-                textBaseline: TextBaseline.alphabetic
-              ),
-            ),
-            SizedBox(
-              width: 39,
-              height: 39,
-              child: PopupMenuButton<String>(
-                iconSize: 20,
-                icon: const Icon(Icons.more_vert, color: AllowedColors.gray),
-                onSelected: (value) {
-                  // Acción según opción seleccionada
-                },
-                itemBuilder: (context) => [
-                  const PopupMenuItem(
-                      value: "markUnread", child: Text("Marcar como no leído")),
-                  const PopupMenuItem(value: "delete", child: Text("Eliminar")),
-                ],
-              ),
-            ),
-          ],
+          subtitle: Text(
+            notif.mensaje,
+            style: TextStyle(fontSize: 12),
+          ),
+          trailing: Text(
+            notif.fecha,
+            style: TextStyle(fontSize: 10, color: AllowedColors.gray),
+          ),
         ),
       ),
     );
@@ -184,13 +205,14 @@ class _NotificationsPageState extends State<Notifications>
                         MaterialPageRoute(
                             builder: (context) =>
                                 //Result(pdfName: attachment["path"])))
-                                Result(pdfName: "violencia_genero_autocuidado.pdf")))
+                                Result(
+                                    pdfName:
+                                        "violencia_genero_autocuidado.pdf")))
                     : () => {};
               },
               child: Text(
                 attachment["name"],
-                style: TextStyle(
-                    fontSize: 11, color: AllowedColors.blue),
+                style: TextStyle(fontSize: 11, color: AllowedColors.blue),
               ),
             )
           ],
