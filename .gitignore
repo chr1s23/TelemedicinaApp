@@ -59,6 +59,7 @@ app.*.map.json
 .pub/
 build/
 lib/generated_plugin_registrant.dart
+**/generated_*
 
 # Android related
 **/android/**/gradle-wrapper.jar
