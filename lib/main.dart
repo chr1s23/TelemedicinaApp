@@ -9,6 +9,7 @@ import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'log_utils.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 final _log = Logger('Main');
 
@@ -24,6 +25,14 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      supportedLocales: const [
+        Locale('es'), // Español
+      ],
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       locale: Locale("es", "EC"),
       theme: ThemeData(
           useMaterial3: true,
