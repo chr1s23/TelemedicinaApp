@@ -1,5 +1,5 @@
 class AppConfig {
-  static const bool isDevelopment = true; // CAMBIAR A FALSE si es producción
+  static const bool isDevelopment = false; // CAMBIAR A FALSE si es producción
   static const bool usingEmulator = false; // CAMBIAR A FALSE si usas dispositivo real
 
   static String get baseUrl {
