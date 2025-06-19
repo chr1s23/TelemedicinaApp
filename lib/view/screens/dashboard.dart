@@ -3,7 +3,6 @@ import 'package:chatbot/utils/connectivity_listener.dart';
 import 'package:chatbot/view/screens/chat.dart';
 import 'package:chatbot/view/screens/form_chat.dart';
 import 'package:chatbot/view/screens/notifications.dart';
-//import 'package:chatbot/view/screens/notifications.dart';
 import 'package:chatbot/view/screens/resources.dart';
 import 'package:chatbot/view/screens/scanner.dart';
 import 'package:chatbot/view/screens/wip.dart';
@@ -15,10 +14,10 @@ import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:chatbot/service/notification_service.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key, this.hasInternet = true});
-
   final bool hasInternet;
 
   @override
@@ -31,11 +30,30 @@ class _AutoSamplingPageState extends State<Dashboard> {
   int _currentIndex = 0;
   bool deviceRegistered = false;
   bool videoComplete = false;
+  bool hasUnreadNotifications = false;
 
   @override
   void initState() {
     _initializePlayer();
+    actualizarNotificaciones();
     super.initState();
+  }
+
+  Future<void> actualizarNotificaciones() async {
+    final userId = await secureStorage.read(key: "user_id");
+    final token = await secureStorage.read(key: "user_token");
+
+    if (userId != null && token != null) {
+      final notifications =
+          await NotificationService.fetchNotifications(userId);
+      final unread = notifications.any((n) => !n.leido);
+
+      if (mounted) {
+        setState(() {
+          hasUnreadNotifications = unread;
+        });
+      }
+    }
   }
 
   Future<void> _initializePlayer() async {
@@ -106,8 +124,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
         _buildBody(),
         Resources(),
         WIPScreen(),
-        //WIPScreen(),
-        Notifications(),
+        Notifications(onNotificacionesLeidas: actualizarNotificaciones),
       ][_currentIndex],
       bottomNavigationBar: _buildBottomNavigationBar(
           (index) => _currentIndex = index, () => _currentIndex),
@@ -230,15 +247,27 @@ class _AutoSamplingPageState extends State<Dashboard> {
             },
           ),
           IconButton(
-            icon: Badge(
-                child: Icon(currentIndex() == notificationsIndex
+            icon: Stack(
+              children: [
+                Icon(currentIndex() == notificationsIndex
                     ? Icons.notifications
-                    : Icons.notifications_outlined)),
+                    : Icons.notifications_outlined),
+                if (hasUnreadNotifications)
+                  const Positioned(
+                    right: 0,
+                    top: 0,
+                    child: CircleAvatar(
+                      radius: 5,
+                      backgroundColor: Colors.red,
+                    ),
+                  ),
+              ],
+            ),
             color: AllowedColors.white,
             onPressed: () {
-              currentIndex() != notificationsIndex
-                  ? changePage(notificationsIndex)
-                  : null;
+              if (currentIndex() != notificationsIndex) {
+                changePage(notificationsIndex);
+              }
             },
           ),
         ],

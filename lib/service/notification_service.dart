@@ -5,7 +5,7 @@ import 'package:chatbot/model/storage/storage.dart';
 
 class NotificationService {
   static const String _baseUrl =
-      "http://192.168.1.13:8080"; // cambia si es necesario
+      "http://192.168.18.4:8080"; // cambia si es necesario
 
   static Future<List<NotificacionResponse>> fetchNotifications(
       String publicId) async {
@@ -25,6 +25,26 @@ class NotificationService {
       return jsonList.map((e) => NotificacionResponse.fromJson(e)).toList();
     } else {
       throw Exception("Error al obtener notificaciones");
+    }
+  }
+
+  static Future<void> marcarNotificacionComoLeida(String publicId) async {
+    final token = await secureStorage.read(key: "user_token");
+    if (token == null) {
+      throw Exception("Token JWT no disponible");
+    }
+
+    final uri = Uri.parse("$_baseUrl/notificaciones/$publicId/marcar-leida");
+    final response = await http.put(uri, headers: {
+      "Authorization": "Bearer $token",
+      "Content-Type": "application/json"
+    });
+
+    print("🔄 PUT marcar-leida statusCode = ${response.statusCode}");
+    print("📦 Response body: ${response.body}");
+
+    if (response.statusCode != 200 && response.statusCode != 204) {
+      throw Exception("No se pudo marcar como leída la notificación");
     }
   }
 }

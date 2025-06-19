@@ -1,12 +1,13 @@
 import 'package:chatbot/model/responses/notificacion_response.dart';
 import 'package:chatbot/model/storage/storage.dart';
 import 'package:chatbot/service/notification_service.dart';
-import 'package:chatbot/view/screens/result.dart';
+//import 'package:chatbot/view/screens/result.dart';
 import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
 
 class Notifications extends StatefulWidget {
-  const Notifications({super.key});
+  final VoidCallback? onNotificacionesLeidas;
+  const Notifications({super.key, this.onNotificacionesLeidas});
 
   @override
   State<Notifications> createState() => _NotificationsPageState();
@@ -67,6 +68,32 @@ class _NotificationsPageState extends State<Notifications>
     super.dispose();
   }
 
+  Future<void> _cargarNotificaciones() async {
+    final cuentaUsuarioId = await secureStorage.read(key: "user_id");
+    if (cuentaUsuarioId != null) {
+      try {
+        final resultado =
+            await NotificationService.fetchNotifications(cuentaUsuarioId);
+
+        // 🔍 DEBUG: imprime la lista completa
+        for (var n in resultado) {
+          print("🧾 ${n.titulo} - leído: ${n.leido}");
+        }
+
+        setState(() {
+          _notificaciones = resultado;
+          _isLoading = false;
+        });
+      } catch (e) {
+        print("Error al mostrar notificaciones: $e");
+      }
+    } else {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -79,42 +106,20 @@ class _NotificationsPageState extends State<Notifications>
     );
   }
 
-  Future<void> _cargarNotificaciones() async {
-     print("▶ Ejecutando _cargarNotificaciones");
-    final cuentaUsuarioId = await secureStorage.read(key: "user_id");
-    print("**** cuentaUsuarioPublicId = $cuentaUsuarioId");
-    if (cuentaUsuarioId != null) {
-      try {
-        final resultado =
-            await NotificationService.fetchNotifications(cuentaUsuarioId);
-        setState(() {
-          _notificaciones = resultado;
-          _isLoading = false;
-        });
-      } catch (e) {
-        print("Error al mostrar notificaciones: $e");
-      }
-    }else {
-      print("No se encontró el ID del paciente");
-      setState(() {
-        _isLoading = false;
-      });
-    }
+  void debugSecureStorage() async {
+    final all = await secureStorage.readAll();
+    print(
+        "*************************************************************** Contenido de secureStorage:");
+    all.forEach((key, value) => print("🔑 $key => $value"));
   }
 
-   void debugSecureStorage() async {
-  final all = await secureStorage.readAll();
-  print("*************************************************************** Contenido de secureStorage:");
-  all.forEach((key, value) => print("🔑 $key => $value"));
-}
-  
   Widget _buildTabBar() {
     return TabBar(
       controller: _tabController,
       indicatorColor: AllowedColors.blue,
       labelColor: AllowedColors.blue,
       unselectedLabelColor: AllowedColors.gray,
-      tabs: [
+      tabs: const [
         Tab(text: "Todas"),
         Tab(text: "Leídas"),
         Tab(text: "No leídas"),
@@ -128,10 +133,10 @@ class _NotificationsPageState extends State<Notifications>
   Widget _buildNotificationList() {
     List<NotificacionResponse> filtered;
     switch (_tabController.index) {
-      case 1: // Leídas
+      case 1:
         filtered = _notificaciones.where((n) => n.leido).toList();
         break;
-      case 2: // No leídas
+      case 2:
         filtered = _notificaciones.where((n) => !n.leido).toList();
         break;
       default:
@@ -150,12 +155,19 @@ class _NotificationsPageState extends State<Notifications>
 
   Widget _buildNotificationCard(NotificacionResponse notif) {
     return GestureDetector(
-      onTap: () {
+      onTap: () async {
         if (!notif.leido) {
-          setState(() {
-            notif.leido = true;
-          });
-          // Aquí puedes hacer una petición PUT para marcarla como leída en el backend si deseas
+          try {
+            await NotificationService.marcarNotificacionComoLeida(
+                notif.publicId);
+            await _cargarNotificaciones(); // 🔄 ahora sí recarga correctamente
+            _tabController.animateTo(1); // 👉 cambia a "Leídas"
+            widget.onNotificacionesLeidas?.call(); // 🔔 actualiza punto rojo
+            showSnackBar(context, "Notificación marcada como leída");
+          } catch (e) {
+            showSnackBar(context, "Error al marcar como leída");
+            print("❌ Error al marcar notificación como leída: $e");
+          }
         }
       },
       child: Card(
@@ -174,7 +186,7 @@ class _NotificationsPageState extends State<Notifications>
           ),
           subtitle: Text(
             notif.mensaje,
-            style: TextStyle(fontSize: 12),
+            style: const TextStyle(fontSize: 12),
           ),
           trailing: Text(
             notif.fecha,
@@ -184,6 +196,8 @@ class _NotificationsPageState extends State<Notifications>
       ),
     );
   }
+
+  /*
 
   Widget _buildAttachments(List<dynamic> attachments) {
     return Column(
@@ -219,5 +233,5 @@ class _NotificationsPageState extends State<Notifications>
         );
       }).toList(),
     );
-  }
+  }*/
 }
