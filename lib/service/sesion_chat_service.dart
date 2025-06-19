@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:chatbot/config/env.dart'; // Cambio de ambientes
 
-
 final _log = Logger('SesionChatService');
 Dio? _dio;
 
