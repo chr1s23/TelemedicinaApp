@@ -77,6 +77,7 @@ class _PersonalDataFormState extends State<PersonalDataForm> {
       context: context,
       firstDate: DateTime(1900),
       lastDate: DateTime(2017),
+      locale: Locale('es')
     );
     if (picked != null) {
       setState(() {

@@ -3,9 +3,10 @@ import 'package:chatbot/utils/connectivity_listener.dart';
 import 'package:chatbot/view/screens/chat.dart';
 import 'package:chatbot/view/screens/form_chat.dart';
 import 'package:chatbot/view/screens/notifications.dart';
+import 'package:chatbot/view/screens/maps_unified_screen.dart';
 import 'package:chatbot/view/screens/resources.dart';
 import 'package:chatbot/view/screens/scanner.dart';
-import 'package:chatbot/view/screens/wip.dart';
+//import 'package:chatbot/view/screens/wip.dart';
 import 'package:chatbot/view/widgets/custom_app_bar.dart';
 import 'package:chatbot/view/widgets/custom_drawer.dart';
 import 'package:chatbot/view/widgets/utils.dart';
@@ -123,7 +124,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
       body: <Widget?>[
         _buildBody(),
         Resources(),
-        WIPScreen(),
+        const MapsUnifiedScreen(), // Pantalla de mapas
         Notifications(onNotificacionesLeidas: actualizarNotificaciones),
       ][_currentIndex],
       bottomNavigationBar: _buildBottomNavigationBar(
@@ -153,7 +154,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
                 const SizedBox(height: 20),
                 CustomButton(
                     color: deviceRegistered
-                        ? AllowedColors.blue
+                        ? const Color(0xFF002856)
                         : AllowedColors.gray,
                     label: "Iniciar proceso de Automuestreo",
                     onPressed: deviceRegistered
