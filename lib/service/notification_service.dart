@@ -5,7 +5,7 @@ import 'package:chatbot/model/storage/storage.dart';
 
 class NotificationService {
   static const String _baseUrl =
-      "http://192.168.18.4:8080"; // cambia si es necesario
+      "http://192.168.1.19:8080"; // cambia si es necesario
 
   static Future<List<NotificacionResponse>> fetchNotifications(
       String publicId) async {

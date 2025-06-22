@@ -17,6 +17,8 @@ migrate_working_dir/
 *.ipr
 *.iws
 .idea/
+#Otros
+generated_plugin_*
 
 # The .vscode folder contains launch configuration and tasks you configure in
 # VS Code which you may wish to be included in version control, so this line
@@ -168,3 +170,10 @@ Temporary Items
 *.code-workspace
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,vscode,java,flutter
+linux/flutter/generated_plugin_registrant.cc
+linux/flutter/generated_plugin_registrant.h
+# Archivos generados automáticamente por Flutter
+**/generated_*.*
+
+macos/Flutter/GeneratedPluginRegistrant.swift
+lib/config/env.dart
