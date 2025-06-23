@@ -16,6 +16,9 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:chatbot/service/notification_service.dart';
+import 'package:logger/logger.dart';
+
+final _log = Logger();
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key, this.hasInternet = true});
@@ -60,7 +63,14 @@ class _AutoSamplingPageState extends State<Dashboard> {
   Future<void> _initializePlayer() async {
     String? dispositivo = await secureStorage.read(key: "user_device");
     String? autoPlay = await secureStorage.read(key: "auto_play");
-
+  
+    //Agrega el token del dispositivo del usuario
+        final userId = await secureStorage.read(key: "user_id");
+        if (userId != null) {
+          await NotificationService.registrarTokenFCM(userId);
+        }else{
+          _log.w("[!] User ID not found in secure storage. Cannot register FCM token.");
+        }
     var (video, chewie) =
         await initializeVideoPlayer('assets/videos/automuestreo.mp4');
 
@@ -72,6 +82,7 @@ class _AutoSamplingPageState extends State<Dashboard> {
         });
       }
     });
+    
 
     setState(() {
       if (dispositivo != null) {
@@ -83,6 +94,8 @@ class _AutoSamplingPageState extends State<Dashboard> {
       _videoController = video;
       _chewieController = chewie;
     });
+    
+
   }
 
   @override
