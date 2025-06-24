@@ -2,6 +2,8 @@ import 'package:chatbot/model/requests/user.dart';
 import 'package:chatbot/model/storage/storage.dart';
 import 'package:chatbot/service/auth_service.dart';
 import 'package:chatbot/service/connectivity_service.dart';
+import 'package:chatbot/service/firebase_messaging_handler.dart';
+import 'package:chatbot/service/notification_service.dart';
 import 'package:chatbot/utils/dashboard_listener.dart';
 import 'package:chatbot/view/screens/dashboard.dart';
 import 'package:chatbot/view/screens/presentation.dart';
@@ -10,11 +12,21 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'log_utils.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 final _log = Logger('Main');
-
-void main() {
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+Future<void> main() async {
   initializeLogger();
+  
+  WidgetsFlutterBinding.ensureInitialized(); // OBLIGATORIO antes de Firebase
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  await FirebaseMessagingHandler.initializeFCM(); // Para el manejo de las notificaciones FMC
+
   runApp(MyApp());
 }
 
@@ -24,6 +36,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
       supportedLocales: const [
         Locale('es'), // Español
