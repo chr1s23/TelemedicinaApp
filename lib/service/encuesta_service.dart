@@ -47,4 +47,23 @@ class EncuestaService {
       return false;
     }
   }
+
+  // Verifica si la encuesta está completada
+  static Future<bool> verificarEncuestaCompletada(String cuentaUsuarioId) async {
+  try {
+    final dio = getDio();
+    final response = await dio.get('$_endpoint/completada/$cuentaUsuarioId');
+
+    if (response.statusCode == 200) {
+      return response.data ?? false; 
+    } else {
+      _log.warning('Error al verificar si la encuesta está completada: ${response.statusCode}');
+      return false;
+    }
+  } catch (e, stacktrace) {
+    _log.severe('Excepción al verificar si la encuesta está completada: $e', e, stacktrace);
+    return false;
+  }
+}
+
 }

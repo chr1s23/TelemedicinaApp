@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:chatbot/view/widgets/custom_button.dart';
 import 'package:chatbot/view/widgets/utils.dart';
 import 'package:chatbot/view/screens/terms_and_conditions.dart';
+//import 'package:chatbot/view/screens/pdf_result_page.dart'; 
 import 'package:chatbot/model/requests/encuesta_sus_request.dart';
 import 'package:chatbot/service/encuesta_service.dart';
 import 'package:chatbot/model/storage/storage.dart';
@@ -58,8 +59,7 @@ class _LikertSurveyPageState extends State<LikertSurveyPage> {
                   ..pop(),
               );
             },
-            child: const Text("Cancelar",
-                style: TextStyle(color: AllowedColors.red, fontSize: 12)),
+            child: const Text("Cancelar", style: TextStyle(color: AllowedColors.red, fontSize: 12)),
           ),
         ],
       ),
@@ -71,19 +71,12 @@ class _LikertSurveyPageState extends State<LikertSurveyPage> {
             children: [
               const Text(
                 "Encuesta de usabilidad del sistema y aceptabilidad",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 15,
-                  color: AllowedColors.black,
-                ),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: AllowedColors.black),
               ),
               const SizedBox(height: 10),
               const Text(
                 "Es necesario completar esta encuesta para acceder al resultado de su examen.",
-                style: TextStyle(
-                  fontSize: 13,
-                  color: AllowedColors.black,
-                ),
+                style: TextStyle(fontSize: 13, color: AllowedColors.black),
               ),
               const SizedBox(height: 20),
               const SizedBox(height: 10),
@@ -112,10 +105,7 @@ class _LikertSurveyPageState extends State<LikertSurveyPage> {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      "${index + 1}. ${_questions[index]}",
-                      style: const TextStyle(fontSize: 15, color: AllowedColors.black),
-                    ),
+                    Text("${index + 1}. ${_questions[index]}", style: const TextStyle(fontSize: 15, color: AllowedColors.black)),
                     Wrap(
                       spacing: 10,
                       children: List.generate(5, (i) {
@@ -162,23 +152,31 @@ class _LikertSurveyPageState extends State<LikertSurveyPage> {
               return;
             }
 
-            final encuesta = EncuestaSusRequest(
-              _answers.cast<int>(),
-              cuentaUsuarioId,
-            );
+            // Verificar si la encuesta está completada
+            final completada = await EncuestaService.verificarEncuestaCompletada(cuentaUsuarioId);
 
-            final ok = await EncuestaService.guardarEncuesta(encuesta);
+            if (completada) {
+              // Si  está completada, navega a la página de resultados en PDF (CAMBIALE AQUI JEJE)
+            //  Navigator.push(
+            //    context,
+            //    MaterialPageRoute(builder: (context) => PDFResultPage()),
+            //  );
+            } else {
+              // Si no está completada, guardar la encuesta
+              final encuesta = EncuestaSusRequest(_answers.cast<int>(), cuentaUsuarioId);
+              final ok = await EncuestaService.guardarEncuesta(encuesta);
 
-            if (!ok && context.mounted) {
-              showSnackBar(context, "No se pudo guardar la encuesta.");
-              return;
-            }
+              if (!ok && context.mounted) {
+                showSnackBar(context, "No se pudo guardar la encuesta.");
+                return;
+              }
 
-            if (context.mounted) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => TermsAndConditions()),
-              );
+              if (context.mounted) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => TermsAndConditions()),
+                );
+              }
             }
           },
           label: "Ver Resultado",
