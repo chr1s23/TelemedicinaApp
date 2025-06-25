@@ -1,5 +1,6 @@
 import 'package:chatbot/model/responses/notificacion_response.dart';
 import 'package:chatbot/model/storage/storage.dart';
+import 'package:chatbot/service/firebase_messaging_handler.dart';
 import 'package:chatbot/service/notification_service.dart';
 //import 'package:chatbot/view/screens/result.dart';
 import 'package:chatbot/view/widgets/utils.dart';
@@ -19,7 +20,6 @@ class Notifications extends StatefulWidget {
       GlobalKey<NotificationsPageState>();
 
   Notifications({this.onNotificacionesLeidas}) : super(key: globalKey);
-  
 
   @override
   State<Notifications> createState() => NotificationsPageState();
@@ -30,8 +30,8 @@ Clase que maneja el estado de la vista de notificaciones
 **********************************************************
 */
 
-class NotificationsPageState extends State<Notifications> with SingleTickerProviderStateMixin {
-
+class NotificationsPageState extends State<Notifications>
+    with SingleTickerProviderStateMixin {
   //Controla que pestaña está activa
   late TabController _tabController;
   //Lista las notificaciones obtenidas desde el servicio
@@ -49,6 +49,7 @@ class NotificationsPageState extends State<Notifications> with SingleTickerProvi
     //Trae las notificaciones con el servicio
     _cargarNotificaciones();
   }
+
   /** 
    * Libera al controlador de pestañas cuando se cierra la vista
   ***/
@@ -78,9 +79,8 @@ class NotificationsPageState extends State<Notifications> with SingleTickerProvi
         print("Error al mostrar notificaciones: $e");
       }
     } else {
-       
       // Apartado Vacío si es que la usuaria no tiene notificaciones
-  
+
       setState(() {
         _isLoading = false;
       });
@@ -89,10 +89,10 @@ class NotificationsPageState extends State<Notifications> with SingleTickerProvi
 
   Future<void> recargarDesdeExterior() async {
     print("♻️ Recargando notificaciones desde push...");
-  await _cargarNotificaciones();
-  widget.onNotificacionesLeidas?.call();
-  setState(() {}); // para refrescar lista sin cambiar tab
-}
+    await _cargarNotificaciones();
+    widget.onNotificacionesLeidas?.call();
+    setState(() {}); // para refrescar lista sin cambiar tab
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -100,7 +100,9 @@ class NotificationsPageState extends State<Notifications> with SingleTickerProvi
       body: Column(
         children: [
           _buildTabBar(),
-          Expanded(child: _buildNotificationList()), //El contenido cambia según la pestaña _buildNotificationList
+          Expanded(
+              child:
+                  _buildNotificationList()), //El contenido cambia según la pestaña _buildNotificationList
         ],
       ),
     );
@@ -129,6 +131,7 @@ class NotificationsPageState extends State<Notifications> with SingleTickerProvi
       },
     );
   }
+
   /**
    * Filtra y muestra la lista de notificaciones en la respectiva pestaña
    */
@@ -172,6 +175,10 @@ class NotificationsPageState extends State<Notifications> with SingleTickerProvi
             print("[X] Error al marcar notificación como leída: $e");
           }
         }
+        FirebaseMessagingHandler.manejarClickNotificacion({
+            "publicId": notif.publicId,
+            "tipoNotificacion": notif.tipoNotificacion,
+          });
       },
       // Construye la tarjeta de notificación
       child: Card(
