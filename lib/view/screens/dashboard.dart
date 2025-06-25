@@ -21,14 +21,16 @@ import 'package:logger/logger.dart';
 final _log = Logger();
 
 class Dashboard extends StatefulWidget {
-  const Dashboard({super.key, this.hasInternet = true});
+  Dashboard({super.key, this.hasInternet = true});
   final bool hasInternet;
+  static final GlobalKey<AutoSamplingPageState> globalKey =
+      GlobalKey<AutoSamplingPageState>();
 
   @override
-  State<Dashboard> createState() => _AutoSamplingPageState();
+  State<Dashboard> createState() => AutoSamplingPageState();
 }
 
-class _AutoSamplingPageState extends State<Dashboard> {
+class AutoSamplingPageState extends State<Dashboard> {
   VideoPlayerController? _videoController;
   ChewieController? _chewieController;
   int _currentIndex = 0;
@@ -42,6 +44,16 @@ class _AutoSamplingPageState extends State<Dashboard> {
     actualizarNotificaciones();
     super.initState();
   }
+
+  void actualizarNotificacionesDesdeExterior() {
+  if (mounted) {
+    setState(() {
+      _log.i("⚠️Actualizando notificaciones desde el exterior");
+      hasUnreadNotifications = true;
+    });
+  }
+  _log.i("--- ⚠️Actualizando notificaciones desde el exterior");
+}
 
   Future<void> actualizarNotificaciones() async {
     final userId = await secureStorage.read(key: "user_id");
@@ -63,14 +75,15 @@ class _AutoSamplingPageState extends State<Dashboard> {
   Future<void> _initializePlayer() async {
     String? dispositivo = await secureStorage.read(key: "user_device");
     String? autoPlay = await secureStorage.read(key: "auto_play");
-  
+
     //Agrega el token del dispositivo del usuario
-        final userId = await secureStorage.read(key: "user_id");
-        if (userId != null) {
-          await NotificationService.registrarTokenFCM(userId);
-        }else{
-          _log.w("[!] User ID not found in secure storage. Cannot register FCM token.");
-        }
+    final userId = await secureStorage.read(key: "user_id");
+    if (userId != null) {
+      await NotificationService.registrarTokenFCM(userId);
+    } else {
+      _log.w(
+          "[!] User ID not found in secure storage. Cannot register FCM token.");
+    }
     var (video, chewie) =
         await initializeVideoPlayer('assets/videos/automuestreo.mp4');
 
@@ -82,7 +95,6 @@ class _AutoSamplingPageState extends State<Dashboard> {
         });
       }
     });
-    
 
     setState(() {
       if (dispositivo != null) {
@@ -94,8 +106,6 @@ class _AutoSamplingPageState extends State<Dashboard> {
       _videoController = video;
       _chewieController = chewie;
     });
-    
-
   }
 
   @override

@@ -5,63 +5,53 @@ import 'package:chatbot/service/notification_service.dart';
 import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
 
+/*
+*********************************************************
+Componente Principal de la vista. StatefulWidget es utilizado
+para manejar el estado de las notificaciones y la interacción
+con el usuario.(El contenido cambia dinámicamente)
+
+**********************************************************
+*/
 class Notifications extends StatefulWidget {
   final VoidCallback? onNotificacionesLeidas;
-  const Notifications({super.key, this.onNotificacionesLeidas});
+  static final GlobalKey<NotificationsPageState> globalKey =
+      GlobalKey<NotificationsPageState>();
+
+  Notifications({this.onNotificacionesLeidas}) : super(key: globalKey);
+  
 
   @override
-  State<Notifications> createState() => _NotificationsPageState();
+  State<Notifications> createState() => NotificationsPageState();
 }
-
-class _NotificationsPageState extends State<Notifications>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-
-  /*
-  final List<Map<String, dynamic>> _notifications = [
-    {
-      "icon": Icons.description,
-      "description": "El resultado de su prueba se encuentra listo!",
-      "attachments": [
-        {
-          "type": "pdf",
-          "name": "Resultado.pdf",
-          "path": "assets/docs/resultado.pdf"
-        },
-      ],
-      "date": "15m",
-      "isRead": false,
-    },
-    {
-      "icon": Icons.notifications,
-      "description": "Termina de configurar tu perfil.",
-      "attachments": [],
-      "date": "1m",
-      "isRead": false,
-    },
-    {
-      "icon": Icons.link,
-      "description": "Consulta este enlace para más información.",
-      "attachments": [
-        {"type": "link", "name": "https://example.com"},
-      ],
-      "date": "15/02/2023",
-      "isRead": true,
-    },
-  ];
+/*
+**********************************************************
+Clase que maneja el estado de la vista de notificaciones
+**********************************************************
 */
+
+class NotificationsPageState extends State<Notifications> with SingleTickerProviderStateMixin {
+
+  //Controla que pestaña está activa
+  late TabController _tabController;
+  //Lista las notificaciones obtenidas desde el servicio
   List<NotificacionResponse> _notificaciones = [];
+  // Indica si las notificaciones están cargando
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
     debugSecureStorage();
-    print("------Init Notifications");
+    print("📩 ------Init Notifications");
+    //Definición de las 3 pestañas.
     _tabController = TabController(length: 3, vsync: this);
+    //Trae las notificaciones con el servicio
     _cargarNotificaciones();
   }
-
+  /** 
+   * Libera al controlador de pestañas cuando se cierra la vista
+  ***/
   @override
   void dispose() {
     _tabController.dispose();
@@ -75,11 +65,11 @@ class _NotificationsPageState extends State<Notifications>
         final resultado =
             await NotificationService.fetchNotifications(cuentaUsuarioId);
 
-        // 🔍 DEBUG: imprime la lista completa
+        // DEBUG DE LAS NOTIFICACIONES DE LA USUARIA
         for (var n in resultado) {
-          print("🧾 ${n.titulo} - leído: ${n.leido}");
+          print("************🧾 ${n.titulo} - leído: ${n.leido}");
         }
-
+        // Actualiza el estado con las notificaciones obtenidas
         setState(() {
           _notificaciones = resultado;
           _isLoading = false;
@@ -88,11 +78,21 @@ class _NotificationsPageState extends State<Notifications>
         print("Error al mostrar notificaciones: $e");
       }
     } else {
+       
+      // Apartado Vacío si es que la usuaria no tiene notificaciones
+  
       setState(() {
         _isLoading = false;
       });
     }
   }
+
+  Future<void> recargarDesdeExterior() async {
+    print("♻️ Recargando notificaciones desde push...");
+  await _cargarNotificaciones();
+  widget.onNotificacionesLeidas?.call();
+  setState(() {}); // para refrescar lista sin cambiar tab
+}
 
   @override
   Widget build(BuildContext context) {
@@ -100,7 +100,7 @@ class _NotificationsPageState extends State<Notifications>
       body: Column(
         children: [
           _buildTabBar(),
-          Expanded(child: _buildNotificationList()),
+          Expanded(child: _buildNotificationList()), //El contenido cambia según la pestaña _buildNotificationList
         ],
       ),
     );
@@ -129,7 +129,9 @@ class _NotificationsPageState extends State<Notifications>
       },
     );
   }
-
+  /**
+   * Filtra y muestra la lista de notificaciones en la respectiva pestaña
+   */
   Widget _buildNotificationList() {
     List<NotificacionResponse> filtered;
     switch (_tabController.index) {
@@ -155,21 +157,23 @@ class _NotificationsPageState extends State<Notifications>
 
   Widget _buildNotificationCard(NotificacionResponse notif) {
     return GestureDetector(
+      // Detecta el toque en la notificación: Marca como leída si no lo estaba y cambia a la pestaña "Leídas"
       onTap: () async {
         if (!notif.leido) {
           try {
             await NotificationService.marcarNotificacionComoLeida(
                 notif.publicId);
-            await _cargarNotificaciones(); // 🔄 ahora sí recarga correctamente
-            _tabController.animateTo(1); // 👉 cambia a "Leídas"
-            widget.onNotificacionesLeidas?.call(); // 🔔 actualiza punto rojo
+            await _cargarNotificaciones(); // Recarga de notificaciones
+            _tabController.animateTo(1); //  cambia a "Leídas"
+            widget.onNotificacionesLeidas?.call(); // Actualiza al punto rojo
             showSnackBar(context, "Notificación marcada como leída");
           } catch (e) {
             showSnackBar(context, "Error al marcar como leída");
-            print("❌ Error al marcar notificación como leída: $e");
+            print("[X] Error al marcar notificación como leída: $e");
           }
         }
       },
+      // Construye la tarjeta de notificación
       child: Card(
         elevation: 2,
         margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),

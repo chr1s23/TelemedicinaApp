@@ -195,7 +195,7 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
                           context,
                           MaterialPageRoute(
                               builder: (context) =>
-                                  const DashboardListener(wasOffline: false, child: Dashboard())),
+                                  DashboardListener(wasOffline: false, child: Dashboard())),
                           (route) => false);
                     }
                   });

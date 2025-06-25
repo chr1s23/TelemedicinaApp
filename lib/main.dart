@@ -18,6 +18,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 
 final _log = Logger('Main');
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+final GlobalKey<State<StatefulWidget>> dashboardKey = GlobalKey<State<StatefulWidget>>();
+
 Future<void> main() async {
   initializeLogger();
   
@@ -25,6 +27,7 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  await FirebaseMessaging.instance.requestPermission();
   await FirebaseMessagingHandler.initializeFCM(); // Para el manejo de las notificaciones FMC
 
   runApp(MyApp());
@@ -98,6 +101,7 @@ class SplashScreenState extends State<SplashScreen>
                 builder: (_) => DashboardListener(
                     wasOffline: true,
                     child: Dashboard(
+                      key: Dashboard.globalKey,
                       hasInternet: false,
                     ))),
             (_) => false);
@@ -131,7 +135,8 @@ class SplashScreenState extends State<SplashScreen>
             context,
             MaterialPageRoute(
                 builder: (_) =>
-                    DashboardListener(wasOffline: false, child: Dashboard())),
+                    DashboardListener(wasOffline: false, child: Dashboard(key: Dashboard.globalKey))
+),
             (_) => false);
       } else {
         _log.fine(

@@ -53,7 +53,6 @@ class NotificationService {
     }
   }
 
-// Registrar dispositivo y token FCM en el backend
   static Future<void> registrarTokenFCM(String cuentaUsuarioPublicId) async {
     final tokenJWT = await secureStorage.read(key: "user_token");
     if (tokenJWT == null) {
@@ -92,4 +91,5 @@ class NotificationService {
 
     _log.i("[OK] Token FCM registrado con éxito");
   }
+
 }
