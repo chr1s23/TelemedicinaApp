@@ -17,6 +17,7 @@ import 'package:video_player/video_player.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:chatbot/service/notification_service.dart';
 import 'package:logger/logger.dart';
+import 'package:chatbot/service/notification_state.dart'; 
 
 final _log = Logger();
 
@@ -55,20 +56,14 @@ class AutoSamplingPageState extends State<Dashboard> {
   _log.i("--- ⚠️Actualizando notificaciones desde el exterior");
 }
 
+  
   Future<void> actualizarNotificaciones() async {
-    final userId = await secureStorage.read(key: "user_id");
-    final token = await secureStorage.read(key: "user_token");
+    final unread = NotificationState().hayNoLeidas;
 
-    if (userId != null && token != null) {
-      final notifications =
-          await NotificationService.fetchNotifications(userId);
-      final unread = notifications.any((n) => !n.leido);
-
-      if (mounted) {
-        setState(() {
-          hasUnreadNotifications = unread;
-        });
-      }
+    if (mounted) {
+      setState(() {
+        hasUnreadNotifications = unread;
+      });
     }
   }
 

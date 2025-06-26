@@ -15,6 +15,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:provider/provider.dart';
 
 final _log = Logger('Main');
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -123,11 +124,15 @@ class SplashScreenState extends State<SplashScreen>
       await Future.delayed(const Duration(milliseconds: 600));
 
       if (!mounted) return;
-
+      //Cuando el usuario ya está autenticado
       if (valid != null && user != null) {
         User.setCurrentUser(user, save: false);
 
         secureStorage.write(key: "user_token", value: valid);
+         // Cargar notificaciones desde el backend una sola vez
+         final cuentaUsuarioId = await secureStorage.read(key: "user_id");
+         print("📩 ------Cargando notificaciones para el usuario: $cuentaUsuarioId");
+        await NotificationService.cargarYGuardarNotificaciones(cuentaUsuarioId!);  
 
         _log.fine("User info found in secure storage. Skipping login.");
 

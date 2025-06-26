@@ -5,6 +5,11 @@ import 'package:chatbot/view/screens/resultado_viewer.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:chatbot/view/screens/encuesta_sus.dart';
+import 'package:chatbot/model/storage/storage.dart';
+import 'package:chatbot/utils/notificacion_flags.dart';
+
+
 
 import '../main.dart'; // Para acceder al navigatorKey
 
@@ -46,6 +51,8 @@ class FirebaseMessagingHandler {
 
     //  Cuando está en SEGUNDO PLANO y el usuario toca la notificación
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      
+      actualizarNotificacionesEnMemoria();
       manejarClickNotificacion(message.data);
     });
 
@@ -53,6 +60,11 @@ class FirebaseMessagingHandler {
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       print("📬 Mensaje recibido en primer plano: ${message.data}");
       Dashboard.globalKey.currentState?.actualizarNotificacionesDesdeExterior();
+      print("🧪 Notifications.globalKey.currentState = ${Notifications.globalKey.currentState}");
+
+      actualizarNotificacionesEnMemoria();
+      NotificacionFlags.hayNotificacionNueva = true;
+
       RemoteNotification? notification = message.notification;
       AndroidNotification? android = message.notification?.android;
 
@@ -105,8 +117,24 @@ class FirebaseMessagingHandler {
 
     if (tipo == "RESULTADO") {
       navigatorKey.currentState?.push(
-        MaterialPageRoute(builder: (_) => const ResultadoViewer()),
+        MaterialPageRoute(builder: (_) =>  LikertSurveyPage()),
       );
     }
+  }
+  static Future<void> actualizarNotificacionesEnMemoria() async {
+    final currentState = Notifications.globalKey.currentState;
+    if (currentState != null && currentState.mounted) {
+      final userId = await secureStorage.read(key: "user_id");
+      if (userId != null) {
+        await NotificationService.cargarYGuardarNotificaciones(userId);
+        currentState.recargarDesdeExterior();
+      } else {
+        print("[X] No se pudo obtener el ID de usuario para actualizar notificaciones.");
+      }
+    } else {
+      print("⚠️ Notifications no está montado, guardamos solo en memoria.");
+      NotificacionFlags.hayNotificacionNueva = true;
+    }
+
   }
 }

@@ -5,6 +5,9 @@ import 'package:chatbot/service/notification_service.dart';
 //import 'package:chatbot/view/screens/result.dart';
 import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:chatbot/service/notification_state.dart';
+import 'package:chatbot/utils/notificacion_flags.dart';
+
 
 /*
 *********************************************************
@@ -32,6 +35,7 @@ Clase que maneja el estado de la vista de notificaciones
 
 class NotificationsPageState extends State<Notifications>
     with SingleTickerProviderStateMixin {
+      bool _recargarPendiente = false;
   //Controla que pestaña está activa
   late TabController _tabController;
   //Lista las notificaciones obtenidas desde el servicio
@@ -47,7 +51,27 @@ class NotificationsPageState extends State<Notifications>
     //Definición de las 3 pestañas.
     _tabController = TabController(length: 3, vsync: this);
     //Trae las notificaciones con el servicio
+    if (NotificacionFlags.hayNotificacionNueva) {
+    print("♻️ Se detectó una nueva notificación push, recargando...");
     _cargarNotificaciones();
+    NotificacionFlags.hayNotificacionNueva = false; 
+  } else {
+    _cargarNotificaciones();
+  }
+  }
+  /**
+   * Método que se llama cuando las dependencias cambian.
+   * Aquí se verifica si hay una nueva notificación y se recarga la lista.
+   */
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    if (NotificacionFlags.hayNotificacionNueva) {
+      print("🔁 Recargando porque bandera está activa");
+      _cargarNotificaciones();
+      NotificacionFlags.hayNotificacionNueva = false;
+    }
   }
 
   /** 
@@ -59,36 +83,33 @@ class NotificationsPageState extends State<Notifications>
     super.dispose();
   }
 
+  /**
+   * Carga las notificaciones desde la memoria y actualiza el estado
+   */
+
   Future<void> _cargarNotificaciones() async {
-    final cuentaUsuarioId = await secureStorage.read(key: "user_id");
-    if (cuentaUsuarioId != null) {
-      try {
-        final resultado =
-            await NotificationService.fetchNotifications(cuentaUsuarioId);
-
-        // DEBUG DE LAS NOTIFICACIONES DE LA USUARIA
-        for (var n in resultado) {
-          print("************🧾 ${n.titulo} - leído: ${n.leido}");
-        }
-        // Actualiza el estado con las notificaciones obtenidas
-        setState(() {
-          _notificaciones = resultado;
-          _isLoading = false;
-        });
-      } catch (e) {
-        print("Error al mostrar notificaciones: $e");
+    if (NotificacionFlags.hayNotificacionNueva) {
+      print("🔁 Recargando desde el servidor (hay nueva)");
+      final userId = await secureStorage.read(key: "user_id");
+      if (userId != null) {
+        final nuevas = await NotificationService.fetchNotifications(userId);
+        NotificationState().actualizar(nuevas); // actualiza en memoria
+        NotificacionFlags.hayNotificacionNueva = false;
       }
-    } else {
-      // Apartado Vacío si es que la usuaria no tiene notificaciones
-
-      setState(() {
-        _isLoading = false;
-      });
     }
+
+    final resultado = NotificationState().notificaciones;
+    setState(() {
+      _notificaciones = resultado;
+      _isLoading = false;
+      _recargarPendiente = false;
+    });
   }
 
+
+
   Future<void> recargarDesdeExterior() async {
-    print("♻️ Recargando notificaciones desde push...");
+    print("--♻️ Recargando notificaciones desde push...");
     await _cargarNotificaciones();
     widget.onNotificacionesLeidas?.call();
     setState(() {}); // para refrescar lista sin cambiar tab
@@ -96,17 +117,24 @@ class NotificationsPageState extends State<Notifications>
 
   @override
   Widget build(BuildContext context) {
+    // Si hay notificación pendiente, la recargo
+    if (NotificacionFlags.hayNotificacionNueva && !_recargarPendiente) {
+      print("🔁 Re-render: bandera activa, recargando en build()");
+      _recargarPendiente = true; // evitamos loops infinitos
+      NotificacionFlags.hayNotificacionNueva = false;
+      _cargarNotificaciones(); // async pero sin esperar
+    }
+
     return Scaffold(
       body: Column(
         children: [
           _buildTabBar(),
-          Expanded(
-              child:
-                  _buildNotificationList()), //El contenido cambia según la pestaña _buildNotificationList
+          Expanded(child: _buildNotificationList()),
         ],
       ),
     );
   }
+
 
   void debugSecureStorage() async {
     final all = await secureStorage.readAll();
@@ -164,9 +192,9 @@ class NotificationsPageState extends State<Notifications>
       onTap: () async {
         if (!notif.leido) {
           try {
-            await NotificationService.marcarNotificacionComoLeida(
-                notif.publicId);
-            await _cargarNotificaciones(); // Recarga de notificaciones
+            await NotificationService.marcarNotificacionComoLeida(notif.publicId);
+            NotificationState().marcarComoLeida(notif.publicId);
+            _cargarNotificaciones();
             _tabController.animateTo(1); //  cambia a "Leídas"
             widget.onNotificacionesLeidas?.call(); // Actualiza al punto rojo
             showSnackBar(context, "Notificación marcada como leída");
