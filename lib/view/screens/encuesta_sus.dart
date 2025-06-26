@@ -8,7 +8,7 @@ import 'package:chatbot/service/encuesta_service.dart';
 import 'package:chatbot/model/storage/storage.dart';
 import 'package:chatbot/view/screens/encuesta_sus.dart';
 import 'package:chatbot/view/screens/resultado_viewer.dart';
-
+import 'package:chatbot/service/resultado_service.dart';
 
 
 class LikertSurveyPage extends StatefulWidget {
@@ -160,11 +160,31 @@ class _LikertSurveyPageState extends State<LikertSurveyPage> {
             final completada = await EncuestaService.verificarEncuestaCompletada(cuentaUsuarioId);
 
             if (completada) {
-              // Redirige a la vista del PDF si ya completó la encuesta
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const ResultadoViewer()),
+              // Mostrar spinner
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (_) => const Center(
+                  child: CircularProgressIndicator(),
+                ),
               );
+              final userDeviceId = await secureStorage.read(key: "user_device");
+
+              if (userDeviceId == null) {
+                Navigator.of(context).pop(); // Cerrar spinner
+                showSnackBar(context, "No se encontró el dispositivo del usuario.");
+                return;
+              }
+
+              final resultado = await ResultadoService.obtenerResultado(userDeviceId);
+
+              if (resultado != null && context.mounted) {
+                Navigator.of(context).pop(); // Cerrar spinner
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => ResultadoViewer(resultado: resultado)),
+                );
+              }
 
             } else {
               // Si no está completada, guardar la encuesta

@@ -58,10 +58,7 @@ class FirebaseMessagingHandler {
 
     //  Cuando está en PRIMER PLANO (opcional, puedes mostrar alerta)
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print("📬 Mensaje recibido en primer plano: ${message.data}");
       Dashboard.globalKey.currentState?.actualizarNotificacionesDesdeExterior();
-      print("🧪 Notifications.globalKey.currentState = ${Notifications.globalKey.currentState}");
-
       actualizarNotificacionesEnMemoria();
       NotificacionFlags.hayNotificacionNueva = true;
 
