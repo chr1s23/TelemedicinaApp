@@ -31,4 +31,26 @@ class NotificacionResponse {
       leido: json['leido'] ?? false,
     );
   }
+  NotificacionResponse copyWith({
+    String? publicId,
+    String? tipoNotificacion,
+    String? titulo,
+    String? mensaje,
+    String? accion,
+    String? tipoAccion,
+    String? fecha,
+    bool? leido,
+  }) {
+    return NotificacionResponse(
+      publicId: publicId ?? this.publicId,
+      tipoNotificacion: tipoNotificacion ?? this.tipoNotificacion,
+      titulo: titulo ?? this.titulo,
+      mensaje: mensaje ?? this.mensaje,
+      accion: accion ?? this.accion,
+      tipoAccion: tipoAccion ?? this.tipoAccion,
+      fecha: fecha ?? this.fecha,
+      leido: leido ?? this.leido,
+    );
+  }
 }
+  

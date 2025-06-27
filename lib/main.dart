@@ -15,9 +15,12 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:provider/provider.dart';
 
 final _log = Logger('Main');
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+final GlobalKey<State<StatefulWidget>> dashboardKey = GlobalKey<State<StatefulWidget>>();
+
 Future<void> main() async {
   initializeLogger();
   
@@ -25,6 +28,7 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  await FirebaseMessaging.instance.requestPermission();
   await FirebaseMessagingHandler.initializeFCM(); // Para el manejo de las notificaciones FMC
 
   runApp(MyApp());
@@ -98,6 +102,7 @@ class SplashScreenState extends State<SplashScreen>
                 builder: (_) => DashboardListener(
                     wasOffline: true,
                     child: Dashboard(
+                      key: Dashboard.globalKey,
                       hasInternet: false,
                     ))),
             (_) => false);
@@ -119,11 +124,15 @@ class SplashScreenState extends State<SplashScreen>
       await Future.delayed(const Duration(milliseconds: 600));
 
       if (!mounted) return;
-
+      //Cuando el usuario ya está autenticado
       if (valid != null && user != null) {
         User.setCurrentUser(user, save: false);
 
         secureStorage.write(key: "user_token", value: valid);
+         // Cargar notificaciones desde el backend una sola vez
+         final cuentaUsuarioId = await secureStorage.read(key: "user_id");
+         print("📩 ------Cargando notificaciones para el usuario: $cuentaUsuarioId");
+        await NotificationService.cargarYGuardarNotificaciones(cuentaUsuarioId!);  
 
         _log.fine("User info found in secure storage. Skipping login.");
 
@@ -131,7 +140,8 @@ class SplashScreenState extends State<SplashScreen>
             context,
             MaterialPageRoute(
                 builder: (_) =>
-                    DashboardListener(wasOffline: false, child: Dashboard())),
+                    DashboardListener(wasOffline: false, child: Dashboard(key: Dashboard.globalKey))
+),
             (_) => false);
       } else {
         _log.fine(

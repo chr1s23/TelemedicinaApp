@@ -6,6 +6,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:device_info_plus/device_info_plus.dart'; // Para obtener info del dispositivo
 import 'package:chatbot/config/env.dart'; // Cambio de ambientes
 import 'package:logger/logger.dart';
+import 'package:chatbot/service/notification_state.dart';
+
 
 final _log = Logger();
 
@@ -53,7 +55,6 @@ class NotificationService {
     }
   }
 
-// Registrar dispositivo y token FCM en el backend
   static Future<void> registrarTokenFCM(String cuentaUsuarioPublicId) async {
     final tokenJWT = await secureStorage.read(key: "user_token");
     if (tokenJWT == null) {
@@ -92,4 +93,39 @@ class NotificationService {
 
     _log.i("[OK] Token FCM registrado con éxito");
   }
+
+  static Future<void> cargarYGuardarNotificaciones(String publicId) async {
+    if(publicId == null || publicId.isEmpty) {
+      _log.w("Public ID no proporcionado para cargar notificaciones");
+      return;
+    }
+    _log.i("-*-*-*-*-*-*-*📩 Cargando notificaciones para el usuario: $publicId");
+
+    final token = await secureStorage.read(key: "user_token");
+    if (token == null) {
+      throw Exception("Token JWT no disponible");
+    }
+
+    final uri = Uri.parse("$_baseUrl/notificaciones/$publicId");
+    final response = await http.get(uri, headers: {
+      "Authorization": "Bearer $token",
+      "Content-Type": "application/json"
+    });
+
+    if (response.statusCode == 200) {
+      final List<dynamic> jsonList = jsonDecode(response.body);
+      final notificaciones = jsonList
+          .map((e) => NotificacionResponse.fromJson(e))
+          .toList();
+
+      NotificationState().actualizar(notificaciones);
+      _log.i("✅ Notificaciones cargadas y guardadas en memoria: ${notificaciones.length}");
+    } else {
+      _log.e("❌ Error al obtener notificaciones: ${response.statusCode}");
+      throw Exception("Error al obtener notificaciones");
+    }
+    
+  }
+
+
 }

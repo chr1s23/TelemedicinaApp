@@ -1,101 +1,130 @@
 import 'package:chatbot/model/responses/notificacion_response.dart';
 import 'package:chatbot/model/storage/storage.dart';
+import 'package:chatbot/service/firebase_messaging_handler.dart';
 import 'package:chatbot/service/notification_service.dart';
 //import 'package:chatbot/view/screens/result.dart';
 import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:chatbot/service/notification_state.dart';
+import 'package:chatbot/utils/notificacion_flags.dart';
 
+
+/*
+*********************************************************
+Componente Principal de la vista. StatefulWidget es utilizado
+para manejar el estado de las notificaciones y la interacción
+con el usuario.(El contenido cambia dinámicamente)
+
+**********************************************************
+*/
 class Notifications extends StatefulWidget {
   final VoidCallback? onNotificacionesLeidas;
-  const Notifications({super.key, this.onNotificacionesLeidas});
+  static final GlobalKey<NotificationsPageState> globalKey =
+      GlobalKey<NotificationsPageState>();
+
+  Notifications({this.onNotificacionesLeidas}) : super(key: globalKey);
 
   @override
-  State<Notifications> createState() => _NotificationsPageState();
+  State<Notifications> createState() => NotificationsPageState();
 }
-
-class _NotificationsPageState extends State<Notifications>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-
-  /*
-  final List<Map<String, dynamic>> _notifications = [
-    {
-      "icon": Icons.description,
-      "description": "El resultado de su prueba se encuentra listo!",
-      "attachments": [
-        {
-          "type": "pdf",
-          "name": "Resultado.pdf",
-          "path": "assets/docs/resultado.pdf"
-        },
-      ],
-      "date": "15m",
-      "isRead": false,
-    },
-    {
-      "icon": Icons.notifications,
-      "description": "Termina de configurar tu perfil.",
-      "attachments": [],
-      "date": "1m",
-      "isRead": false,
-    },
-    {
-      "icon": Icons.link,
-      "description": "Consulta este enlace para más información.",
-      "attachments": [
-        {"type": "link", "name": "https://example.com"},
-      ],
-      "date": "15/02/2023",
-      "isRead": true,
-    },
-  ];
+/*
+**********************************************************
+Clase que maneja el estado de la vista de notificaciones
+**********************************************************
 */
+
+class NotificationsPageState extends State<Notifications>
+    with SingleTickerProviderStateMixin {
+      bool _recargarPendiente = false;
+  //Controla que pestaña está activa
+  late TabController _tabController;
+  //Lista las notificaciones obtenidas desde el servicio
   List<NotificacionResponse> _notificaciones = [];
+  // Indica si las notificaciones están cargando
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
     debugSecureStorage();
-    print("------Init Notifications");
+    print("📩 ------Init Notifications");
+    //Definición de las 3 pestañas.
     _tabController = TabController(length: 3, vsync: this);
+    //Trae las notificaciones con el servicio
+    if (NotificacionFlags.hayNotificacionNueva) {
+    print("♻️ Se detectó una nueva notificación push, recargando...");
+    _cargarNotificaciones();
+    NotificacionFlags.hayNotificacionNueva = false; 
+  } else {
     _cargarNotificaciones();
   }
+  }
+  /**
+   * Método que se llama cuando las dependencias cambian.
+   * Aquí se verifica si hay una nueva notificación y se recarga la lista.
+   */
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
 
+    if (NotificacionFlags.hayNotificacionNueva) {
+      print("🔁 Recargando porque bandera está activa");
+      _cargarNotificaciones();
+      NotificacionFlags.hayNotificacionNueva = false;
+    }
+  }
+
+  /** 
+   * Libera al controlador de pestañas cuando se cierra la vista
+  ***/
   @override
   void dispose() {
     _tabController.dispose();
     super.dispose();
   }
 
+  /**
+   * Carga las notificaciones desde la memoria y actualiza el estado
+   */
+
   Future<void> _cargarNotificaciones() async {
-    final cuentaUsuarioId = await secureStorage.read(key: "user_id");
-    if (cuentaUsuarioId != null) {
-      try {
-        final resultado =
-            await NotificationService.fetchNotifications(cuentaUsuarioId);
-
-        // 🔍 DEBUG: imprime la lista completa
-        for (var n in resultado) {
-          print("🧾 ${n.titulo} - leído: ${n.leido}");
-        }
-
-        setState(() {
-          _notificaciones = resultado;
-          _isLoading = false;
-        });
-      } catch (e) {
-        print("Error al mostrar notificaciones: $e");
+    if (NotificacionFlags.hayNotificacionNueva) {
+      print("🔁 Recargando desde el servidor (hay nueva)");
+      final userId = await secureStorage.read(key: "user_id");
+      if (userId != null) {
+        final nuevas = await NotificationService.fetchNotifications(userId);
+        NotificationState().actualizar(nuevas); // actualiza en memoria
+        NotificacionFlags.hayNotificacionNueva = false;
       }
-    } else {
-      setState(() {
-        _isLoading = false;
-      });
     }
+
+    final resultado = NotificationState().notificaciones;
+    setState(() {
+      _notificaciones = resultado;
+      _isLoading = false;
+      _recargarPendiente = false;
+    });
+  }
+
+
+
+  Future<void> recargarDesdeExterior() async {
+    print("--♻️ Recargando notificaciones desde push...");
+    await _cargarNotificaciones();
+    widget.onNotificacionesLeidas?.call();
+    setState(() {}); // para refrescar lista sin cambiar tab
   }
 
   @override
   Widget build(BuildContext context) {
+    // Si hay notificación pendiente, la recargo
+    if (NotificacionFlags.hayNotificacionNueva && !_recargarPendiente) {
+      print("🔁 Re-render: bandera activa, recargando en build()");
+      _recargarPendiente = true; // evitamos loops infinitos
+      NotificacionFlags.hayNotificacionNueva = false;
+      _cargarNotificaciones(); // async pero sin esperar
+    }
+
     return Scaffold(
       body: Column(
         children: [
@@ -105,6 +134,7 @@ class _NotificationsPageState extends State<Notifications>
       ),
     );
   }
+
 
   void debugSecureStorage() async {
     final all = await secureStorage.readAll();
@@ -130,6 +160,9 @@ class _NotificationsPageState extends State<Notifications>
     );
   }
 
+  /**
+   * Filtra y muestra la lista de notificaciones en la respectiva pestaña
+   */
   Widget _buildNotificationList() {
     List<NotificacionResponse> filtered;
     switch (_tabController.index) {
@@ -155,21 +188,27 @@ class _NotificationsPageState extends State<Notifications>
 
   Widget _buildNotificationCard(NotificacionResponse notif) {
     return GestureDetector(
+      // Detecta el toque en la notificación: Marca como leída si no lo estaba y cambia a la pestaña "Leídas"
       onTap: () async {
         if (!notif.leido) {
           try {
-            await NotificationService.marcarNotificacionComoLeida(
-                notif.publicId);
-            await _cargarNotificaciones(); // 🔄 ahora sí recarga correctamente
-            _tabController.animateTo(1); // 👉 cambia a "Leídas"
-            widget.onNotificacionesLeidas?.call(); // 🔔 actualiza punto rojo
-            showSnackBar(context, "Notificación marcada como leída");
+            await NotificationService.marcarNotificacionComoLeida(notif.publicId);
+            NotificationState().marcarComoLeida(notif.publicId);
+            _cargarNotificaciones();
+            //_tabController.animateTo(1); //  cambia a "Leídas"
+            widget.onNotificacionesLeidas?.call(); // Actualiza al punto rojo
+            //showSnackBar(context, "Notificación marcada como leída");
           } catch (e) {
             showSnackBar(context, "Error al marcar como leída");
-            print("❌ Error al marcar notificación como leída: $e");
+            print("[X] Error al marcar notificación como leída: $e");
           }
         }
+        FirebaseMessagingHandler.manejarClickNotificacion({
+            "publicId": notif.publicId,
+            "tipoNotificacion": notif.tipoNotificacion,
+          });
       },
+      // Construye la tarjeta de notificación
       child: Card(
         elevation: 2,
         margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),

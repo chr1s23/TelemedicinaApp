@@ -195,7 +195,7 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
                           context,
                           MaterialPageRoute(
                               builder: (context) =>
-                                  const DashboardListener(wasOffline: false, child: Dashboard())),
+                                  DashboardListener(wasOffline: false, child: Dashboard())),
                           (route) => false);
                     }
                   });
@@ -208,19 +208,8 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
               }
             },
             label: widget.edit ? "Guardar" : "Continuar"),
-        const SizedBox(height: 20),
-        if (!widget.edit)
-          CustomInkWell(
-            label: "En otro momento",
-            onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => TermsAndConditions()));
-            },
-            color: AllowedColors.red,
-          )
       ],
     );
   }
+
 }
