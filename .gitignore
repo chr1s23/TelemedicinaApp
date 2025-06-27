@@ -177,4 +177,3 @@ linux/flutter/generated_plugin_registrant.h
 **/generated_*.*
 
 macos/Flutter/GeneratedPluginRegistrant.swift
-lib/config/env.dart
