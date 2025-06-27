@@ -3,7 +3,7 @@ import 'package:chatbot/utils/connectivity_listener.dart';
 import 'package:chatbot/view/screens/chat.dart';
 import 'package:chatbot/view/screens/form_chat.dart';
 import 'package:chatbot/view/screens/notifications.dart';
-import 'package:chatbot/view/screens/maps_unified_screen.dart';
+import 'package:chatbot/view/screens/maps_selector_screen.dart';
 import 'package:chatbot/view/screens/resources.dart';
 import 'package:chatbot/view/screens/scanner.dart';
 //import 'package:chatbot/view/screens/wip.dart';
@@ -147,7 +147,7 @@ class AutoSamplingPageState extends State<Dashboard> {
       body: <Widget?>[
         _buildBody(),
         Resources(),
-        const MapsUnifiedScreen(), // Pantalla de mapas
+        const MapsSelectorScreen(), // Pantalla de mapas
         Notifications(onNotificacionesLeidas: actualizarNotificaciones),
       ][_currentIndex],
       bottomNavigationBar: _buildBottomNavigationBar(
