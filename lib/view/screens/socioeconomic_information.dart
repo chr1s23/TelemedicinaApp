@@ -208,18 +208,6 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
               }
             },
             label: widget.edit ? "Guardar" : "Continuar"),
-        const SizedBox(height: 20),
-        if (!widget.edit)
-          CustomInkWell(
-            label: "En otro momento",
-            onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => TermsAndConditions()));
-            },
-            color: AllowedColors.red,
-          )
       ],
     );
   }
