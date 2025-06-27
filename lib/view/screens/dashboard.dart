@@ -56,7 +56,12 @@ class AutoSamplingPageState extends State<Dashboard> {
   _log.i("--- ⚠️Actualizando notificaciones desde el exterior");
 }
 
-  
+  void irAPestanaPrincipal() {
+  setState(() {
+    _currentIndex = 0;
+  });
+}
+
   Future<void> actualizarNotificaciones() async {
     final unread = NotificationState().hayNoLeidas;
 

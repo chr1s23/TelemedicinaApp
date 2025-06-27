@@ -1,15 +1,15 @@
+import 'package:chatbot/utils/resultado_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:chatbot/view/widgets/custom_button.dart';
 import 'package:chatbot/view/widgets/utils.dart';
 import 'package:chatbot/view/screens/terms_and_conditions.dart';
-//import 'package:chatbot/view/screens/pdf_result_page.dart'; 
+//import 'package:chatbot/view/screens/pdf_result_page.dart';
 import 'package:chatbot/model/requests/encuesta_sus_request.dart';
 import 'package:chatbot/service/encuesta_service.dart';
 import 'package:chatbot/model/storage/storage.dart';
 import 'package:chatbot/view/screens/encuesta_sus.dart';
 import 'package:chatbot/view/screens/resultado_viewer.dart';
 import 'package:chatbot/service/resultado_service.dart';
-
 
 class LikertSurveyPage extends StatefulWidget {
   const LikertSurveyPage({super.key});
@@ -57,13 +57,15 @@ class _LikertSurveyPageState extends State<LikertSurveyPage> {
               modalYesNoDialog(
                 context: context,
                 title: "¿Cancelar?",
-                message: "¿Desea cancelar la encuesta? Se perderán todos los datos ingresados.",
+                message:
+                    "¿Desea cancelar la encuesta? Se perderán todos los datos ingresados.",
                 onYes: () => Navigator.of(context)
                   ..pop()
                   ..pop(),
               );
             },
-            child: const Text("Cancelar", style: TextStyle(color: AllowedColors.red, fontSize: 12)),
+            child: const Text("Cancelar",
+                style: TextStyle(color: AllowedColors.red, fontSize: 12)),
           ),
         ],
       ),
@@ -75,7 +77,10 @@ class _LikertSurveyPageState extends State<LikertSurveyPage> {
             children: [
               const Text(
                 "Encuesta de usabilidad del sistema y aceptabilidad",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: AllowedColors.black),
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                    color: AllowedColors.black),
               ),
               const SizedBox(height: 10),
               const Text(
@@ -85,7 +90,8 @@ class _LikertSurveyPageState extends State<LikertSurveyPage> {
               const SizedBox(height: 20),
               const SizedBox(height: 10),
               Container(
-                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                 decoration: BoxDecoration(
                   color: Colors.grey.shade100,
                   borderRadius: BorderRadius.circular(8),
@@ -94,7 +100,8 @@ class _LikertSurveyPageState extends State<LikertSurveyPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: const [
-                    Text("Escala de respuestas:", style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text("Escala de respuestas:",
+                        style: TextStyle(fontWeight: FontWeight.bold)),
                     SizedBox(height: 6),
                     Text("1 = Muy en desacuerdo"),
                     Text("2 = En desacuerdo"),
@@ -109,7 +116,9 @@ class _LikertSurveyPageState extends State<LikertSurveyPage> {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("${index + 1}. ${_questions[index]}", style: const TextStyle(fontSize: 15, color: AllowedColors.black)),
+                    Text("${index + 1}. ${_questions[index]}",
+                        style: const TextStyle(
+                            fontSize: 15, color: AllowedColors.black)),
                     Wrap(
                       spacing: 10,
                       children: List.generate(5, (i) {
@@ -157,38 +166,19 @@ class _LikertSurveyPageState extends State<LikertSurveyPage> {
             }
 
             // Verificar si la encuesta está completada
-            final completada = await EncuestaService.verificarEncuestaCompletada(cuentaUsuarioId);
+            final completada =
+                await EncuestaService.verificarEncuestaCompletada(
+                    cuentaUsuarioId);
+            print(
+                "✅ ------------------------- Encuesta completada: $completada");
 
             if (completada) {
-              // Mostrar spinner
-              showDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (_) => const Center(
-                  child: CircularProgressIndicator(),
-                ),
-              );
-              final userDeviceId = await secureStorage.read(key: "user_device");
-
-              if (userDeviceId == null) {
-                Navigator.of(context).pop(); // Cerrar spinner
-                showSnackBar(context, "No se encontró el dispositivo del usuario.");
-                return;
-              }
-
-              final resultado = await ResultadoService.obtenerResultado(userDeviceId);
-
-              if (resultado != null && context.mounted) {
-                Navigator.of(context).pop(); // Cerrar spinner
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => ResultadoViewer(resultado: resultado)),
-                );
-              }
+              await mostrarResultadoDesdeContexto(context);
 
             } else {
               // Si no está completada, guardar la encuesta
-              final encuesta = EncuestaSusRequest(_answers.cast<int>(), cuentaUsuarioId);
+              final encuesta =
+                  EncuestaSusRequest(_answers.cast<int>(), cuentaUsuarioId);
               final ok = await EncuestaService.guardarEncuesta(encuesta);
 
               if (!ok && context.mounted) {
@@ -197,10 +187,7 @@ class _LikertSurveyPageState extends State<LikertSurveyPage> {
               }
 
               if (context.mounted) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => TermsAndConditions()),
-                );
+                await mostrarResultadoDesdeContexto(context);
               }
             }
           },
@@ -209,4 +196,6 @@ class _LikertSurveyPageState extends State<LikertSurveyPage> {
       ],
     );
   }
+
+  
 }

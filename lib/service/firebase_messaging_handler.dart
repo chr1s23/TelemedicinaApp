@@ -1,15 +1,18 @@
 import 'package:chatbot/service/notification_service.dart';
+import 'package:chatbot/utils/resultado_utils.dart';
 import 'package:chatbot/view/screens/dashboard.dart';
 import 'package:chatbot/view/screens/notifications.dart';
-import 'package:chatbot/view/screens/resultado_viewer.dart';
+import 'package:chatbot/view/screens/resources.dart';
+import 'package:chatbot/view/widgets/utils.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:chatbot/view/screens/encuesta_sus.dart';
 import 'package:chatbot/model/storage/storage.dart';
 import 'package:chatbot/utils/notificacion_flags.dart';
-
-
+import 'package:chatbot/service/encuesta_service.dart';
+import 'package:chatbot/service/paciente_service.dart';
+import 'package:chatbot/view/screens/socioeconomic_information.dart';
 
 import '../main.dart'; // Para acceder al navigatorKey
 
@@ -51,7 +54,6 @@ class FirebaseMessagingHandler {
 
     //  Cuando está en SEGUNDO PLANO y el usuario toca la notificación
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      
       actualizarNotificacionesEnMemoria();
       manejarClickNotificacion(message.data);
     });
@@ -100,7 +102,6 @@ class FirebaseMessagingHandler {
       Map<String, dynamic> data) async {
     final publicId = data["publicId"];
     final tipo = data["tipoNotificacion"];
-    print("---- 📬 Click en notificación: $publicId, tipo: $tipo");
 
     if (publicId != null) {
       try {
@@ -111,13 +112,86 @@ class FirebaseMessagingHandler {
         print("[X] Error al marcar como leída desde mensaje abierto: $e");
       }
     }
+    print("📩--------------------------- TIPO DE NOTIFICACIÓN: $tipo");
 
     if (tipo == "RESULTADO") {
-      navigatorKey.currentState?.push(
-        MaterialPageRoute(builder: (_) =>  LikertSurveyPage()),
+      final cuentaUsuarioId = await secureStorage.read(key: "user_id");
+      if (cuentaUsuarioId != null) {
+        try {
+          final existeFicha =
+              await PacienteService.verificarFichaSocioeconomica(
+                  cuentaUsuarioId);
+
+          if (!existeFicha) {
+            navigatorKey.currentState?.push(
+              MaterialPageRoute(builder: (_) => SocioeconomicInformation()),
+            );
+            return;
+          }
+
+          final completada = await EncuestaService.verificarEncuestaCompletada(
+              cuentaUsuarioId);
+
+          if (completada) {
+            final ctx = navigatorKey.currentContext;
+            if (ctx != null) {
+              await mostrarResultadoDesdeContexto(ctx);
+            } else {
+              print(
+                  "[X] No se encontró un contexto válido para mostrar el resultado.");
+            }
+          } else {
+            navigatorKey.currentState?.push(
+              MaterialPageRoute(builder: (_) => LikertSurveyPage()),
+            );
+          }
+        } catch (e) {
+          print("[X] Error al procesar flujo de RESULTADO: $e");
+        }
+      } else {
+        print("[X] No se pudo obtener el ID de usuario para verificar estado.");
+      }
+    } else if (tipo == "RECORDATORIO_NO_EXAMEN") {
+      // Asegurarte de ir al dashboard principal (en caso de estar en otra vista)
+      navigatorKey.currentState?.pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => Dashboard()),
+        (route) => false,
       );
+
+      // Esperar brevemente a que se monte el widget antes de actuar
+      await Future.delayed(const Duration(milliseconds: 400));
+
+      final autoSamplingState = Dashboard.globalKey.currentState;
+      if (autoSamplingState != null && autoSamplingState.mounted) {
+        autoSamplingState.setState(() {
+          autoSamplingState.irAPestanaPrincipal(); // Ir a la pestaña principal
+        });
+      } else {
+        print("[X] No se pudo acceder al estado de AutoSamplingPageState.");
+      }
+    } else if (tipo == "RECORDATORIO_NO_ENTREGA_DISPOSITIVO") {
+      final ctx = navigatorKey.currentContext;
+      final userId = await secureStorage.read(key: "user_id");
+
+      if (ctx != null && userId != null) {
+        final confirmed = await mostrarDialogoEntregaDispositivo(ctx);
+        if (confirmed) {
+          final success =
+              await PacienteService.desactivarRecordatorioEntrega(userId);
+          if (success && ctx.mounted) {
+            showSnackBar(ctx, "¡Gracias! Hemos detenido estos recordatorios.");
+          }
+        }
+      }
+    }else{
+      
+      navigatorKey.currentState?.push(
+      MaterialPageRoute(builder: (_) => const Resources()),
+      );
+
     }
   }
+
   static Future<void> actualizarNotificacionesEnMemoria() async {
     final currentState = Notifications.globalKey.currentState;
     if (currentState != null && currentState.mounted) {
@@ -126,12 +200,35 @@ class FirebaseMessagingHandler {
         await NotificationService.cargarYGuardarNotificaciones(userId);
         currentState.recargarDesdeExterior();
       } else {
-        print("[X] No se pudo obtener el ID de usuario para actualizar notificaciones.");
+        print(
+            "[X] No se pudo obtener el ID de usuario para actualizar notificaciones.");
       }
     } else {
       print("⚠️ Notifications no está montado, guardamos solo en memoria.");
       NotificacionFlags.hayNotificacionNueva = true;
     }
-
   }
+
+static Future<bool> mostrarDialogoEntregaDispositivo(BuildContext context) async {
+  return await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text("¿Entregaste tu muestra?"),
+          content: const Text("Por favor confirma si ya entregaste el dispositivo de automuestreo."),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: const Text("Todavía no"),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: const Text("Sí, ya entregué"),
+            ),
+          ],
+        ),
+      ) ??
+      false;
+}
+
+
 }

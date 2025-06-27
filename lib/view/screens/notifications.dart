@@ -195,9 +195,9 @@ class NotificationsPageState extends State<Notifications>
             await NotificationService.marcarNotificacionComoLeida(notif.publicId);
             NotificationState().marcarComoLeida(notif.publicId);
             _cargarNotificaciones();
-            _tabController.animateTo(1); //  cambia a "Leídas"
+            //_tabController.animateTo(1); //  cambia a "Leídas"
             widget.onNotificacionesLeidas?.call(); // Actualiza al punto rojo
-            showSnackBar(context, "Notificación marcada como leída");
+            //showSnackBar(context, "Notificación marcada como leída");
           } catch (e) {
             showSnackBar(context, "Error al marcar como leída");
             print("[X] Error al marcar notificación como leída: $e");

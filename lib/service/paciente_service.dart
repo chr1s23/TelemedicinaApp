@@ -1,6 +1,8 @@
 // ignore_for_file: use_build_context_synchronously
 // showSnackBar guards calls on context with [mounted]
 
+import 'dart:convert';
+
 import 'package:chatbot/model/requests/dispositivo_request.dart';
 import 'package:chatbot/model/requests/paciente_request.dart';
 import 'package:chatbot/model/storage/storage.dart';
@@ -8,6 +10,7 @@ import 'package:chatbot/service/connectivity_service.dart';
 import 'package:chatbot/view/widgets/utils.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
 import 'package:chatbot/config/env.dart'; // Cambio de ambientes
 
@@ -129,5 +132,31 @@ sealed class PacienteService {
     }
 
     return null;
+  }
+
+  static Future<bool> verificarFichaSocioeconomica(String userId) async {
+    final String _baseUrl = AppConfig.baseUrl;
+    final url = Uri.parse('$_baseUrl/info-socioeconomica/ficha/existe/$userId');
+
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return data['existeFicha'] == true;
+    } else {
+      throw Exception("Error al verificar ficha socioeconómica");
+    }
+  }
+
+  static Future<bool> desactivarRecordatorioEntrega(String userId) async {
+    try {
+      final response = await getDio()
+          .put("/notificaciones/programada/desactivar-entrega/$userId");
+
+      return response.statusCode == 204;
+    } catch (e) {
+      _log.severe("Error al desactivar notificaciones programadas: $e");
+      return false;
+    }
   }
 }
