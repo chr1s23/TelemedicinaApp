@@ -2,6 +2,7 @@ import 'package:chatbot/service/notification_service.dart';
 import 'package:chatbot/utils/resultado_utils.dart';
 import 'package:chatbot/view/screens/dashboard.dart';
 import 'package:chatbot/view/screens/notifications.dart';
+import 'package:chatbot/view/screens/requiredSocioeconomicForm.dart';
 import 'package:chatbot/view/screens/resources.dart';
 import 'package:chatbot/view/widgets/utils.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -102,6 +103,7 @@ class FirebaseMessagingHandler {
       Map<String, dynamic> data) async {
     final publicId = data["publicId"];
     final tipo = data["tipoNotificacion"];
+    final contxt = navigatorKey.currentContext!;
 
     if (publicId != null) {
       try {
@@ -112,20 +114,40 @@ class FirebaseMessagingHandler {
         print("[X] Error al marcar como leída desde mensaje abierto: $e");
       }
     }
-    print("📩--------------------------- TIPO DE NOTIFICACIÓN: $tipo");
+    print("[MENSAJE]TIPO DE NOTIFICACIÓN: $tipo");
+    //Mostramos un circular progress indicator mientras se carga el resultado
+
+    showDialog(
+      context: contxt,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
 
     if (tipo == "RESULTADO") {
       final cuentaUsuarioId = await secureStorage.read(key: "user_id");
+
       if (cuentaUsuarioId != null) {
         try {
           final existeFicha =
               await PacienteService.verificarFichaSocioeconomica(
                   cuentaUsuarioId);
 
+          print(
+              "[MENSAJE] Existe ficha socioeconómica: $existeFicha de usuario $cuentaUsuarioId");
+
           if (!existeFicha) {
-            navigatorKey.currentState?.push(
-              MaterialPageRoute(builder: (_) => SocioeconomicInformation()),
-            );
+            final paciente =
+                await PacienteService.getPaciente(navigatorKey.currentContext!);
+            if (paciente != null) {
+              Navigator.of(contxt).pop();
+              navigatorKey.currentState?.push(
+                MaterialPageRoute(
+                  builder: (_) => RequiredSocioeconomicForm(paciente: paciente),
+                ),
+              );
+            } else {
+              print("[X] No se pudo obtener la información del paciente.");
+            }
             return;
           }
 
@@ -141,6 +163,7 @@ class FirebaseMessagingHandler {
                   "[X] No se encontró un contexto válido para mostrar el resultado.");
             }
           } else {
+            Navigator.of(contxt).pop();
             navigatorKey.currentState?.push(
               MaterialPageRoute(builder: (_) => LikertSurveyPage()),
             );
@@ -153,6 +176,7 @@ class FirebaseMessagingHandler {
       }
     } else if (tipo == "RECORDATORIO_NO_EXAMEN") {
       // Asegurarte de ir al dashboard principal (en caso de estar en otra vista)
+      Navigator.of(contxt).pop();
       navigatorKey.currentState?.pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => Dashboard()),
         (route) => false,
@@ -175,6 +199,7 @@ class FirebaseMessagingHandler {
 
       if (ctx != null && userId != null) {
         final confirmed = await mostrarDialogoEntregaDispositivo(ctx);
+        Navigator.of(contxt).pop();
         if (confirmed) {
           final success =
               await PacienteService.desactivarRecordatorioEntrega(userId);
@@ -183,12 +208,11 @@ class FirebaseMessagingHandler {
           }
         }
       }
-    }else{
-      
+    } else {
+      Navigator.of(contxt).pop();
       navigatorKey.currentState?.push(
-      MaterialPageRoute(builder: (_) => const Resources()),
+        MaterialPageRoute(builder: (_) => const Resources()),
       );
-
     }
   }
 
@@ -209,26 +233,27 @@ class FirebaseMessagingHandler {
     }
   }
 
-static Future<bool> mostrarDialogoEntregaDispositivo(BuildContext context) async {
-  return await showDialog<bool>(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: const Text("¿Entregaste tu muestra?"),
-          content: const Text("Por favor confirma si ya entregaste el dispositivo de automuestreo."),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(false),
-              child: const Text("Todavía no"),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.of(ctx).pop(true),
-              child: const Text("Sí, ya entregué"),
-            ),
-          ],
-        ),
-      ) ??
-      false;
-}
-
-
+  static Future<bool> mostrarDialogoEntregaDispositivo(
+      BuildContext context) async {
+    return await showDialog<bool>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text("¿Entregaste tu muestra?"),
+            content: const Text(
+                "Por favor confirma si ya entregaste el dispositivo de automuestreo."),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(false),
+                child: const Text("Todavía no"),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.of(ctx).pop(true),
+                child: const Text("Sí, ya entregué"),
+                
+              ),
+            ],
+          ),
+        ) ??
+        false;
+  }
 }
