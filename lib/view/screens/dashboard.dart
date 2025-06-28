@@ -64,7 +64,6 @@ class AutoSamplingPageState extends State<Dashboard> {
 
   Future<void> actualizarNotificaciones() async {
     final unread = NotificationState().hayNoLeidas;
-
     if (mounted) {
       setState(() {
         hasUnreadNotifications = unread;
