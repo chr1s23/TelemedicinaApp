@@ -46,11 +46,12 @@ class FirebaseMessagingHandler {
 
     await flutterLocalNotificationsPlugin.initialize(initSettings);
 
-    //  Si la app se abrió desde una notificación (CERRADA COMPLETAMENTE)
+    // Si la app se abrió desde una notificación (CERRADA COMPLETAMENTE)
     RemoteMessage? initialMessage =
         await FirebaseMessaging.instance.getInitialMessage();
     if (initialMessage != null) {
-      _handleMessage(initialMessage);
+      await actualizarNotificacionesEnMemoria();
+      await manejarClickNotificacion(initialMessage.data);
     }
 
     //  Cuando está en SEGUNDO PLANO y el usuario toca la notificación
@@ -86,17 +87,6 @@ class FirebaseMessagingHandler {
         Notifications.globalKey.currentState?.recargarDesdeExterior();
       }
     });
-  }
-
-  static void _handleMessage(RemoteMessage message) {
-    final data = message.data;
-    final tipo = data['tipoNotificacion'];
-
-    if (tipo == 'RESULTADO') {
-      print("📄 Resultado recibido");
-    } else if (tipo == 'RECORDATORIO') {
-      print("📅 Recordatorio recibido");
-    }
   }
 
   static Future<void> manejarClickNotificacion(
@@ -210,9 +200,13 @@ class FirebaseMessagingHandler {
       }
     } else {
       Navigator.of(contxt).pop();
-      navigatorKey.currentState?.push(
-        MaterialPageRoute(builder: (_) => const Resources()),
-      );
+
+      final dashboardState = Dashboard.globalKey.currentState;
+      if (dashboardState != null && dashboardState.mounted) {
+        dashboardState.irAPestanaRecursos();
+      } else {
+        print("[X] No se pudo acceder al estado del Dashboard.");
+      }
     }
   }
 
@@ -228,7 +222,6 @@ class FirebaseMessagingHandler {
             "[X] No se pudo obtener el ID de usuario para actualizar notificaciones.");
       }
     } else {
-      print("⚠️ Notifications no está montado, guardamos solo en memoria.");
       NotificacionFlags.hayNotificacionNueva = true;
     }
   }
@@ -249,7 +242,6 @@ class FirebaseMessagingHandler {
               ElevatedButton(
                 onPressed: () => Navigator.of(ctx).pop(true),
                 child: const Text("Sí, ya entregué"),
-                
               ),
             ],
           ),

@@ -46,13 +46,11 @@ class NotificationsPageState extends State<Notifications>
   @override
   void initState() {
     super.initState();
-    debugSecureStorage();
-    print("📩 ------Init Notifications");
+    //debugSecureStorage();
     //Definición de las 3 pestañas.
     _tabController = TabController(length: 3, vsync: this);
     //Trae las notificaciones con el servicio
     if (NotificacionFlags.hayNotificacionNueva) {
-    print("♻️ Se detectó una nueva notificación push, recargando...");
     _cargarNotificaciones();
     NotificacionFlags.hayNotificacionNueva = false; 
   } else {
@@ -68,7 +66,6 @@ class NotificationsPageState extends State<Notifications>
     super.didChangeDependencies();
 
     if (NotificacionFlags.hayNotificacionNueva) {
-      print("🔁 Recargando porque bandera está activa");
       _cargarNotificaciones();
       NotificacionFlags.hayNotificacionNueva = false;
     }
@@ -89,7 +86,6 @@ class NotificationsPageState extends State<Notifications>
 
   Future<void> _cargarNotificaciones() async {
     if (NotificacionFlags.hayNotificacionNueva) {
-      print("🔁 Recargando desde el servidor (hay nueva)");
       final userId = await secureStorage.read(key: "user_id");
       if (userId != null) {
         final nuevas = await NotificationService.fetchNotifications(userId);
@@ -109,7 +105,6 @@ class NotificationsPageState extends State<Notifications>
 
 
   Future<void> recargarDesdeExterior() async {
-    print("--♻️ Recargando notificaciones desde push...");
     await _cargarNotificaciones();
     widget.onNotificacionesLeidas?.call();
     setState(() {}); // para refrescar lista sin cambiar tab
@@ -119,7 +114,6 @@ class NotificationsPageState extends State<Notifications>
   Widget build(BuildContext context) {
     // Si hay notificación pendiente, la recargo
     if (NotificacionFlags.hayNotificacionNueva && !_recargarPendiente) {
-      print("🔁 Re-render: bandera activa, recargando en build()");
       _recargarPendiente = true; // evitamos loops infinitos
       NotificacionFlags.hayNotificacionNueva = false;
       _cargarNotificaciones(); // async pero sin esperar
