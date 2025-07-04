@@ -79,12 +79,9 @@ class AutoSamplingPageState extends State<Dashboard> {
   Future<void> _initializePlayer() async {
     String? dispositivo = await secureStorage.read(key: "user_device");
     String? autoPlay = await secureStorage.read(key: "auto_play");
-
-    //Agrega el token del dispositivo del usuario
+        //Agrega el token del dispositivo del usuario
     final userId = await secureStorage.read(key: "user_id");
     if (userId != null) {
-      await NotificationService.registrarTokenFCM(userId);
-      // Cargar notificaciones desde el backend una sola vez
       await NotificationService.cargarYGuardarNotificaciones(userId!);
       // Actualizar el estado de las notificaciones
       await actualizarNotificaciones();
@@ -94,8 +91,7 @@ class AutoSamplingPageState extends State<Dashboard> {
           "[!] User ID not found in secure storage. Cannot register FCM token.");
     }
     var (video, chewie) =
-        await initializeVideoPlayer('assets/videos/automuestreo.mp4');
-
+        await initializeVideoPlayer('assets/videos/automuestreo.mp4');    
     // Listener para saber si terminó el video
     video.addListener(() {
       if (video.value.position >= video.value.duration && !videoComplete) {
