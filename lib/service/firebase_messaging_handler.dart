@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:chatbot/service/notification_service.dart';
 import 'package:chatbot/utils/resultado_utils.dart';
 import 'package:chatbot/view/screens/dashboard.dart';
@@ -14,6 +16,7 @@ import 'package:chatbot/utils/notificacion_flags.dart';
 import 'package:chatbot/service/encuesta_service.dart';
 import 'package:chatbot/service/paciente_service.dart';
 import 'package:chatbot/view/screens/socioeconomic_information.dart';
+import 'package:chatbot/utils/notificacion_bienvenida_constants.dart';
 
 import '../main.dart'; // Para acceder al navigatorKey
 
@@ -44,13 +47,23 @@ class FirebaseMessagingHandler {
     const InitializationSettings initSettings =
         InitializationSettings(android: androidSettings);
 
-    await flutterLocalNotificationsPlugin.initialize(initSettings);
+    await flutterLocalNotificationsPlugin.initialize(
+      initSettings,
+      onDidReceiveNotificationResponse: (details) {
+        final payload = details.payload;
+        if (payload != null) {
+          final data = jsonDecode(payload);
+          manejarClickNotificacion(data);
+        }
+      },
+    );
 
-    //  Si la app se abrió desde una notificación (CERRADA COMPLETAMENTE)
+    // Si la app se abrió desde una notificación (CERRADA COMPLETAMENTE)
     RemoteMessage? initialMessage =
         await FirebaseMessaging.instance.getInitialMessage();
     if (initialMessage != null) {
-      _handleMessage(initialMessage);
+      await actualizarNotificacionesEnMemoria();
+      await manejarClickNotificacion(initialMessage.data);
     }
 
     //  Cuando está en SEGUNDO PLANO y el usuario toca la notificación
@@ -86,17 +99,6 @@ class FirebaseMessagingHandler {
         Notifications.globalKey.currentState?.recargarDesdeExterior();
       }
     });
-  }
-
-  static void _handleMessage(RemoteMessage message) {
-    final data = message.data;
-    final tipo = data['tipoNotificacion'];
-
-    if (tipo == 'RESULTADO') {
-      print("📄 Resultado recibido");
-    } else if (tipo == 'RECORDATORIO') {
-      print("📅 Recordatorio recibido");
-    }
   }
 
   static Future<void> manejarClickNotificacion(
@@ -209,10 +211,15 @@ class FirebaseMessagingHandler {
         }
       }
     } else {
-      Navigator.of(contxt).pop();
-      navigatorKey.currentState?.push(
-        MaterialPageRoute(builder: (_) => const Resources()),
-      );
+      Navigator.of(contxt).pop(); // Cierra cualquier diálogo de carga
+
+// Ahora accede al estado de Dashboard para cambiar pestaña
+      final dashboardState = Dashboard.globalKey.currentState;
+      if (dashboardState != null && dashboardState.mounted) {
+        dashboardState.irAPestanaRecursos();
+      } else {
+        print("[X] No se pudo acceder al estado del Dashboard.");
+      }
     }
   }
 
@@ -228,7 +235,6 @@ class FirebaseMessagingHandler {
             "[X] No se pudo obtener el ID de usuario para actualizar notificaciones.");
       }
     } else {
-      print("⚠️ Notifications no está montado, guardamos solo en memoria.");
       NotificacionFlags.hayNotificacionNueva = true;
     }
   }
@@ -249,11 +255,35 @@ class FirebaseMessagingHandler {
               ElevatedButton(
                 onPressed: () => Navigator.of(ctx).pop(true),
                 child: const Text("Sí, ya entregué"),
-                
               ),
             ],
           ),
         ) ??
         false;
+  }
+
+  static Future<void> mostrarNotificacionBienvenidaLocal() async {
+    const AndroidNotificationDetails androidDetails =
+        AndroidNotificationDetails(
+      'canal_principal',
+      'Notificaciones CLIAS',
+      importance: Importance.max,
+      priority: Priority.high,
+      showWhen: true,
+    );
+
+    const NotificationDetails notificationDetails = NotificationDetails(
+      android: androidDetails,
+    );
+
+    await _flutterLocalNotificationsPlugin.show(
+      DateTime.now().millisecondsSinceEpoch ~/ 1000, // ID único
+      NotificacionBienvenida.titulo,
+      NotificacionBienvenida.mensaje,
+      notificationDetails,
+      payload: jsonEncode({
+        "tipoNotificacion": NotificacionBienvenida.tipo,
+      }),
+    );
   }
 }

@@ -129,10 +129,6 @@ class SplashScreenState extends State<SplashScreen>
         User.setCurrentUser(user, save: false);
 
         secureStorage.write(key: "user_token", value: valid);
-         // Cargar notificaciones desde el backend una sola vez
-         final cuentaUsuarioId = await secureStorage.read(key: "user_id");
-         print("📩 ------Cargando notificaciones para el usuario: $cuentaUsuarioId");
-        await NotificationService.cargarYGuardarNotificaciones(cuentaUsuarioId!);  
 
         _log.fine("User info found in secure storage. Skipping login.");
 

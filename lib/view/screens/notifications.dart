@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:chatbot/service/notification_state.dart';
 import 'package:chatbot/utils/notificacion_flags.dart';
 
-
 /*
 *********************************************************
 Componente Principal de la vista. StatefulWidget es utilizado
@@ -35,7 +34,7 @@ Clase que maneja el estado de la vista de notificaciones
 
 class NotificationsPageState extends State<Notifications>
     with SingleTickerProviderStateMixin {
-      bool _recargarPendiente = false;
+  bool _recargarPendiente = false;
   //Controla que pestaña está activa
   late TabController _tabController;
   //Lista las notificaciones obtenidas desde el servicio
@@ -46,19 +45,18 @@ class NotificationsPageState extends State<Notifications>
   @override
   void initState() {
     super.initState();
-    debugSecureStorage();
-    print("📩 ------Init Notifications");
+    //debugSecureStorage();
     //Definición de las 3 pestañas.
     _tabController = TabController(length: 3, vsync: this);
     //Trae las notificaciones con el servicio
     if (NotificacionFlags.hayNotificacionNueva) {
-    print("♻️ Se detectó una nueva notificación push, recargando...");
     _cargarNotificaciones();
     NotificacionFlags.hayNotificacionNueva = false; 
   } else {
     _cargarNotificaciones();
   }
   }
+
   /**
    * Método que se llama cuando las dependencias cambian.
    * Aquí se verifica si hay una nueva notificación y se recarga la lista.
@@ -68,7 +66,6 @@ class NotificationsPageState extends State<Notifications>
     super.didChangeDependencies();
 
     if (NotificacionFlags.hayNotificacionNueva) {
-      print("🔁 Recargando porque bandera está activa");
       _cargarNotificaciones();
       NotificacionFlags.hayNotificacionNueva = false;
     }
@@ -89,10 +86,9 @@ class NotificationsPageState extends State<Notifications>
 
   Future<void> _cargarNotificaciones() async {
     if (NotificacionFlags.hayNotificacionNueva) {
-      print("🔁 Recargando desde el servidor (hay nueva)");
       final userId = await secureStorage.read(key: "user_id");
       if (userId != null) {
-        final nuevas = await NotificationService.fetchNotifications(userId);
+        final nuevas = await NotificationService.cargarNotificacionesxPublicID(userId);
         NotificationState().actualizar(nuevas); // actualiza en memoria
         NotificacionFlags.hayNotificacionNueva = false;
       }
@@ -106,10 +102,7 @@ class NotificationsPageState extends State<Notifications>
     });
   }
 
-
-
   Future<void> recargarDesdeExterior() async {
-    print("--♻️ Recargando notificaciones desde push...");
     await _cargarNotificaciones();
     widget.onNotificacionesLeidas?.call();
     setState(() {}); // para refrescar lista sin cambiar tab
@@ -119,7 +112,6 @@ class NotificationsPageState extends State<Notifications>
   Widget build(BuildContext context) {
     // Si hay notificación pendiente, la recargo
     if (NotificacionFlags.hayNotificacionNueva && !_recargarPendiente) {
-      print("🔁 Re-render: bandera activa, recargando en build()");
       _recargarPendiente = true; // evitamos loops infinitos
       NotificacionFlags.hayNotificacionNueva = false;
       _cargarNotificaciones(); // async pero sin esperar
@@ -134,7 +126,6 @@ class NotificationsPageState extends State<Notifications>
       ),
     );
   }
-
 
   void debugSecureStorage() async {
     final all = await secureStorage.readAll();
@@ -186,13 +177,32 @@ class NotificationsPageState extends State<Notifications>
     );
   }
 
+  String _formatearFechaInteligente(String fechaIso) {
+    try {
+      final date = DateTime.parse(fechaIso);
+      final ahora = DateTime.now();
+      final esHoy = date.year == ahora.year &&
+          date.month == ahora.month &&
+          date.day == ahora.day;
+
+      if (esHoy) {
+        return "${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}";
+      } else {
+        return "${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}";
+      }
+    } catch (e) {
+      return "";
+    }
+  }
+
   Widget _buildNotificationCard(NotificacionResponse notif) {
     return GestureDetector(
       // Detecta el toque en la notificación: Marca como leída si no lo estaba y cambia a la pestaña "Leídas"
       onTap: () async {
         if (!notif.leido) {
           try {
-            await NotificationService.marcarNotificacionComoLeida(notif.publicId);
+            await NotificationService.marcarNotificacionComoLeida(
+                notif.publicId);
             NotificationState().marcarComoLeida(notif.publicId);
             _cargarNotificaciones();
             //_tabController.animateTo(1); //  cambia a "Leídas"
@@ -204,9 +214,9 @@ class NotificationsPageState extends State<Notifications>
           }
         }
         FirebaseMessagingHandler.manejarClickNotificacion({
-            "publicId": notif.publicId,
-            "tipoNotificacion": notif.tipoNotificacion,
-          });
+          "publicId": notif.publicId,
+          "tipoNotificacion": notif.tipoNotificacion,
+        });
       },
       // Construye la tarjeta de notificación
       child: Card(
@@ -228,49 +238,11 @@ class NotificationsPageState extends State<Notifications>
             style: const TextStyle(fontSize: 12),
           ),
           trailing: Text(
-            notif.fecha,
+            _formatearFechaInteligente(notif.fecha),
             style: TextStyle(fontSize: 10, color: AllowedColors.gray),
           ),
         ),
       ),
     );
   }
-
-  /*
-
-  Widget _buildAttachments(List<dynamic> attachments) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: attachments.map((attachment) {
-        return Row(
-          children: [
-            Icon(
-              attachment["type"] == "pdf" ? Icons.picture_as_pdf : Icons.link,
-              color: AllowedColors.gray,
-              size: 16,
-            ),
-            const SizedBox(width: 5),
-            TextButton(
-              onPressed: () {
-                attachment["type"] == "pdf"
-                    ? Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                //Result(pdfName: attachment["path"])))
-                                Result(
-                                    pdfName:
-                                        "violencia_genero_autocuidado.pdf")))
-                    : () => {};
-              },
-              child: Text(
-                attachment["name"],
-                style: TextStyle(fontSize: 11, color: AllowedColors.blue),
-              ),
-            )
-          ],
-        );
-      }).toList(),
-    );
-  }*/
 }

@@ -17,7 +17,7 @@ import 'package:video_player/video_player.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:chatbot/service/notification_service.dart';
 import 'package:logger/logger.dart';
-import 'package:chatbot/service/notification_state.dart'; 
+import 'package:chatbot/service/notification_state.dart';
 
 final _log = Logger();
 
@@ -41,26 +41,31 @@ class AutoSamplingPageState extends State<Dashboard> {
 
   @override
   void initState() {
+    _log.i("[🔄] Inicializando Dashboard  -✅");
     _initializePlayer();
-    actualizarNotificaciones();
     super.initState();
   }
 
   void actualizarNotificacionesDesdeExterior() {
-  if (mounted) {
+    if (mounted) {
+      setState(() {
+        _log.i("⚠️Actualizando notificaciones desde el exterior");
+        hasUnreadNotifications = true;
+      });
+    }
+  }
+
+  void irAPestanaRecursos() {
     setState(() {
-      _log.i("⚠️Actualizando notificaciones desde el exterior");
-      hasUnreadNotifications = true;
+      _currentIndex = 1; // El índice que corresponde a la pestaña de Recursos
     });
   }
-  _log.i("--- ⚠️Actualizando notificaciones desde el exterior");
-}
 
   void irAPestanaPrincipal() {
-  setState(() {
-    _currentIndex = 0;
-  });
-}
+    setState(() {
+      _currentIndex = 0;
+    });
+  }
 
   Future<void> actualizarNotificaciones() async {
     final unread = NotificationState().hayNoLeidas;
@@ -74,18 +79,19 @@ class AutoSamplingPageState extends State<Dashboard> {
   Future<void> _initializePlayer() async {
     String? dispositivo = await secureStorage.read(key: "user_device");
     String? autoPlay = await secureStorage.read(key: "auto_play");
-
-    //Agrega el token del dispositivo del usuario
+        //Agrega el token del dispositivo del usuario
     final userId = await secureStorage.read(key: "user_id");
     if (userId != null) {
-      await NotificationService.registrarTokenFCM(userId);
+      await NotificationService.cargarYGuardarNotificaciones(userId!);
+      // Actualizar el estado de las notificaciones
+      await actualizarNotificaciones();
+      //endpoint
     } else {
       _log.w(
           "[!] User ID not found in secure storage. Cannot register FCM token.");
     }
     var (video, chewie) =
-        await initializeVideoPlayer('assets/videos/automuestreo.mp4');
-
+        await initializeVideoPlayer('assets/videos/automuestreo.mp4');    
     // Listener para saber si terminó el video
     video.addListener(() {
       if (video.value.position >= video.value.duration && !videoComplete) {
