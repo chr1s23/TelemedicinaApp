@@ -48,9 +48,6 @@ class NotificationService {
       "Content-Type": "application/json"
     });
 
-    print("🔄 PUT marcar-leida statusCode = ${response.statusCode}");
-    print("📦 Response body: ${response.body}");
-
     if (response.statusCode != 200 && response.statusCode != 204) {
       throw Exception("No se pudo marcar como leída la notificación");
     }
@@ -123,10 +120,9 @@ class NotificationService {
           jsonList.map((e) => NotificacionResponse.fromJson(e)).toList();
 
       NotificationState().actualizar(notificaciones);
-      _log.i(
-          "✅ Notificaciones cargadas y guardadas en memoria: ${notificaciones.length}");
+      _log.i("[OK] Notificaciones cargadas y guardadas en memoria: ${notificaciones.length}");
     } else {
-      _log.e("❌ Error al obtener notificaciones: ${response.statusCode}");
+      _log.e("[X] Error al obtener notificaciones: ${response.statusCode}");
       throw Exception("Error al obtener notificaciones");
     }
   }
