@@ -20,7 +20,7 @@ class LikertSurveyPage extends StatefulWidget {
 
 class _LikertSurveyPageState extends State<LikertSurveyPage> {
   final _formKey = GlobalKey<FormState>();
-  final List<int?> _answers = List.generate(14, (_) => null);
+  final List<int?> _answers = List.generate(14, (index) => null);
 
   final List<String> _questions = [
     // SUS
@@ -119,8 +119,8 @@ class _LikertSurveyPageState extends State<LikertSurveyPage> {
                     Text("${index + 1}. ${_questions[index]}",
                         style: const TextStyle(
                             fontSize: 15, color: AllowedColors.black)),
-                    Wrap(
-                      spacing: 10,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: List.generate(5, (i) {
                         final value = i + 1;
                         return ChoiceChip(
@@ -174,7 +174,6 @@ class _LikertSurveyPageState extends State<LikertSurveyPage> {
 
             if (completada) {
               await mostrarResultadoDesdeContexto(context);
-
             } else {
               // Si no está completada, guardar la encuesta
               final encuesta =
@@ -196,6 +195,4 @@ class _LikertSurveyPageState extends State<LikertSurveyPage> {
       ],
     );
   }
-
-  
 }

@@ -3,7 +3,6 @@ import 'package:chatbot/model/storage/storage.dart';
 import 'package:chatbot/service/auth_service.dart';
 import 'package:chatbot/service/connectivity_service.dart';
 import 'package:chatbot/service/firebase_messaging_handler.dart';
-import 'package:chatbot/service/notification_service.dart';
 import 'package:chatbot/utils/dashboard_listener.dart';
 import 'package:chatbot/view/screens/dashboard.dart';
 import 'package:chatbot/view/screens/presentation.dart';
@@ -128,10 +127,6 @@ class SplashScreenState extends State<SplashScreen>
         User.setCurrentUser(user, save: false);
 
         secureStorage.write(key: "user_token", value: valid);
-         // Cargar notificaciones desde el backend una sola vez
-         final cuentaUsuarioId = await secureStorage.read(key: "user_id");
-         _log.fine("📩 ------Cargando notificaciones para el usuario: $cuentaUsuarioId");
-        await NotificationService.cargarYGuardarNotificaciones(cuentaUsuarioId!);  
 
         _log.fine("User info found in secure storage. Skipping login.");
 
