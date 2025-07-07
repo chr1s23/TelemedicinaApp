@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:chatbot/service/notification_service.dart';
 import 'package:chatbot/utils/resultado_utils.dart';
 import 'package:chatbot/view/screens/dashboard.dart';
@@ -14,6 +16,7 @@ import 'package:chatbot/utils/notificacion_flags.dart';
 import 'package:chatbot/service/encuesta_service.dart';
 import 'package:chatbot/service/paciente_service.dart';
 import 'package:chatbot/view/screens/socioeconomic_information.dart';
+import 'package:chatbot/utils/notificacion_bienvenida_constants.dart';
 
 import '../main.dart'; // Para acceder al navigatorKey
 
@@ -44,7 +47,16 @@ class FirebaseMessagingHandler {
     const InitializationSettings initSettings =
         InitializationSettings(android: androidSettings);
 
-    await flutterLocalNotificationsPlugin.initialize(initSettings);
+    await flutterLocalNotificationsPlugin.initialize(
+      initSettings,
+      onDidReceiveNotificationResponse: (details) {
+        final payload = details.payload;
+        if (payload != null) {
+          final data = jsonDecode(payload);
+          manejarClickNotificacion(data);
+        }
+      },
+    );
 
     // Si la app se abrió desde una notificación (CERRADA COMPLETAMENTE)
     RemoteMessage? initialMessage =
@@ -199,8 +211,9 @@ class FirebaseMessagingHandler {
         }
       }
     } else {
-      Navigator.of(contxt).pop();
+      Navigator.of(contxt).pop(); // Cierra cualquier diálogo de carga
 
+// Ahora accede al estado de Dashboard para cambiar pestaña
       final dashboardState = Dashboard.globalKey.currentState;
       if (dashboardState != null && dashboardState.mounted) {
         dashboardState.irAPestanaRecursos();
@@ -247,5 +260,30 @@ class FirebaseMessagingHandler {
           ),
         ) ??
         false;
+  }
+
+  static Future<void> mostrarNotificacionBienvenidaLocal() async {
+    const AndroidNotificationDetails androidDetails =
+        AndroidNotificationDetails(
+      'canal_principal',
+      'Notificaciones CLIAS',
+      importance: Importance.max,
+      priority: Priority.high,
+      showWhen: true,
+    );
+
+    const NotificationDetails notificationDetails = NotificationDetails(
+      android: androidDetails,
+    );
+
+    await _flutterLocalNotificationsPlugin.show(
+      DateTime.now().millisecondsSinceEpoch ~/ 1000, // ID único
+      NotificacionBienvenida.titulo,
+      NotificacionBienvenida.mensaje,
+      notificationDetails,
+      payload: jsonEncode({
+        "tipoNotificacion": NotificacionBienvenida.tipo,
+      }),
+    );
   }
 }
