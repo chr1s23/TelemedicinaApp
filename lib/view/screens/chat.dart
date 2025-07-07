@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:chatbot/model/requests/message_request.dart';
 import 'package:chatbot/service/connectivity_service.dart';
+import 'package:chatbot/service/sesion_chat_service.dart';
 import 'package:chatbot/utils/dashboard_listener.dart';
 import 'package:chatbot/view/screens/dashboard.dart';
 import 'package:chatbot/service/chat_service.dart';
@@ -42,6 +43,7 @@ class _ChatbotPageState extends State<Chat> {
   final TextEditingController _messageController = TextEditingController();
   final TextEditingController dateController = TextEditingController();
   final List<Map<String, dynamic>> _messages = [];
+  final initTimestamp = DateTime.now();
 
   bool _isLoading = false;
   int _loadingIndex = 0;
@@ -143,7 +145,15 @@ class _ChatbotPageState extends State<Chat> {
               title: "¿Salir del chat?",
               message: "Se perderá todo el contenido del chat.",
               onYes: () async {
-                //chatService.reset(await getUserId());
+                //detener el contador de tiempo del chat y mandar a guardar los datos de tiempo
+                final time = DateTime.now().difference(initTimestamp).inSeconds / 60;
+                _log.fine("Chat time: $time minutes");
+                _log.fine("Initial timestamp: $initTimestamp");
+                _log.fine("End timestamp: ${DateTime.now()}");
+                var publicId = await secureStorage.read(key: "user_id");
+
+                //verificar si el tiempo de chat es mayor a un minuto para guardar
+                await SesionChatService.saveChatTime(tiempo: time, publicId: publicId!);
               },
             ) ??
             false;

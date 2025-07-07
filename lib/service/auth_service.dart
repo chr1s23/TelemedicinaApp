@@ -29,6 +29,7 @@ sealed class AuthService {
       final response = await getDio().post("/usuarios/autenticar", data: {
         "nombreUsuario": user.nombreUsuario,
         "contrasena": user.contrasena,
+        "appVersion": AppConfig.appVersion,
       });
 
       if (response.statusCode == 200) {
@@ -116,12 +117,13 @@ sealed class AuthService {
     return null;
   }
 
-  static Future<bool> changePassword(BuildContext context, User user) async {
+  static Future<bool> changePassword(BuildContext context, User user, String fecha) async {
     try {
       final response =
           await getDio().put("/usuarios/cambiar-contrasena", data: {
         "nombreUsuario": user.nombreUsuario,
         "contrasena": user.contrasena,
+        "fechaNacimientoCambioPass": fecha //dd/MM/yyyy
       });
 
       if (response.statusCode == 200) {
