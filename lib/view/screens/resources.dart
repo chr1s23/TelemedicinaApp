@@ -370,11 +370,9 @@ class _ResourcesPageState extends State<Resources> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: InkWell(
         onTap: () async {
-          // Incrementar vista del blog
-          await _incrementarVistas(blog[
-              "codigo"]!); // Llamamos a la función de incrementar vistas al abrir el blog
 
-          // Ahora navegamos al detalle del blog
+          await _incrementarVistas(blog[
+              "codigo"]!); 
           Navigator.push(
             context,
             MaterialPageRoute(
