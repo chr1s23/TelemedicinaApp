@@ -24,7 +24,7 @@ class WIPScreen extends StatelessWidget {
             style: TextStyle(fontSize: 14), 
             textAlign: TextAlign.center,
           ),
-          SizedBox(height: 200),
+          SizedBox(height: MediaQuery.of(context).size.height * 0.2),
         ],
       ),
     );
