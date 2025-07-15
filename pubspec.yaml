@@ -64,10 +64,29 @@ flutter:
     - assets/icons/chatbot.svg
     - assets/images/avatar.png
     - assets/videos/sample.mp4
-    - assets/videos/automuestreo.mp4
     - assets/videos/short.mp4
     - assets/images/clias.jpg
     - assets/images/idrc.png
     - assets/images/logo_clias.png
     - assets/offline_messages.json
     - assets/offline_form.json
+    - assets/videos/automuestreo.mp4    
+    - assets/videos/ccu.mp4    
+    - assets/videos/higiene_intima.mp4    
+    - assets/videos/preservativos.mp4    
+    - assets/videos/violencia.mp4    
+    - assets/videos/vph_positivo.mp4 
+    - assets/images/Automuestreo.png
+    - assets/images/ccu.png
+    - assets/images/embarazo.png
+    - assets/images/higiene.png
+    - assets/images/Infertilidad.png
+    - assets/images/ITS.png
+    - assets/images/prevencion_embarazo.png
+    - assets/images/salud_sexual.png
+    - assets/images/VIH.png
+    - assets/images/violencia2.png
+    - assets/images/VPH.png
+
+
+    
