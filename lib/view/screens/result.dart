@@ -1,11 +1,13 @@
+import 'dart:io';
+import 'dart:typed_data';
+import 'package:flutter/material.dart';
 import 'package:chatbot/model/responses/examen_vph_response.dart';
 import 'package:chatbot/view/screens/resultado_viewer.dart';
 import 'package:chatbot/view/widgets/custom_app_bar.dart';
 import 'package:chatbot/view/widgets/utils.dart';
-import 'package:flutter/material.dart';
-import 'package:file_saver/file_saver.dart';
+
+import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'dart:typed_data';
 
 class Result extends StatelessWidget {
   final String nombrePaciente;
@@ -20,9 +22,8 @@ class Result extends StatelessWidget {
   String _descripcionDiagnostico(String? diagnostico) {
     switch (diagnostico?.toLowerCase()) {
       case "alto":
-        return "Un resultado positivo en VPH no significa que tengas cáncer.\n Es un virus común que, en la mayoría de los casos, se elimina solo en uno o dos años.\n Lo más importante es acudir al médico para hacer los controles necesarios.  Puedes identificar el centro de salud más cercano usando el mapa de nuestra aplicación.\n Como recomendación utiliza preservativo en tus relaciones. Detectarlo a tiempo te da la oportunidad de actuar y proteger tu salud.";
       case "bajo":
-        return "Un resultado positivo en VPH no significa que tengas cáncer.\n Es un virus común que, en la mayoría de los casos, se elimina solo en uno o dos años.\n Lo más importante es acudir al médico para hacer los controles necesarios.  Puedes identificar el centro de salud más cercano usando el mapa de nuestra aplicación.\n Como recomendación utiliza preservativo en tus relaciones. Detectarlo a tiempo te da la oportunidad de actuar y proteger tu salud.";
+        return "Un resultado positivo en VPH no significa que tengas cáncer.\nEs un virus común que, en la mayoría de los casos, se elimina solo en uno o dos años.\nLo más importante es acudir al médico para hacer los controles necesarios. Puedes identificar el centro de salud más cercano usando el mapa de nuestra aplicación.\nComo recomendación utiliza preservativo en tus relaciones. Detectarlo a tiempo te da la oportunidad de actuar y proteger tu salud.";
       case "negativo":
         return "No se detectaron genotipos de VPH dentro de los incluidos en la prueba. Se sugiere repetir el estudio en 5 años, de acuerdo con las recomendaciones para el tamizaje rutinario.";
       default:
@@ -30,31 +31,27 @@ class Result extends StatelessWidget {
     }
   }
 
-  Future<void> descargarPDF(
-      Uint8List pdfBytes, String nombreArchivo, BuildContext context) async {
-    final status = await Permission.storage.request();
-
-    if (!status.isGranted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Permiso de almacenamiento denegado')),
-      );
-      return;
+  Future<void> solicitarPermisos() async {
+    if (Platform.isAndroid) {
+      await Permission.storage.request();
     }
+  }
 
+  Future<void> guardarPdfDesdeBytes(
+      Uint8List pdfBytes, String fileName, BuildContext context) async {
     try {
-      await FileSaver.instance.saveFile(
-        name: nombreArchivo,
-        bytes: pdfBytes,
-        ext: "pdf",
-        mimeType: MimeType.pdf,
-      );
+      final dir =
+          await getExternalStorageDirectory(); // ruta como /storage/emulated/0/Android/data/tu.app/files/
+      final filePath = "${dir!.path}/$fileName.pdf";
+      final file = File(filePath);
+      await file.writeAsBytes(pdfBytes);
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('PDF descargado exitosamente')),
+        SnackBar(content: Text('✅ PDF guardado exitosamente, revisa tu carpeta de descargas.')),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al guardar el archivo: $e')),
+        SnackBar(content: Text('❌ Error al guardar PDF: $e')),
       );
     }
   }
@@ -121,8 +118,10 @@ class Result extends StatelessWidget {
                       Center(
                         child: ElevatedButton.icon(
                           onPressed: () async {
+                            await solicitarPermisos();
+
                             final pdfBytes = resultado.contenido;
-                            if (pdfBytes == null) {
+                            if (pdfBytes == null || pdfBytes.isEmpty) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
                                     content:
@@ -131,7 +130,7 @@ class Result extends StatelessWidget {
                               return;
                             }
 
-                            await descargarPDF(
+                            await guardarPdfDesdeBytes(
                               Uint8List.fromList(pdfBytes),
                               resultado.nombre ?? 'resultado',
                               context,
