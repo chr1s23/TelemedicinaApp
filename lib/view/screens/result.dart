@@ -46,7 +46,7 @@ class Result extends StatelessWidget {
 
       if (ok == true) {
         ScaffoldMessenger.of(ctx).showSnackBar(
-          SnackBar(content: Text('✅ PDF guardado en Descargas como $safeName')),
+          SnackBar(content: Text('✅ PDF  $safeName guardado exitosamente')),
         );
       } else {
         throw Exception('Unknown error from native');
