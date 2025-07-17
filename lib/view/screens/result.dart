@@ -6,8 +6,10 @@ import 'package:chatbot/view/screens/resultado_viewer.dart';
 import 'package:chatbot/view/widgets/custom_app_bar.dart';
 import 'package:chatbot/view/widgets/utils.dart';
 
+
+import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
+
 
 class Result extends StatelessWidget {
   final String nombrePaciente;
@@ -19,6 +21,43 @@ class Result extends StatelessWidget {
     required this.resultado,
   });
 
+  // Canal que coincide con el nombre en MainActivity.kt
+  static const _downloadChannel = MethodChannel('app/download');
+
+  Future<void> _saveToDownloads(
+      Uint8List pdfBytes, String fileName, BuildContext ctx) async {
+    try {
+      // 1) Normaliza nombre sin .pdf duplicado
+      final base = fileName.toLowerCase().endsWith('.pdf')
+          ? fileName.substring(0, fileName.length - 4)
+          : fileName;
+      final safeName = '$base.pdf';
+
+      // 2) Guarda en carpeta temporal de la app
+      final tempDir = await getTemporaryDirectory();
+      final tmpPath = '${tempDir.path}/$safeName';
+      await File(tmpPath).writeAsBytes(pdfBytes);
+
+      // 3) Llama al canal nativo
+      final ok = await _downloadChannel.invokeMethod<bool>('saveToDownloads', {
+        'filePath': tmpPath,
+        'fileName': safeName,
+      });
+
+      if (ok == true) {
+        ScaffoldMessenger.of(ctx).showSnackBar(
+          SnackBar(content: Text('✅ PDF guardado en Descargas como $safeName')),
+        );
+      } else {
+        throw Exception('Unknown error from native');
+      }
+    } on PlatformException catch (e) {
+      ScaffoldMessenger.of(ctx).showSnackBar(
+        SnackBar(content: Text('❌ Error al guardar PDF: ${e.message}')),
+      );
+    }
+  }
+
   String _descripcionDiagnostico(String? diagnostico) {
     switch (diagnostico?.toLowerCase()) {
       case "alto":
@@ -28,31 +67,6 @@ class Result extends StatelessWidget {
         return "No se detectaron genotipos de VPH dentro de los incluidos en la prueba. Se sugiere repetir el estudio en 5 años, de acuerdo con las recomendaciones para el tamizaje rutinario.";
       default:
         return "Consulta con tu médico para más información.";
-    }
-  }
-
-  Future<void> solicitarPermisos() async {
-    if (Platform.isAndroid) {
-      await Permission.storage.request();
-    }
-  }
-
-  Future<void> guardarPdfDesdeBytes(
-      Uint8List pdfBytes, String fileName, BuildContext context) async {
-    try {
-      final dir =
-          await getExternalStorageDirectory(); // ruta como /storage/emulated/0/Android/data/tu.app/files/
-      final filePath = "${dir!.path}/$fileName.pdf";
-      final file = File(filePath);
-      await file.writeAsBytes(pdfBytes);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('✅ PDF guardado exitosamente, revisa tu carpeta de descargas.')),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('❌ Error al guardar PDF: $e')),
-      );
     }
   }
 
@@ -117,27 +131,23 @@ class Result extends StatelessWidget {
                       const SizedBox(height: 12),
                       Center(
                         child: ElevatedButton.icon(
+                          icon: const Icon(Icons.download),
+                          label: const Text("Descargar PDF"),
                           onPressed: () async {
-                            await solicitarPermisos();
-
-                            final pdfBytes = resultado.contenido;
-                            if (pdfBytes == null || pdfBytes.isEmpty) {
+                            final bytes = resultado.contenido;
+                            if (bytes == null || bytes.isEmpty) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                    content:
-                                        Text('No se encontró el archivo PDF')),
+                                    content: Text('No se encontró el PDF')),
                               );
                               return;
                             }
-
-                            await guardarPdfDesdeBytes(
-                              Uint8List.fromList(pdfBytes),
+                            await _saveToDownloads(
+                              Uint8List.fromList(bytes),
                               resultado.nombre ?? 'resultado',
                               context,
                             );
                           },
-                          icon: const Icon(Icons.download),
-                          label: const Text("Descargar PDF"),
                         ),
                       ),
                       const SizedBox(height: 20),

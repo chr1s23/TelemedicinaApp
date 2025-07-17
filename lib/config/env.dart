@@ -13,7 +13,7 @@ class AppConfig {
   }
 
   static String get appVersion {
-    return "1.0.5"; // Ir actualizando con cada versión
+    return "1.0.7"; // Ir actualizando con cada versión
   }
 
 
