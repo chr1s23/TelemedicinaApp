@@ -49,7 +49,7 @@ class _ResultadoViewerState extends State<ResultadoViewer> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.of(context).popUntil((route) => route.isFirst); // vuelve al dashboard
+            Navigator.pop(context);
           },
         ),
       ),

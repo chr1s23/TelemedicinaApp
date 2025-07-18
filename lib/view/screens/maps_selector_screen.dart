@@ -14,47 +14,41 @@ class MapsSelectorScreen extends StatefulWidget {
 class _MapsSelectorScreenState extends State<MapsSelectorScreen> {
   MapaBase _selectedMap = MapaBase.osm;
 
+  void _toggleMapa() {
+    setState(() {
+      _selectedMap =
+          _selectedMap == MapaBase.osm ? MapaBase.google : MapaBase.osm;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final Widget mapa = _selectedMap == MapaBase.osm
+        ? const MapsOSMScreen()
+        : const WIPScreen();
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Seleccione el mapa base',
-          style: TextStyle(
-            fontSize: 15, // Cambia este valor a lo que desees
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        actions: [
-          DropdownButton<MapaBase>(
-            value: _selectedMap,
-            icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
-            dropdownColor: Colors.white,
-            underline: const SizedBox(),
-            onChanged: (value) {
-              if (value != null) {
-                setState(() {
-                  _selectedMap = value;
-                });
-              }
-            },
-            items: const [
-              DropdownMenuItem(
-                value: MapaBase.osm,
-                child: Text('OpenStreetMap'),
+      body: Stack(
+        children: [
+          Positioned.fill(child: mapa), // Asegura que el mapa se expanda
+          Positioned(
+            bottom: 110, // más bajo = más cerca del borde inferior
+            left: 15,  // más grande = más hacia el centro
+            child: FloatingActionButton(
+              heroTag: 'cambiar_mapa',
+              backgroundColor: Colors.white,
+              foregroundColor: const Color(0xFF002856),
+              tooltip: _selectedMap == MapaBase.osm
+                  ? 'Cambiar a Google Maps'
+                  : 'Cambiar a OpenStreetMap',
+              onPressed: _toggleMapa,
+              child: Icon(
+                _selectedMap == MapaBase.osm ? Icons.picture_in_picture_alt_outlined : Icons.picture_in_picture_alt,
               ),
-              DropdownMenuItem(
-                value: MapaBase.google,
-                child: Text('Google Maps'),
-              ),
-            ],
+            ),
           ),
-          const SizedBox(width: 10),
         ],
       ),
-      body: _selectedMap == MapaBase.osm
-          ? const MapsOSMScreen()
-          : WIPScreen(),
     );
   }
 }
