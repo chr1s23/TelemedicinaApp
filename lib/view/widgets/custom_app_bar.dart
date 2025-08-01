@@ -45,7 +45,7 @@ class CustomAppBarState extends State<CustomAppBar> {
 
     final chewie = ChewieController(
       videoPlayerController: video,
-      autoPlay: true,
+      autoPlay: false,
       aspectRatio: video.value.aspectRatio, // Relación real del video
       allowFullScreen: true,
       fullScreenByDefault: false,
