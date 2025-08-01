@@ -4,6 +4,8 @@ import 'package:chatbot/view/widgets/utils.dart';
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
+import 'package:flutter/services.dart';
+
 
 class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   const CustomAppBar({super.key, this.helpButton = false, this.profileButton = true});
@@ -26,8 +28,8 @@ class CustomAppBarState extends State<CustomAppBar> {
 
   @override
   void initState() {
-    _initVideoPlayer();
     super.initState();
+    _initVideoPlayer();
   }
 
   @override
@@ -38,15 +40,27 @@ class CustomAppBarState extends State<CustomAppBar> {
   }
 
   void _initVideoPlayer() async {
-    var (video, chewie) = await initializeVideoPlayer(
-      'assets/videos/sample.mp4',
-      autoPlay: true,
+    final video = VideoPlayerController.asset('assets/videos/sample.mp4');
+    await video.initialize();
+
+    final chewie = ChewieController(
+      videoPlayerController: video,
+      autoPlay: false,
+      aspectRatio: video.value.aspectRatio, // Relación real del video
+      allowFullScreen: true,
+      fullScreenByDefault: false,
+      showControlsOnInitialize: true,
+      deviceOrientationsOnEnterFullScreen: null, // Permitir comportamiento automático
+      deviceOrientationsAfterFullScreen: [
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
+      ],
     );
 
-    _videoController = video;
-    _chewieController = chewie;
-
-    setState(() {});
+    setState(() {
+      _videoController = video;
+      _chewieController = chewie;
+    });
   }
 
   @override
@@ -63,93 +77,118 @@ class CustomAppBarState extends State<CustomAppBar> {
                   padding: const EdgeInsets.all(1),
                   style: IconButton.styleFrom(
                     backgroundColor: AllowedColors.red,
-                    shape: CircleBorder(),
+                    shape: const CircleBorder(),
                   ),
                   onPressed: () {
                     _showHelpDialog(context);
                   },
-                  icon: const Icon(Icons.help_outline,
-                      color: AllowedColors.white),
+                  icon: const Icon(Icons.help_outline, color: AllowedColors.white),
                   iconSize: 30,
                 ),
               ),
             )
           : null,
-      title: Text(
+      title: const Text(
         "SISA",
         style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.w900,
-            color: AllowedColors.red),
+          fontSize: 22,
+          fontWeight: FontWeight.w900,
+          color: AllowedColors.red,
+        ),
       ),
       centerTitle: true,
-      actions: widget.profileButton ? [
-        IconButton(
-          icon: CircleAvatar(
-            backgroundImage:
-                AssetImage('assets/images/avatar.png'), // Imagen del avatar
-            radius: 15,
-          ),
-          onPressed: () {
-            // Acción del perfil
-            Scaffold.of(context)
-                .openEndDrawer(); // Abre el Drawer desde la derecha
-          },
-        ),
-      ] : null,
+      actions: widget.profileButton
+          ? [
+              IconButton(
+                icon: const CircleAvatar(
+                  backgroundImage: AssetImage('assets/images/avatar.png'),
+                  radius: 15,
+                ),
+                onPressed: () {
+                  Scaffold.of(context).openEndDrawer();
+                },
+              ),
+            ]
+          : null,
     );
   }
 
   void _showHelpDialog(BuildContext context) {
+    final maxWidth = MediaQuery.of(context).size.width * 0.9;
+    final maxHeight = MediaQuery.of(context).size.height * 0.6;
+
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) {
         return Dialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15),
-            ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          child: SingleChildScrollView(
             child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(mainAxisSize: MainAxisSize.min, children: [
-                // Botón de cerrar (X)
-                Align(
-                  alignment: Alignment.topLeft,
-                  child: IconButton(
-                    icon: const Icon(Icons.close,
-                        color: AllowedColors.black, size: 24),
-                    onPressed: () {
-                      _videoController?.pause();
-                      //helpVideoController.dispose();
-                      Navigator.pop(context);
-                    },
-                  ),
-                ),
-
-                // Video
-                buildVideoPlayer(_videoController, _chewieController),
-                const SizedBox(height: 15),
-                Column(children: [
-                  CustomButton(
-                      color: AllowedColors.red,
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Botón de cerrar
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: IconButton(
+                      icon: const Icon(Icons.close, color: AllowedColors.black, size: 24),
                       onPressed: () {
                         _videoController?.pause();
                         Navigator.pop(context);
                       },
-                      label: "Entendido"),
-                  const SizedBox(height: 20),
-                  CustomButton(
-                      color: AllowedColors.blue,
-                      onPressed: () {
-                        _videoController?.pause();
-                        Navigator.push(context,
-                            MaterialPageRoute(builder: (context) => AboutUs()));
-                      },
-                      label: "Acerca de"),
-                  const SizedBox(height: 15)
-                ])
-              ]),
-            ));
+                    ),
+                  ),
+
+                  // Contenedor del video
+                  if (_videoController != null && _videoController!.value.isInitialized)
+                    Container(
+                      constraints: BoxConstraints(maxWidth: maxWidth, maxHeight: maxHeight),
+                      child: AspectRatio(
+                        aspectRatio: _videoController!.value.aspectRatio,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Chewie(controller: _chewieController!),
+                        ),
+                      ),
+                    )
+                  else
+                    const Center(child: CircularProgressIndicator()),
+
+                  // Botones
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    child: Column(
+                      children: [
+                        CustomButton(
+                          color: AllowedColors.red,
+                          onPressed: () {
+                            _videoController?.pause();
+                            Navigator.pop(context);
+                          },
+                          label: "Entendido",
+                        ),
+                        const SizedBox(height: 15),
+                        CustomButton(
+                          color: AllowedColors.blue,
+                          onPressed: () {
+                            _videoController?.pause();
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const AboutUs()),
+                            );
+                          },
+                          label: "Acerca de",
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
       },
     );
   }
