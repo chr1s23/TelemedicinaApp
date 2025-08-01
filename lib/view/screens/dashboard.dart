@@ -6,13 +6,13 @@ import 'package:chatbot/view/screens/notifications.dart';
 import 'package:chatbot/view/screens/maps_selector_screen.dart';
 import 'package:chatbot/view/screens/resources.dart';
 import 'package:chatbot/view/screens/scanner.dart';
-//import 'package:chatbot/view/screens/wip.dart';
 import 'package:chatbot/view/widgets/custom_app_bar.dart';
 import 'package:chatbot/view/widgets/custom_drawer.dart';
 import 'package:chatbot/view/widgets/utils.dart';
 import 'package:chatbot/view/widgets/custom_button.dart';
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:video_player/video_player.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:chatbot/service/notification_service.dart';
@@ -67,6 +67,20 @@ class AutoSamplingPageState extends State<Dashboard> {
     });
   }
 
+  void _abrirWhatsapp() async {
+    const whatsappUrl =
+        "https://wa.me/593991190832?text=Hola,%20necesito%20ayuda%20con%20la%20aplicación.";
+    if (await canLaunchUrl(Uri.parse(whatsappUrl))) {
+      await launchUrl(Uri.parse(whatsappUrl),
+          mode: LaunchMode.externalApplication);
+    } else {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("No se pudo abrir WhatsApp")),
+      );
+    }
+  }
+
   Future<void> actualizarNotificaciones() async {
     final unread = NotificationState().hayNoLeidas;
     if (mounted) {
@@ -79,7 +93,7 @@ class AutoSamplingPageState extends State<Dashboard> {
   Future<void> _initializePlayer() async {
     String? dispositivo = await secureStorage.read(key: "user_device");
     String? autoPlay = await secureStorage.read(key: "auto_play");
-        //Agrega el token del dispositivo del usuario
+    //Agrega el token del dispositivo del usuario
     final userId = await secureStorage.read(key: "user_id");
     if (userId != null) {
       await NotificationService.cargarYGuardarNotificaciones(userId!);
@@ -91,7 +105,7 @@ class AutoSamplingPageState extends State<Dashboard> {
           "[!] User ID not found in secure storage. Cannot register FCM token.");
     }
     var (video, chewie) =
-        await initializeVideoPlayer('assets/videos/automuestreo.mp4');    
+        await initializeVideoPlayer('assets/videos/automuestreo.mp4');
     // Listener para saber si terminó el video
     video.addListener(() {
       if (video.value.position >= video.value.duration && !videoComplete) {
@@ -218,9 +232,22 @@ class AutoSamplingPageState extends State<Dashboard> {
                 Text(
                     "Este video explica el proceso de automuestreo. Sigue los pasos descritos para completar el procedimiento correctamente.",
                     style: TextStyle(fontSize: 12, color: AllowedColors.gray)),
-                const SizedBox(
-                  height: 150,
-                )
+                const SizedBox(height: 60),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: SizedBox(
+                    width: 60, // Puedes probar 56, 60, etc.
+                    height: 60,
+                    child: FloatingActionButton(
+                      heroTag: "whatsapp-help",
+                      backgroundColor: Colors.green,
+                      tooltip: "Ayuda por WhatsApp",
+                      onPressed: _abrirWhatsapp,
+                      elevation: 2, shape: const CircleBorder(),
+                      child: const Icon(Icons.support_agent, color: Colors.white, size: 28), 
+                    ),
+                  ),
+                ),
               ],
             ),
           )),
