@@ -2,8 +2,6 @@ import 'package:http/http.dart' as http;
 import 'package:chatbot/config/env.dart';
 import 'package:chatbot/model/storage/storage.dart';
 import 'package:logger/logger.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 
 final _log = Logger();
 

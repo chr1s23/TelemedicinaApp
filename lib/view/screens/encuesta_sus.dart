@@ -2,14 +2,10 @@ import 'package:chatbot/utils/resultado_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:chatbot/view/widgets/custom_button.dart';
 import 'package:chatbot/view/widgets/utils.dart';
-import 'package:chatbot/view/screens/terms_and_conditions.dart';
 //import 'package:chatbot/view/screens/pdf_result_page.dart';
 import 'package:chatbot/model/requests/encuesta_sus_request.dart';
 import 'package:chatbot/service/encuesta_service.dart';
 import 'package:chatbot/model/storage/storage.dart';
-import 'package:chatbot/view/screens/encuesta_sus.dart';
-import 'package:chatbot/view/screens/resultado_viewer.dart';
-import 'package:chatbot/service/resultado_service.dart';
 
 class LikertSurveyPage extends StatefulWidget {
   const LikertSurveyPage({super.key});
