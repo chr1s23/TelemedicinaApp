@@ -45,6 +45,7 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+android/*
 
 
 # Created by https://www.toptal.com/developers/gitignore/api/macos,vscode,java,flutter

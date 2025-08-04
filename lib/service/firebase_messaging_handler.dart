@@ -17,6 +17,7 @@ import 'package:chatbot/service/encuesta_service.dart';
 import 'package:chatbot/service/paciente_service.dart';
 import 'package:chatbot/view/screens/socioeconomic_information.dart';
 import 'package:chatbot/utils/notificacion_bienvenida_constants.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../main.dart'; // Para acceder al navigatorKey
 
@@ -105,6 +106,7 @@ class FirebaseMessagingHandler {
       Map<String, dynamic> data) async {
     final publicId = data["publicId"];
     final tipo = data["tipoNotificacion"];
+    final accion = data["accion"] ?? "";
     final contxt = navigatorKey.currentContext!;
 
     if (publicId != null) {
@@ -211,14 +213,42 @@ class FirebaseMessagingHandler {
         }
       }
     } else {
-      Navigator.of(contxt).pop(); // Cierra cualquier diálogo de carga
-
-// Ahora accede al estado de Dashboard para cambiar pestaña
-      final dashboardState = Dashboard.globalKey.currentState;
-      if (dashboardState != null && dashboardState.mounted) {
-        dashboardState.irAPestanaRecursos();
+      Navigator.of(contxt).pop();
+      //Si es otro tipo de notificación, entonces :
+      if (!accion.startsWith("https://miapp.com/")) {
+        //Si es que la acción tiene un enlace externo válido, entonces al dar click redirecciona a ese enlace
+        showDialog(
+          context: contxt,
+          builder: (_) => AlertDialog(
+            title: Text(data["titulo"] ?? "Notificación "),
+            content: Text(data["mensaje"] ?? "No se proporcionó un mensaje."),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(contxt).pop(),
+                child: const Text("Cerrar"),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  if (await canLaunchUrl(Uri.parse(accion))) {
+                    await launchUrl(Uri.parse(accion),
+                        mode: LaunchMode.externalApplication);
+                  } else {
+                    print("[X] No se pudo abrir el enlace: $accion");
+                  }
+                },
+                child: const Text("Navegar"),
+              ),
+            ],
+          ),
+        );
       } else {
-        print("[X] No se pudo acceder al estado del Dashboard.");
+        // Ahora accede al estado de Dashboard para cambiar pestaña
+        final dashboardState = Dashboard.globalKey.currentState;
+        if (dashboardState != null && dashboardState.mounted) {
+          dashboardState.irAPestanaRecursos();
+        } else {
+          print("[X] No se pudo acceder al estado del Dashboard.");
+        }
       }
     }
   }
