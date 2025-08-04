@@ -18,7 +18,7 @@ Future<void> mostrarResultadoDesdeContexto(BuildContext context) async {
     final userDeviceId = await secureStorage.read(key: "user_device");
 
     if (userDeviceId == null) {
-      showSnackBar(context, "No se encontró el dispositivo del usuario.");
+      showSnackBar(context, "No se encontró el dispositivo del usuario, dispositivo: $userDeviceId");
       return;
     }
 

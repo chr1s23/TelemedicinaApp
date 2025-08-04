@@ -18,6 +18,7 @@ class _MapsOSMScreenState extends State<MapsOSMScreen> {
   List<UbicacionResponse> ubicaciones = [];
   bool isLoading = true;
   LatLng? _userLocation;
+  final Map<String, List<UbicacionResponse>> _ubicacionesPorTipo = {};
 
   @override
   void initState() {
@@ -28,14 +29,22 @@ class _MapsOSMScreenState extends State<MapsOSMScreen> {
   Future<void> _loadUbicaciones() async {
     setState(() => isLoading = true);
     try {
-      final data = await UbicacionService.fetchUbicaciones(
-        establecimiento: selectedEstablecimiento,
-      );
-      if (!mounted) return;
-      setState(() {
-        ubicaciones = data;
-        isLoading = false;
-      });
+      if (_ubicacionesPorTipo.containsKey(selectedEstablecimiento)) {
+        setState(() {
+          ubicaciones = _ubicacionesPorTipo[selectedEstablecimiento]!;
+          isLoading = false;
+        });
+      } else {
+        final data = await UbicacionService.fetchUbicaciones(
+          establecimiento: selectedEstablecimiento,
+        );
+        if (!mounted) return;
+        _ubicacionesPorTipo[selectedEstablecimiento] = data;
+        setState(() {
+          ubicaciones = data;
+          isLoading = false;
+        });
+      }
     } catch (e) {
       if (!mounted) return;
       setState(() => isLoading = false);
@@ -44,7 +53,8 @@ class _MapsOSMScreenState extends State<MapsOSMScreen> {
   }
 
   void _showSnackBar(String mensaje) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(mensaje)));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(mensaje)));
   }
 
   void _showUbicacionDialog(UbicacionResponse ubicacion) {
@@ -66,7 +76,8 @@ class _MapsOSMScreenState extends State<MapsOSMScreen> {
   }
 
   Widget _buildUbicacionInfo(UbicacionResponse ubicacion) {
-    final sitioWeb = ubicacion.sitioWeb.trim().replaceAll('\n', '').replaceAll('\r', '');
+    final sitioWeb =
+        ubicacion.sitioWeb.trim().replaceAll('\n', '').replaceAll('\r', '');
     final Uri urlSitio = Uri.parse(sitioWeb);
     final Uri telUri = Uri(scheme: 'tel', path: ubicacion.telefono.trim());
 
@@ -130,7 +141,7 @@ class _MapsOSMScreenState extends State<MapsOSMScreen> {
         point: LatLng(ubicacion.latitud, ubicacion.longitud),
         child: GestureDetector(
           onTap: () => _showUbicacionDialog(ubicacion),
-          child: const Icon(Icons.location_on, size: 40, color: Colors.red),
+          child: const Icon(Icons.location_on, size: 40, color: Color(0xFFA51008)),
         ),
       );
     }).toList();
@@ -150,7 +161,8 @@ class _MapsOSMScreenState extends State<MapsOSMScreen> {
         }
       },
       style: ElevatedButton.styleFrom(
-        backgroundColor: isSelected ? const Color(0xFF002856) : Colors.grey[300],
+        backgroundColor:
+            isSelected ? const Color(0xFF002856) : Colors.grey[300],
         foregroundColor: isSelected ? Colors.white : Colors.black,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       ),
@@ -177,6 +189,28 @@ class _MapsOSMScreenState extends State<MapsOSMScreen> {
     );
   }
 
+  Widget _buildStaticMap() {
+    return FlutterMap(
+      key: const PageStorageKey('flutter_map_osm'),
+      options: MapOptions(
+        initialCenter: _getInitialCenter(),
+        initialZoom: 13.0,
+        interactionOptions: InteractionOptions(
+          flags: InteractiveFlag.drag |
+              InteractiveFlag.pinchZoom |
+              InteractiveFlag.doubleTapZoom,
+        ),
+      ),
+      children: [
+        TileLayer(
+          urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+          userAgentPackageName: 'com.example.chatbot'
+        ),
+        MarkerLayer(markers: _buildMarkers()),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -196,25 +230,12 @@ class _MapsOSMScreenState extends State<MapsOSMScreen> {
             child: Center(child: _buildFilterButtons()),
           ),
           Expanded(
-            child: isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : FlutterMap(
-                    options: MapOptions(
-                      initialCenter: _getInitialCenter(),
-                      initialZoom: 13.0,
-                      interactionOptions: InteractionOptions(
-                        flags: InteractiveFlag.drag |
-                            InteractiveFlag.pinchZoom |
-                            InteractiveFlag.doubleTapZoom,
-                      ),
-                    ),
-                    children: [
-                      TileLayer(
-                        urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                      ),
-                      MarkerLayer(markers: _buildMarkers()),
-                    ],
-                  ),
+            child: Stack(
+              children: [
+                _buildStaticMap(), // Mapa no se reconstruye
+                if (isLoading) const Center(child: CircularProgressIndicator()),
+              ],
+            ),
           ),
         ],
       ),

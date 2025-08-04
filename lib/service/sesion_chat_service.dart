@@ -75,4 +75,29 @@ sealed class SesionChatService {
       return true;
     }
   }
+
+  static Future<bool?> saveChatTime({
+    required double tiempo,
+    required String publicId
+  }) async {
+    try {
+      final response = await getDio().put(
+        "/usuarios/chat-time/$publicId",
+        data: {
+          "tiempo": tiempo
+        },
+      );
+
+      if (response.statusCode == 200) {
+        _log.info("Chat time saved successfully");
+        return true;
+      } else {
+        _log.warning("Failed to save chat time: ${response.statusCode}");
+        return false;
+      }
+    } on DioException catch (e) {
+      _log.severe('Error saving chat time: $e');
+      return false;
+    }
+  }
 }

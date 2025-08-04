@@ -2,9 +2,7 @@ import 'package:chatbot/model/requests/paciente_request.dart';
 import 'package:chatbot/view/screens/encuesta_sus.dart';
 import 'package:flutter/material.dart';
 import 'package:chatbot/model/requests/inf_socioeconomica_request.dart';
-import 'package:chatbot/model/requests/user_request.dart';
 import 'package:chatbot/service/paciente_service.dart';
-import 'package:chatbot/view/screens/dashboard.dart';
 import 'package:chatbot/view/widgets/custom_button.dart';
 import 'package:chatbot/view/widgets/utils.dart';
 

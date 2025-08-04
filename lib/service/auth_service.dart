@@ -4,6 +4,7 @@
 import 'package:chatbot/model/requests/user.dart';
 import 'package:chatbot/model/requests/user_request.dart';
 import 'package:chatbot/model/responses/user_response.dart';
+import 'package:chatbot/service/notification_service.dart';
 import 'package:chatbot/view/widgets/utils.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -25,10 +26,12 @@ Dio getDio() {
 
 sealed class AuthService {
   static Future<UserResponse?> login(BuildContext context, User user) async {
+    print("🔄 POST /usuarios/autenticar");
     try {
       final response = await getDio().post("/usuarios/autenticar", data: {
         "nombreUsuario": user.nombreUsuario,
         "contrasena": user.contrasena,
+        "appVersion": AppConfig.appVersion,
       });
 
       if (response.statusCode == 200) {
@@ -36,11 +39,13 @@ sealed class AuthService {
 
         secureStorage.write(key: "user_id", value: userResponse.publicId);
         secureStorage.write(key: "user_token", value: userResponse.token);
-        secureStorage.write(key: "user_device", value: userResponse.dispositivo);
+        secureStorage.write(
+            key: "user_device", value: userResponse.dispositivo);
+        User.setCurrentUser(User(userResponse.nombre,
+            userResponse.nombreUsuario, "*****", userResponse.dispositivo));
 
-        User.setCurrentUser(User(userResponse.nombre, userResponse.nombreUsuario, "*****", userResponse.dispositivo));
-
-        _log.fine("Saved to storage: ID - ${userResponse.publicId} | Token - ${userResponse.token}");
+        _log.fine(
+            "Saved to storage: ID - ${userResponse.publicId} | Token - ${userResponse.token}");
 
         String? autoPlay = await secureStorage.read(key: "auto_play");
 
@@ -65,14 +70,25 @@ sealed class AuthService {
       BuildContext context, UserRequest user) async {
     try {
       var request = user.toJson();
+      print("El usuario a registrar es: $request");
       final response = await getDio().post("/usuarios/registro", data: request);
       if (response.statusCode == 200) {
         UserResponse userResponse = UserResponse.fromJsonMap(response.data);
-
+        
         secureStorage.write(key: "user_id", value: userResponse.publicId);
         secureStorage.write(key: "user_token", value: userResponse.token);
-        secureStorage.write(key: "user_device", value: userResponse.dispositivo);
+        secureStorage.write(
+            key: "user_device", value: userResponse.dispositivo);
         secureStorage.write(key: "auto_play", value: "on");
+        /**
+         * Agrega el token del dispositivo del usuario y manda
+         * notificación de bienvenida
+         */
+        await NotificationService.registrarTokenFCM(userResponse.publicId);
+        await NotificationService.crearNotificacionBienvenida(userResponse.publicId);
+
+        print("🔐 Guardado en storage: ID - ${userResponse.publicId} | Token - ${userResponse.token}");
+        
 
         return userResponse;
       }
@@ -116,12 +132,13 @@ sealed class AuthService {
     return null;
   }
 
-  static Future<bool> changePassword(BuildContext context, User user) async {
+  static Future<bool> changePassword(BuildContext context, User user, String fecha) async {
     try {
       final response =
           await getDio().put("/usuarios/cambiar-contrasena", data: {
         "nombreUsuario": user.nombreUsuario,
         "contrasena": user.contrasena,
+        "fechaNacimientoCambioPass": fecha //dd/MM/yyyy
       });
 
       if (response.statusCode == 200) {

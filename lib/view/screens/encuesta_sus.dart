@@ -2,14 +2,10 @@ import 'package:chatbot/utils/resultado_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:chatbot/view/widgets/custom_button.dart';
 import 'package:chatbot/view/widgets/utils.dart';
-import 'package:chatbot/view/screens/terms_and_conditions.dart';
 //import 'package:chatbot/view/screens/pdf_result_page.dart';
 import 'package:chatbot/model/requests/encuesta_sus_request.dart';
 import 'package:chatbot/service/encuesta_service.dart';
 import 'package:chatbot/model/storage/storage.dart';
-import 'package:chatbot/view/screens/encuesta_sus.dart';
-import 'package:chatbot/view/screens/resultado_viewer.dart';
-import 'package:chatbot/service/resultado_service.dart';
 
 class LikertSurveyPage extends StatefulWidget {
   const LikertSurveyPage({super.key});
@@ -20,7 +16,7 @@ class LikertSurveyPage extends StatefulWidget {
 
 class _LikertSurveyPageState extends State<LikertSurveyPage> {
   final _formKey = GlobalKey<FormState>();
-  final List<int?> _answers = List.generate(14, (_) => null);
+  final List<int?> _answers = List.generate(14, (index) => null);
 
   final List<String> _questions = [
     // SUS
@@ -119,8 +115,8 @@ class _LikertSurveyPageState extends State<LikertSurveyPage> {
                     Text("${index + 1}. ${_questions[index]}",
                         style: const TextStyle(
                             fontSize: 15, color: AllowedColors.black)),
-                    Wrap(
-                      spacing: 10,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: List.generate(5, (i) {
                         final value = i + 1;
                         return ChoiceChip(
@@ -174,7 +170,6 @@ class _LikertSurveyPageState extends State<LikertSurveyPage> {
 
             if (completada) {
               await mostrarResultadoDesdeContexto(context);
-
             } else {
               // Si no está completada, guardar la encuesta
               final encuesta =
@@ -196,6 +191,4 @@ class _LikertSurveyPageState extends State<LikertSurveyPage> {
       ],
     );
   }
-
-  
 }

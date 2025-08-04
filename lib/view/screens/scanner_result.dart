@@ -77,7 +77,7 @@ class ScannerResultPageState extends State<ScannerResultPage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  "Dispositivo de Autmouestreo escaneado correctamente!",
+                  "Dispositivo de Automuestreo escaneado correctamente!",
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),

@@ -1,9 +1,10 @@
+import 'dart:convert';
+
 import 'package:chatbot/service/notification_service.dart';
 import 'package:chatbot/utils/resultado_utils.dart';
 import 'package:chatbot/view/screens/dashboard.dart';
 import 'package:chatbot/view/screens/notifications.dart';
 import 'package:chatbot/view/screens/requiredSocioeconomicForm.dart';
-import 'package:chatbot/view/screens/resources.dart';
 import 'package:chatbot/view/widgets/utils.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +14,8 @@ import 'package:chatbot/model/storage/storage.dart';
 import 'package:chatbot/utils/notificacion_flags.dart';
 import 'package:chatbot/service/encuesta_service.dart';
 import 'package:chatbot/service/paciente_service.dart';
-import 'package:chatbot/view/screens/socioeconomic_information.dart';
+import 'package:chatbot/utils/notificacion_bienvenida_constants.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../main.dart'; // Para acceder al navigatorKey
 
@@ -44,23 +46,37 @@ class FirebaseMessagingHandler {
     const InitializationSettings initSettings =
         InitializationSettings(android: androidSettings);
 
-    await flutterLocalNotificationsPlugin.initialize(initSettings);
+    await flutterLocalNotificationsPlugin.initialize(
+      initSettings,
+      onDidReceiveNotificationResponse: (details) {
+        print("🟢[NOTIFICACIÓN] Usuario tocó la notificación: ${details.payload}");
+        final payload = details.payload;
+        if (payload != null) {
+          final data = jsonDecode(payload);
+          manejarClickNotificacion(data);
+        }
+      },
+    );
 
-    //  Si la app se abrió desde una notificación (CERRADA COMPLETAMENTE)
+    // Si la app se abrió desde una notificación (CERRADA COMPLETAMENTE)
     RemoteMessage? initialMessage =
         await FirebaseMessaging.instance.getInitialMessage();
     if (initialMessage != null) {
-      _handleMessage(initialMessage);
+      await actualizarNotificacionesEnMemoria();
+      print("🟢[NOTIFICACIÓN] Usuario tocó la notificación M: ${initialMessage}");
+      await manejarClickNotificacion(initialMessage.data);
     }
 
     //  Cuando está en SEGUNDO PLANO y el usuario toca la notificación
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       actualizarNotificacionesEnMemoria();
+      print("🟢[NOTIFICACIÓN] Usuario tocó la notificación M: ${message}");
       manejarClickNotificacion(message.data);
     });
 
     //  Cuando está en PRIMER PLANO (opcional, puedes mostrar alerta)
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print("🟢[NOTIFICACIÓN] Usuario tocó la notificación M: ${message} ⬆️");
       Dashboard.globalKey.currentState?.actualizarNotificacionesDesdeExterior();
       actualizarNotificacionesEnMemoria();
       NotificacionFlags.hayNotificacionNueva = true;
@@ -88,21 +104,11 @@ class FirebaseMessagingHandler {
     });
   }
 
-  static void _handleMessage(RemoteMessage message) {
-    final data = message.data;
-    final tipo = data['tipoNotificacion'];
-
-    if (tipo == 'RESULTADO') {
-      print("📄 Resultado recibido");
-    } else if (tipo == 'RECORDATORIO') {
-      print("📅 Recordatorio recibido");
-    }
-  }
-
   static Future<void> manejarClickNotificacion(
       Map<String, dynamic> data) async {
     final publicId = data["publicId"];
     final tipo = data["tipoNotificacion"];
+    final accion = data["accion"] ?? "";
     final contxt = navigatorKey.currentContext!;
 
     if (publicId != null) {
@@ -210,9 +216,43 @@ class FirebaseMessagingHandler {
       }
     } else {
       Navigator.of(contxt).pop();
-      navigatorKey.currentState?.push(
-        MaterialPageRoute(builder: (_) => const Resources()),
-      );
+      //Si es otro tipo de notificación, entonces :
+      if (!accion.startsWith("https://miapp.com/")) {
+        //Si es que la acción tiene un enlace externo válido, entonces al dar click redirecciona a ese 
+        print("[MENSAJE] Acción de notificación: $accion con la data: $data");
+        showDialog(
+          context: contxt,
+          builder: (_) => AlertDialog(
+            title: Text(data["titulo"] ?? "Notificación "),
+            content: Text(data["mensaje"] ?? "No se proporcionó un mensaje."),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(contxt).pop(),
+                child: const Text("Cerrar"),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  if (await canLaunchUrl(Uri.parse(accion))) {
+                    await launchUrl(Uri.parse(accion),
+                        mode: LaunchMode.externalApplication);
+                  } else {
+                    print("[X] No se pudo abrir el enlace: $accion");
+                  }
+                },
+                child: const Text("Navegar"),
+              ),
+            ],
+          ),
+        );
+      } else {
+        // Ahora accede al estado de Dashboard para cambiar pestaña
+        final dashboardState = Dashboard.globalKey.currentState;
+        if (dashboardState != null && dashboardState.mounted) {
+          dashboardState.irAPestanaRecursos();
+        } else {
+          print("[X] No se pudo acceder al estado del Dashboard.");
+        }
+      }
     }
   }
 
@@ -228,7 +268,6 @@ class FirebaseMessagingHandler {
             "[X] No se pudo obtener el ID de usuario para actualizar notificaciones.");
       }
     } else {
-      print("⚠️ Notifications no está montado, guardamos solo en memoria.");
       NotificacionFlags.hayNotificacionNueva = true;
     }
   }
@@ -249,11 +288,35 @@ class FirebaseMessagingHandler {
               ElevatedButton(
                 onPressed: () => Navigator.of(ctx).pop(true),
                 child: const Text("Sí, ya entregué"),
-                
               ),
             ],
           ),
         ) ??
         false;
+  }
+
+  static Future<void> mostrarNotificacionBienvenidaLocal() async {
+    const AndroidNotificationDetails androidDetails =
+        AndroidNotificationDetails(
+      'canal_principal',
+      'Notificaciones CLIAS',
+      importance: Importance.max,
+      priority: Priority.high,
+      showWhen: true,
+    );
+
+    const NotificationDetails notificationDetails = NotificationDetails(
+      android: androidDetails,
+    );
+
+    await _flutterLocalNotificationsPlugin.show(
+      DateTime.now().millisecondsSinceEpoch ~/ 1000, // ID único
+      NotificacionBienvenida.titulo,
+      NotificacionBienvenida.mensaje,
+      notificationDetails,
+      payload: jsonEncode({
+        "tipoNotificacion": NotificacionBienvenida.tipo,
+      }),
+    );
   }
 }
