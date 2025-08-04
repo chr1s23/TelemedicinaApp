@@ -5,7 +5,6 @@ import 'package:chatbot/utils/resultado_utils.dart';
 import 'package:chatbot/view/screens/dashboard.dart';
 import 'package:chatbot/view/screens/notifications.dart';
 import 'package:chatbot/view/screens/requiredSocioeconomicForm.dart';
-import 'package:chatbot/view/screens/resources.dart';
 import 'package:chatbot/view/widgets/utils.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +14,6 @@ import 'package:chatbot/model/storage/storage.dart';
 import 'package:chatbot/utils/notificacion_flags.dart';
 import 'package:chatbot/service/encuesta_service.dart';
 import 'package:chatbot/service/paciente_service.dart';
-import 'package:chatbot/view/screens/socioeconomic_information.dart';
 import 'package:chatbot/utils/notificacion_bienvenida_constants.dart';
 import 'package:url_launcher/url_launcher.dart';
 
