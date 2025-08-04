@@ -45,9 +45,13 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+android/*
 
 /android/app/.cxx/
+<<<<<<< HEAD
 
+=======
+>>>>>>> 65401a9549eb398f6f0d560811fcd5642707f842
 
 # Created by https://www.toptal.com/developers/gitignore/api/macos,vscode,java,flutter
 # Edit at https://www.toptal.com/developers/gitignore?templates=macos,vscode,java,flutter
