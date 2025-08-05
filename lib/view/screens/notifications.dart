@@ -1,3 +1,4 @@
+//view/screens/notifications.dart
 import 'package:chatbot/model/responses/notificacion_response.dart';
 import 'package:chatbot/model/storage/storage.dart';
 import 'package:chatbot/service/firebase_messaging_handler.dart';
@@ -50,16 +51,18 @@ class NotificationsPageState extends State<Notifications>
     _tabController = TabController(length: 3, vsync: this);
     //Trae las notificaciones con el servicio
     if (NotificacionFlags.hayNotificacionNueva) {
-    _cargarNotificaciones();
-    NotificacionFlags.hayNotificacionNueva = false; 
-  } else {
-    _cargarNotificaciones();
-  }
+      _cargarNotificaciones();
+      NotificacionFlags.hayNotificacionNueva = false;
+    } else {
+      _cargarNotificaciones();
+    }
   }
 
-  /**
-   * Método que se llama cuando las dependencias cambian.
-   * Aquí se verifica si hay una nueva notificación y se recarga la lista.
+  /*
+   ************************************************************************ 
+   Método que se llama cuando las dependencias cambian. Aquí se verifica si hay 
+   una nueva notificación y se recarga la lista.
+   ************************************************************************
    */
   @override
   void didChangeDependencies() {
@@ -88,7 +91,8 @@ class NotificationsPageState extends State<Notifications>
     if (NotificacionFlags.hayNotificacionNueva) {
       final userId = await secureStorage.read(key: "user_id");
       if (userId != null) {
-        final nuevas = await NotificationService.cargarNotificacionesxPublicID(userId);
+        final nuevas =
+            await NotificationService.cargarNotificacionesxPublicID(userId);
         NotificationState().actualizar(nuevas); // actualiza en memoria
         NotificacionFlags.hayNotificacionNueva = false;
       }
@@ -129,9 +133,11 @@ class NotificationsPageState extends State<Notifications>
 
   void debugSecureStorage() async {
     final all = await secureStorage.readAll();
+    /*
     print(
         "*************************************************************** Contenido de secureStorage:");
     all.forEach((key, value) => print("🔑 $key => $value"));
+    */
   }
 
   Widget _buildTabBar() {

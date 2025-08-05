@@ -1,3 +1,4 @@
+//service/notification_service.dart
 import 'dart:convert';
 import 'package:chatbot/service/firebase_messaging_handler.dart';
 import 'package:http/http.dart' as http;
@@ -120,7 +121,8 @@ class NotificationService {
           jsonList.map((e) => NotificacionResponse.fromJson(e)).toList();
 
       NotificationState().actualizar(notificaciones);
-      _log.i("[OK] Notificaciones cargadas y guardadas en memoria: ${notificaciones.length}");
+      _log.i(
+          "[OK] Notificaciones cargadas y guardadas en memoria: ${notificaciones.length}");
     } else {
       _log.e("[X] Error al obtener notificaciones: ${response.statusCode}");
       throw Exception("Error al obtener notificaciones");

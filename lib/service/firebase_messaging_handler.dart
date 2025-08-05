@@ -49,7 +49,8 @@ class FirebaseMessagingHandler {
     await flutterLocalNotificationsPlugin.initialize(
       initSettings,
       onDidReceiveNotificationResponse: (details) {
-        print("🟢[NOTIFICACIÓN] Usuario tocó la notificación: ${details.payload}");
+        print(
+            "🟢[NOTIFICACIÓN] Usuario tocó la notificación: ${details.payload}");
         final payload = details.payload;
         if (payload != null) {
           final data = jsonDecode(payload);
@@ -63,7 +64,8 @@ class FirebaseMessagingHandler {
         await FirebaseMessaging.instance.getInitialMessage();
     if (initialMessage != null) {
       await actualizarNotificacionesEnMemoria();
-      print("🟢[NOTIFICACIÓN] Usuario tocó la notificación M: ${initialMessage}");
+      print(
+          "🟢[NOTIFICACIÓN] Usuario tocó la notificación M: ${initialMessage}");
       await manejarClickNotificacion(initialMessage.data);
     }
 
@@ -77,7 +79,7 @@ class FirebaseMessagingHandler {
     //  Cuando está en PRIMER PLANO (opcional, puedes mostrar alerta)
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       print("🟢[NOTIFICACIÓN] Usuario tocó la notificación M: ${message} ⬆️");
-      Dashboard.globalKey.currentState?.actualizarNotificacionesDesdeExterior();
+      Dashboard.globalKey.currentState?.actualizarNotificacionesDelDashboard();
       actualizarNotificacionesEnMemoria();
       NotificacionFlags.hayNotificacionNueva = true;
 
@@ -93,13 +95,20 @@ class FirebaseMessagingHandler {
             android: AndroidNotificationDetails(
               'canal_principal',
               'Notificaciones CLIAS',
+              icon: '@drawable/ic_notification', // <- Personalizado
               importance: Importance.max,
               priority: Priority.high,
-              showWhen: false,
+              ticker: 'ticker', // <- Forza heads-up
+              playSound: true,
+              enableVibration: true,
+              visibility: NotificationVisibility.public,
             ),
           ),
+          payload: jsonEncode(message.data), // Necesario para detectar el click
         );
         Notifications.globalKey.currentState?.recargarDesdeExterior();
+        Dashboard.globalKey.currentState
+            ?.actualizarNotificacionesDelDashboard();
       }
     });
   }
@@ -218,7 +227,7 @@ class FirebaseMessagingHandler {
       Navigator.of(contxt).pop();
       //Si es otro tipo de notificación, entonces :
       if (!accion.startsWith("https://miapp.com/")) {
-        //Si es que la acción tiene un enlace externo válido, entonces al dar click redirecciona a ese 
+        //Si es que la acción tiene un enlace externo válido, entonces al dar click redirecciona a ese
         print("[MENSAJE] Acción de notificación: $accion con la data: $data");
         showDialog(
           context: contxt,

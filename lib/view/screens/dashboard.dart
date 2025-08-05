@@ -1,3 +1,4 @@
+//view/screens/dashboard.dart
 import 'package:chatbot/model/storage/storage.dart';
 import 'package:chatbot/utils/connectivity_listener.dart';
 import 'package:chatbot/view/screens/chat.dart';
@@ -46,10 +47,11 @@ class AutoSamplingPageState extends State<Dashboard> {
     super.initState();
   }
 
-  void actualizarNotificacionesDesdeExterior() {
+  void actualizarNotificacionesDelDashboard() {
     if (mounted) {
       setState(() {
-        _log.i("⚠️Actualizando notificaciones desde el exterior");
+        _log.i(
+            "⚠️ Actualizando notificaciones desde el exterior en el Dashboard");
         hasUnreadNotifications = true;
       });
     }
@@ -243,8 +245,10 @@ class AutoSamplingPageState extends State<Dashboard> {
                       backgroundColor: Colors.green,
                       tooltip: "Ayuda por WhatsApp",
                       onPressed: _abrirWhatsapp,
-                      elevation: 2, shape: const CircleBorder(),
-                      child: const Icon(Icons.support_agent, color: Colors.white, size: 28), 
+                      elevation: 2,
+                      shape: const CircleBorder(),
+                      child: const Icon(Icons.support_agent,
+                          color: Colors.white, size: 28),
                     ),
                   ),
                 ),
