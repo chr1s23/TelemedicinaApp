@@ -26,7 +26,7 @@ Dio getDio() {
 
 sealed class AuthService {
   static Future<UserResponse?> login(BuildContext context, User user) async {
-    print("🔄 POST /usuarios/autenticar");
+    _log.info("🔄 POST /usuarios/autenticar");
     try {
       final response = await getDio().post("/usuarios/autenticar", data: {
         "nombreUsuario": user.nombreUsuario,
@@ -52,6 +52,7 @@ sealed class AuthService {
         if (autoPlay == null) {
           secureStorage.write(key: "auto_play", value: "on");
         }
+        await NotificationService.registrarTokenFCM(userResponse.publicId);
 
         return userResponse;
       }
@@ -70,7 +71,7 @@ sealed class AuthService {
       BuildContext context, UserRequest user) async {
     try {
       var request = user.toJson();
-      print("El usuario a registrar es: $request");
+      _log.info("El usuario a registrar es: $request");
       final response = await getDio().post("/usuarios/registro", data: request);
       if (response.statusCode == 200) {
         UserResponse userResponse = UserResponse.fromJsonMap(response.data);
@@ -87,7 +88,7 @@ sealed class AuthService {
         await NotificationService.registrarTokenFCM(userResponse.publicId);
         await NotificationService.crearNotificacionBienvenida(userResponse.publicId);
 
-        print("🔐 Guardado en storage: ID - ${userResponse.publicId} | Token - ${userResponse.token}");
+        _log.info("🔐 Guardado en storage: ID - ${userResponse.publicId} | Token - ${userResponse.token}");
         
 
         return userResponse;
