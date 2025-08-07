@@ -7,7 +7,7 @@ class AppConfig {
     if (isDevelopment) {
       return usingEmulator
           ? "http://192.168.1.7:8080" // Emulador
-          : "http://10.24.160.209:8080"; // Dispositivo real (reemplaza con tu IP local)
+          : "http://10.21.130.140:8080"; // Dispositivo real (reemplaza con tu IP local)
     } else {
       return "https://clias.ucuenca.edu.ec"; // Producción
     }
