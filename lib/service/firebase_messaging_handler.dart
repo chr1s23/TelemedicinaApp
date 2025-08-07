@@ -16,8 +16,12 @@ import 'package:chatbot/service/encuesta_service.dart';
 import 'package:chatbot/service/paciente_service.dart';
 import 'package:chatbot/utils/notificacion_bienvenida_constants.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:logger/logger.dart';
+
 
 import '../main.dart'; // Para acceder al navigatorKey
+
+final _log = Logger();
 
 class FirebaseMessagingHandler {
   static final FlutterLocalNotificationsPlugin
@@ -49,7 +53,7 @@ class FirebaseMessagingHandler {
     await flutterLocalNotificationsPlugin.initialize(
       initSettings,
       onDidReceiveNotificationResponse: (details) {
-        print(
+        _log.i(
             "🟢[NOTIFICACIÓN] Usuario tocó la notificación: ${details.payload}");
         final payload = details.payload;
         if (payload != null) {
@@ -64,7 +68,7 @@ class FirebaseMessagingHandler {
         await FirebaseMessaging.instance.getInitialMessage();
     if (initialMessage != null) {
       await actualizarNotificacionesEnMemoria();
-      print(
+      _log.i(
           "🟢[NOTIFICACIÓN] Usuario tocó la notificación M: ${initialMessage}");
       await manejarClickNotificacion(initialMessage.data);
     }
@@ -72,13 +76,13 @@ class FirebaseMessagingHandler {
     //  Cuando está en SEGUNDO PLANO y el usuario toca la notificación
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       actualizarNotificacionesEnMemoria();
-      print("🟢[NOTIFICACIÓN] Usuario tocó la notificación M: ${message}");
+      _log.i("🟢[NOTIFICACIÓN] Usuario tocó la notificación M: ${message}");
       manejarClickNotificacion(message.data);
     });
 
     //  Cuando está en PRIMER PLANO (opcional, puedes mostrar alerta)
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print("🟢[NOTIFICACIÓN] Usuario tocó la notificación M: ${message} ⬆️");
+      _log.i("🟢[NOTIFICACIÓN] Usuario tocó la notificación M: ${message} ⬆️");
       Dashboard.globalKey.currentState?.actualizarNotificacionesDelDashboard();
       actualizarNotificacionesEnMemoria();
       NotificacionFlags.hayNotificacionNueva = true;
@@ -126,10 +130,10 @@ class FirebaseMessagingHandler {
         Dashboard.globalKey.currentState
             ?.actualizarNotificaciones(); // Actualiza punto rojo
       } catch (e) {
-        print("[X] Error al marcar como leída desde mensaje abierto: $e");
+        _log.i("[X] Error al marcar como leída desde mensaje abierto: $e");
       }
     }
-    print("[MENSAJE]TIPO DE NOTIFICACIÓN: $tipo");
+    _log.i("[MENSAJE]TIPO DE NOTIFICACIÓN: $tipo");
     //Mostramos un circular progress indicator mientras se carga el resultado
 
     showDialog(
@@ -147,7 +151,7 @@ class FirebaseMessagingHandler {
               await PacienteService.verificarFichaSocioeconomica(
                   cuentaUsuarioId);
 
-          print(
+          _log.i(
               "[MENSAJE] Existe ficha socioeconómica: $existeFicha de usuario $cuentaUsuarioId");
 
           if (!existeFicha) {
@@ -161,7 +165,7 @@ class FirebaseMessagingHandler {
                 ),
               );
             } else {
-              print("[X] No se pudo obtener la información del paciente.");
+              _log.i("[X] No se pudo obtener la información del paciente.");
             }
             return;
           }
@@ -174,7 +178,7 @@ class FirebaseMessagingHandler {
             if (ctx != null) {
               await mostrarResultadoDesdeContexto(ctx);
             } else {
-              print(
+              _log.i(
                   "[X] No se encontró un contexto válido para mostrar el resultado.");
             }
           } else {
@@ -184,10 +188,10 @@ class FirebaseMessagingHandler {
             );
           }
         } catch (e) {
-          print("[X] Error al procesar flujo de RESULTADO: $e");
+          _log.i("[X] Error al procesar flujo de RESULTADO: $e");
         }
       } else {
-        print("[X] No se pudo obtener el ID de usuario para verificar estado.");
+        _log.i("[X] No se pudo obtener el ID de usuario para verificar estado.");
       }
     } else if (tipo == "RECORDATORIO_NO_EXAMEN") {
       // Asegurarte de ir al dashboard principal (en caso de estar en otra vista)
@@ -206,7 +210,7 @@ class FirebaseMessagingHandler {
           autoSamplingState.irAPestanaPrincipal(); // Ir a la pestaña principal
         });
       } else {
-        print("[X] No se pudo acceder al estado de AutoSamplingPageState.");
+        _log.i("[X] No se pudo acceder al estado de AutoSamplingPageState.");
       }
     } else if (tipo == "RECORDATORIO_NO_ENTREGA_DISPOSITIVO") {
       final ctx = navigatorKey.currentContext;
@@ -228,7 +232,7 @@ class FirebaseMessagingHandler {
       //Si es otro tipo de notificación, entonces :
       if (!accion.startsWith("https://miapp.com/")) {
         //Si es que la acción tiene un enlace externo válido, entonces al dar click redirecciona a ese
-        print("[MENSAJE] Acción de notificación: $accion con la data: $data");
+        _log.i("[MENSAJE] Acción de notificación: $accion con la data: $data");
         showDialog(
           context: contxt,
           builder: (_) => AlertDialog(
@@ -245,7 +249,7 @@ class FirebaseMessagingHandler {
                     await launchUrl(Uri.parse(accion),
                         mode: LaunchMode.externalApplication);
                   } else {
-                    print("[X] No se pudo abrir el enlace: $accion");
+                    _log.i("[X] No se pudo abrir el enlace: $accion");
                   }
                 },
                 child: const Text("Navegar"),
@@ -259,7 +263,7 @@ class FirebaseMessagingHandler {
         if (dashboardState != null && dashboardState.mounted) {
           dashboardState.irAPestanaRecursos();
         } else {
-          print("[X] No se pudo acceder al estado del Dashboard.");
+          _log.i("[X] No se pudo acceder al estado del Dashboard.");
         }
       }
     }
@@ -273,7 +277,7 @@ class FirebaseMessagingHandler {
         await NotificationService.cargarYGuardarNotificaciones(userId);
         currentState.recargarDesdeExterior();
       } else {
-        print(
+        _log.i(
             "[X] No se pudo obtener el ID de usuario para actualizar notificaciones.");
       }
     } else {
