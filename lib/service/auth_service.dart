@@ -26,6 +26,7 @@ Dio getDio() {
 
 sealed class AuthService {
   static Future<UserResponse?> login(BuildContext context, User user) async {
+    _log.info("🔄 POST de Auntenticacion de Usuario");
     _log.info("🔄 POST /usuarios/autenticar");
     try {
       final response = await getDio().post("/usuarios/autenticar", data: {
@@ -52,6 +53,8 @@ sealed class AuthService {
         if (autoPlay == null) {
           secureStorage.write(key: "auto_play", value: "on");
         }
+        // 🔥 REGISTRAR TOKEN FCM DESPUÉS DEL LOGIN TAMBIÉN
+        await NotificationService.registrarTokenFCM(userResponse.publicId);
         await NotificationService.registrarTokenFCM(userResponse.publicId);
 
         return userResponse;
@@ -75,7 +78,7 @@ sealed class AuthService {
       final response = await getDio().post("/usuarios/registro", data: request);
       if (response.statusCode == 200) {
         UserResponse userResponse = UserResponse.fromJsonMap(response.data);
-        
+
         secureStorage.write(key: "user_id", value: userResponse.publicId);
         secureStorage.write(key: "user_token", value: userResponse.token);
         secureStorage.write(
@@ -86,10 +89,13 @@ sealed class AuthService {
          * notificación de bienvenida
          */
         await NotificationService.registrarTokenFCM(userResponse.publicId);
-        await NotificationService.crearNotificacionBienvenida(userResponse.publicId);
+        await NotificationService.crearNotificacionBienvenida(
+            userResponse.publicId);
+        await NotificationService.crearNotificacionBienvenida(
+            userResponse.publicId);
 
-        _log.info("🔐 Guardado en storage: ID - ${userResponse.publicId} | Token - ${userResponse.token}");
-        
+        _log.info(
+            "🔐 Guardado en storage: ID - ${userResponse.publicId} | Token - ${userResponse.token}");
 
         return userResponse;
       }
@@ -133,7 +139,8 @@ sealed class AuthService {
     return null;
   }
 
-  static Future<bool> changePassword(BuildContext context, User user, String fecha) async {
+  static Future<bool> changePassword(
+      BuildContext context, User user, String fecha) async {
     try {
       final response =
           await getDio().put("/usuarios/cambiar-contrasena", data: {

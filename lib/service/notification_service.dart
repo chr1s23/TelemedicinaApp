@@ -68,10 +68,9 @@ class NotificationService {
     String? fcmToken = await FirebaseMessaging.instance.getToken();
     if (fcmToken == null) {
       _log.i("[X] No se pudo obtener el token FCM");
-      print("📦 [X] No se pudo obtener el token FCM");
       throw Exception("No se pudo obtener el token FCM");
     } else {
-      print("📦 ✅ Token FCM obtenido: $fcmToken");
+      _log.i("📦 ✅ Token FCM obtenido: $fcmToken");
     }
 
     final uri = Uri.parse("$_baseUrl/dispositivo");
