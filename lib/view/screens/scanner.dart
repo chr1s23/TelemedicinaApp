@@ -21,24 +21,27 @@ class Scanner extends StatefulWidget {
 
 class _QRScannerPageState extends State<Scanner> {
   ExamenVphRequest? examen;
-  final MobileScannerController _scannerController = MobileScannerController();
+  final MobileScannerController _scannerController = MobileScannerController(
+    formats: [BarcodeFormat.qrCode]
+  );
 
   void _onQRScanned(BarcodeCapture capture) {
     if (capture.barcodes.isNotEmpty) {
       String qrData = capture.barcodes.first.rawValue ?? "Código QR no válido";
       _scannerController.stop();
       if (!widget.deviceRegister) {
-        examen = ExamenVphRequest(qrData, widget.salud!);
+        examen = ExamenVphRequest(qrData, widget.salud!,
+            DateTime.now().toIso8601String().split('.').first);
         widget.sesion!.examenVph = examen;
       }
-      Navigator.push(context, MaterialPageRoute(
-        builder: (context) => ScannerResultPage(
-          qrData: qrData, 
-          deviceRegister: widget.deviceRegister,
-          restartScanner: () => _scannerController.start(),
-          sesion: widget.sesion
-        )
-      ));
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => ScannerResultPage(
+                  qrData: qrData,
+                  deviceRegister: widget.deviceRegister,
+                  restartScanner: () => _scannerController.start(),
+                  sesion: widget.sesion)));
     }
   }
 

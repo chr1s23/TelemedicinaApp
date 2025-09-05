@@ -16,6 +16,7 @@ class Password extends StatefulWidget {
 class _PasswordState extends State<Password> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
+  final dateController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
 
@@ -23,6 +24,7 @@ class _PasswordState extends State<Password> {
   void dispose() {
     _usernameController.dispose();
     _passwordController.dispose();
+    dateController.dispose();
     super.dispose();
   }
 
@@ -36,15 +38,39 @@ class _PasswordState extends State<Password> {
 
     User user = User("", _usernameController.value.text,
         _passwordController.value.text, null);
-    await AuthService.changePassword(context, user);
+    bool success = await AuthService.changePassword(context, user, dateController.value.text);
 
     if (!mounted) return;
 
-    Navigator.pop(context, MaterialPageRoute(builder: (context) => Login()));
+    if (success) {
+      Navigator.pop(context, MaterialPageRoute(builder: (context) => Login()));
+    } else {
+      _usernameController.clear();
+      _passwordController.clear();
+      dateController.clear();
+    }
 
     setState(() {
       _isLoading = false;
     });
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+        context: context,
+        firstDate: DateTime(1900),
+        lastDate: DateTime(2017),
+        locale: Locale('es'));
+    if (picked != null) {
+      setState(() {
+        dateController.text = picked
+            .toIso8601String()
+            .split("T")[0]
+            .split("-")
+            .reversed
+            .join("/");
+      });
+    }
   }
 
   @override
@@ -86,7 +112,7 @@ class _PasswordState extends State<Password> {
                         color: AllowedColors.black),
                   ),
                   Text(
-                    "Ingresa a tu nombre de usuario para el cambio de contraseña.",
+                    "Ingresa tu nombre de usuario para el cambio de contraseña.",
                     style: TextStyle(fontSize: 13, color: AllowedColors.black),
                   ),
                   SizedBox(
@@ -107,6 +133,28 @@ class _PasswordState extends State<Password> {
                   SizedBox(
                     height: 38,
                   ),
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: Text("Fecha de nacimiento*",
+                        style:
+                            TextStyle(fontSize: 12, color: AllowedColors.gray)),
+                  ),
+                  TextFormField(
+                    controller: dateController,
+                    validator: (value) {
+                      if (value?.isEmpty ?? false) {
+                        return 'Campo obligatorio';
+                      }
+                      return null;
+                    },
+                    style: TextStyle(fontSize: 15, color: AllowedColors.black),
+                    decoration: inputDecoration('dd/MM/yyyy', isCalendar: true),
+                    readOnly: true,
+                    onTap: () {
+                      _selectDate(context);
+                    },
+                  ),
+                  const SizedBox(height: 38),
                   Align(
                     alignment: Alignment.topLeft,
                     child: Text(

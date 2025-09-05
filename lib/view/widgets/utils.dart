@@ -1,3 +1,4 @@
+import 'package:chatbot/model/storage/storage.dart';
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
@@ -36,19 +37,19 @@ Future<bool?> modalYesNoDialog({required BuildContext context, required String t
             style: TextButton.styleFrom(textStyle: Theme.of(context).textTheme.labelLarge),
             child: const Text('Sí'),
             onPressed: () {
-              onYes();
               Navigator.of(context).pop(true);
+              onYes();
             },
           ),
           TextButton(
             style: TextButton.styleFrom(textStyle: Theme.of(context).textTheme.labelLarge),
             child: const Text('No'),
             onPressed: () {
+              Navigator.of(context).pop(false);
+              
               if (onNo != null) {
                 onNo();
               }
-
-              Navigator.of(context).pop(false);
             },
           ),
         ],
@@ -122,12 +123,27 @@ Future<(VideoPlayerController, ChewieController)> initializeVideoPlayer(String v
   bool autoPlay = false,
   bool looping = false,
 }) async {
+  final autoPlayVideo = await secureStorage.read(key: "auto_play");
+  final shouldAutoPlay = autoPlayVideo == "on";
+
   final videoPlayerController = VideoPlayerController.asset(videoUrl);
   await videoPlayerController.initialize();
 
+  // Escucha el evento de finalización del video
+  if (shouldAutoPlay) {
+    videoPlayerController.addListener(() async {
+      if (videoPlayerController.value.position >= videoPlayerController.value.duration &&
+          videoPlayerController.value.isInitialized &&
+          !videoPlayerController.value.isPlaying) {
+        // Solo cuando el video ha terminado, cambia el valor
+        await secureStorage.write(key: 'auto_play', value: 'off');
+      }
+    });
+  }
+
   final chewieController = ChewieController(
     videoPlayerController: videoPlayerController,
-    autoPlay: autoPlay,
+    autoPlay: shouldAutoPlay,
     looping: looping,
     showControls: true,
     aspectRatio: 16 / 9,
@@ -158,5 +174,11 @@ Widget buildVideoPlayer(VideoPlayerController? playerController, ChewieControlle
       aspectRatio: playerController.value.aspectRatio,
       child: Chewie(controller: chewieController),
     );
+  }
+}
+
+void showSnackBar(BuildContext context, String message) {
+  if (context.mounted) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 }

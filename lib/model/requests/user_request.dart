@@ -1,3 +1,4 @@
+import 'package:chatbot/config/env.dart';
 import 'package:chatbot/model/requests/paciente_request.dart';
 
 UserRequest? _userRequest;
@@ -18,6 +19,7 @@ class UserRequest {
     return {
       "nombreUsuario": nombreUsuario,
       "contrasena": contrasena,
+      "appVersion": AppConfig.appVersion,
       "rol": rol,
       "aceptaConsentimiento": aceptaConsentimiento,
       "paciente": paciente.toJson()

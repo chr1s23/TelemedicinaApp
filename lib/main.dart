@@ -1,20 +1,34 @@
 import 'package:chatbot/model/requests/user.dart';
 import 'package:chatbot/model/storage/storage.dart';
-import 'package:chatbot/providers/auth_provider.dart';
-import 'package:chatbot/providers/chat_provider.dart';
 import 'package:chatbot/service/auth_service.dart';
+import 'package:chatbot/service/connectivity_service.dart';
+import 'package:chatbot/service/firebase_messaging_handler.dart';
+import 'package:chatbot/utils/dashboard_listener.dart';
 import 'package:chatbot/view/screens/dashboard.dart';
 import 'package:chatbot/view/screens/presentation.dart';
 import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:provider/provider.dart';
 import 'log_utils.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 final _log = Logger('Main');
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+final GlobalKey<State<StatefulWidget>> dashboardKey = GlobalKey<State<StatefulWidget>>();
 
-void main() {
+Future<void> main() async {
   initializeLogger();
+  
+  WidgetsFlutterBinding.ensureInitialized(); // OBLIGATORIO antes de Firebase
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  await FirebaseMessaging.instance.requestPermission();
+  await FirebaseMessagingHandler.initializeFCM(); // Para el manejo de las notificaciones FMC
+
   runApp(MyApp());
 }
 
@@ -23,20 +37,23 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => ChatProvider()),
-        ChangeNotifierProvider(create: (_) => AuthProvider())
+    return MaterialApp(
+      navigatorKey: navigatorKey,
+      debugShowCheckedModeBanner: false,
+      supportedLocales: const [
+        Locale('es'), // Español
       ],
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        locale: Locale("es", "EC"),
-        theme: ThemeData(
-            useMaterial3: true,
-            colorSchemeSeed: AllowedColors.blue,
-            fontFamily: "ArialNarrow"),
-        home: SplashScreen(),
-      ),
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      locale: Locale("es", "EC"),
+      theme: ThemeData(
+          useMaterial3: true,
+          colorSchemeSeed: AllowedColors.blue,
+          fontFamily: "ArialNarrow"),
+      home: SplashScreen(),
     );
   }
 }
@@ -55,45 +72,77 @@ class SplashScreenState extends State<SplashScreen>
   @override
   void initState() {
     super.initState();
-    //_checkAuth();
     Future.delayed(
         const Duration(milliseconds: 600), _checkAuth); // pequeño delay visual
   }
 
   Future<void> _checkAuth() async {
+    bool hasInternet = await ConnectivityService.hasInternetConnection();
     String? token = await secureStorage.read(key: "user_token");
-    User? user = await User.loadUser();
-    String? valid;
+
     // Animar fade-out antes de navegar
     setState(() {
       _opacity = 0.0;
     });
 
-    if (!mounted) return;
+    if (!hasInternet) {
+      await Future.delayed(const Duration(milliseconds: 600));
 
-    if (token != null && token.isNotEmpty) {
-      valid = await AuthService.refreshToken(context, token);
-    }
+      if (!mounted) return;
 
-    // Esperar a que se complete la animación
-    await Future.delayed(const Duration(milliseconds: 600));
+      if (token != null) {
+        _log.fine(
+            "User has not internet connection. Redirecting to dasboard offline mode.");
 
-    if (!mounted) return;
-
-    if (valid != null && user != null) {
-      User.setCurrentUser(user, save: false);
-
-      secureStorage.write(key: "user_token", value: valid);
-
-      _log.fine("User info found in secure storage. Skipping login.");
-
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (_) => Dashboard()));
+        Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+                builder: (_) => DashboardListener(
+                    wasOffline: true,
+                    child: Dashboard(
+                      key: Dashboard.globalKey,
+                      hasInternet: false,
+                    ))),
+            (_) => false);
+      } else {
+        Navigator.pushAndRemoveUntil(context,
+            MaterialPageRoute(builder: (_) => Presentation()), (_) => false);
+      }
     } else {
-      _log.fine(
-          "Some or all user information is missing. Redirecting to login.");
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (_) => Presentation()));
+      User? user = await User.loadUser();
+      String? valid;
+
+      if (!mounted) return;
+
+      if (token != null && token.isNotEmpty) {
+        valid = await AuthService.refreshToken(context, token);
+      }
+
+      // Esperar a que se complete la animación
+      await Future.delayed(const Duration(milliseconds: 600));
+
+      if (!mounted) return;
+      //Cuando el usuario ya está autenticado
+      if (valid != null && user != null) {
+        User.setCurrentUser(user, save: false);
+
+        secureStorage.write(key: "user_token", value: valid);
+
+        _log.fine("User info found in secure storage. Skipping login.");
+
+        Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+                builder: (_) =>
+                    DashboardListener(wasOffline: false, child: Dashboard(key: Dashboard.globalKey))
+),
+            (_) => false);
+      } else {
+        _log.fine(
+            "Some or all user information is missing. Redirecting to login.");
+        Navigator.pushAndRemoveUntil(context,
+            MaterialPageRoute(builder: (_) => Presentation()), (_) => false);
+      }
     }
   }
 

@@ -1,5 +1,6 @@
 import 'package:chatbot/model/responses/user_response.dart';
 import 'package:chatbot/service/auth_service.dart';
+import 'package:chatbot/utils/dashboard_listener.dart';
 import 'package:chatbot/view/screens/password.dart';
 import 'package:chatbot/view/widgets/custom_ink_well.dart';
 import 'package:chatbot/view/widgets/custom_input_field.dart';
@@ -35,6 +36,8 @@ class _LoginState extends State<Login> {
     FocusScope.of(context).unfocus();
     if (_isLoading) return; // Evita múltiples clics
 
+    final doneLoading = modalLoadingDialog(context: context);
+
     setState(() {
       _isLoading = true;
     });
@@ -43,10 +46,13 @@ class _LoginState extends State<Login> {
         "", usernameController.value.text, passwordController.value.text, null);
     UserResponse? userLogged = await AuthService.login(context, user);
 
-    if (userLogged != null) {
+    doneLoading();
+
+    if (userLogged != null && mounted) {
       Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => Dashboard()),
+          MaterialPageRoute(
+              builder: (context) => DashboardListener(wasOffline: false, child: Dashboard())),
           (route) => false);
     }
 

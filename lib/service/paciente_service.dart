@@ -1,15 +1,25 @@
+// ignore_for_file: use_build_context_synchronously
+// showSnackBar guards calls on context with [mounted]
+
+import 'dart:convert';
+
 import 'package:chatbot/model/requests/dispositivo_request.dart';
+import 'package:chatbot/model/requests/paciente_request.dart';
 import 'package:chatbot/model/storage/storage.dart';
+import 'package:chatbot/service/connectivity_service.dart';
+import 'package:chatbot/view/widgets/utils.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
+import 'package:chatbot/config/env.dart'; // Cambio de ambientes
 
 final _log = Logger('PacienteService');
 Dio? _dio;
 
 Dio getDio() {
   _dio ??= Dio(BaseOptions(
-    baseUrl: "https://clias.ucuenca.edu.ec",
+    baseUrl: AppConfig.baseUrl,
     headers: {'Content-Type': 'application/json'},
   ));
 
@@ -29,45 +39,124 @@ Dio getDio() {
 sealed class PacienteService {
   static Future<bool?> registrarDispositivo(
       BuildContext context, DispositivoRequest dispositivo) async {
+    bool hasInternet = await ConnectivityService.hasInternetConnection();
+
+    if (hasInternet) {
+      try {
+        final publicId = await secureStorage.read(key: "user_id");
+        final response = await getDio().put(
+            "/paciente/registrar-dispositivo/$publicId",
+            data: dispositivo.toJson());
+
+        if (response.statusCode == 200) {
+          showSnackBar(context, "Dispositivo registrado correctamente");
+          secureStorage.delete(key: "pending_device");
+          return true;
+        }
+      } on DioException catch (e) {
+        _log.severe('Server connection error: $e');
+        final errorMessage = e.response?.data["mensaje"];
+        if (errorMessage != null) {
+          showSnackBar(context, errorMessage.toString());
+        } else {
+          showSnackBar(context, "No se pudo registrar el dispositivo");
+        }
+      } catch (e) {
+        _log.severe("Request failed: $e");
+        showSnackBar(context, "Registro de dispositivo fallido");
+      }
+
+      return null;
+    } else {
+      secureStorage.write(key: "pending_device", value: "true");
+      showSnackBar(context, "Dispositivo registrado correctamente");
+      return true;
+    }
+  }
+
+  static Future<bool> update(
+      BuildContext context, PacienteRequest request) async {
+    final id = await secureStorage.read(key: "user_id");
     try {
-      final publicId = await secureStorage.read(key: "user_id");
-      final response = await getDio().put("/paciente/registrar-dispositivo/$publicId",
-          data: dispositivo.toJson());
+      final response =
+          await getDio().put("/paciente/editar/$id", data: request.toJson());
 
       if (response.statusCode == 200) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Dispositivo registrado correctamente.')),
-          );
-        }
+        _log.fine("User data updated");
+        showSnackBar(context, "Datos actualizados correctamente");
+
         return true;
-      } else {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('No se pudo registrar el dispositivo')),
-          );
-        }
       }
     } on DioException catch (e) {
       _log.severe('Server connection error: $e');
-
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Ocurrió un error inesperado.')),
-        );
+      final errorMessage = e.response?.data["mensaje"];
+      if (errorMessage != null) {
+        showSnackBar(context, errorMessage.toString());
+      } else {
+        showSnackBar(context, "Actualización fallida");
       }
     } catch (e) {
-      _log.severe("Login failed: $e");
+      _log.severe("Request failed: $e");
 
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Registro de dispositivo fallido'),
-          ),
-        );
+        showSnackBar(context, 'Ocurrió un error inesperado.');
+      }
+    }
+    return false;
+  }
+
+  static Future<PacienteRequest?> getPaciente(BuildContext context) async {
+    final id = await secureStorage.read(key: "user_id");
+    try {
+      final response = await getDio().get("/paciente/usuario/$id");
+
+      if (response.statusCode == 200) {
+        final paciente = PacienteRequest.fromJson(response.data);
+
+        return paciente;
+      }
+    } on DioException catch (e) {
+      _log.severe('Server connection error: $e');
+      final errorMessage = e.response?.data["mensaje"];
+      if (errorMessage != null) {
+        showSnackBar(context, errorMessage.toString());
+      } else {
+        showSnackBar(context, "Error al obtener la información");
+      }
+    } catch (e) {
+      _log.severe("Request failed: $e");
+
+      if (context.mounted) {
+        showSnackBar(context, 'Ocurrió un error inesperado.');
       }
     }
 
     return null;
+  }
+
+  static Future<bool> verificarFichaSocioeconomica(String userId) async {
+    final String _baseUrl = AppConfig.baseUrl;
+    final url = Uri.parse('$_baseUrl/info-socioeconomica/ficha/existe/$userId');
+
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return data['existeFicha'] == true;
+    } else {
+      throw Exception("Error al verificar ficha socioeconómica");
+    }
+  }
+
+  static Future<bool> desactivarRecordatorioEntrega(String userId) async {
+    try {
+      final response = await getDio()
+          .put("/notificaciones/programada/desactivar-entrega/$userId");
+
+      return response.statusCode == 204;
+    } catch (e) {
+      _log.severe("Error al desactivar notificaciones programadas: $e");
+      return false;
+    }
   }
 }

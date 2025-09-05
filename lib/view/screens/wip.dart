@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class WIPScreen extends StatelessWidget {
+  const WIPScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -10,16 +12,19 @@ class WIPScreen extends StatelessWidget {
           Icon(
             Icons.construction,
             size: 100,
+            color: Color(0xFFA51008),
           ),
           Text(
-            '¡Próximamente!',
-            style: TextStyle(fontSize: 40),
+            '¡Sección en desarrollo!',
+            style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
           ),
           Text(
-            'Estamos trabajando en esta sección.',
-            style: TextStyle(fontSize: 20),
+            'Pronto podrás usar la visualización con Google Maps.\nEstamos trabajando para ofrecerte más opciones.',
+            style: TextStyle(fontSize: 14), 
+            textAlign: TextAlign.center,
           ),
-          SizedBox(height: 200),
+          SizedBox(height: MediaQuery.of(context).size.height * 0.2),
         ],
       ),
     );

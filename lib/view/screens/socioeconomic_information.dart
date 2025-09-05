@@ -1,13 +1,19 @@
 import 'package:chatbot/model/requests/inf_socioeconomica_request.dart';
 import 'package:chatbot/model/requests/user_request.dart';
+import 'package:chatbot/service/paciente_service.dart';
+import 'package:chatbot/utils/dashboard_listener.dart';
+import 'package:chatbot/view/screens/dashboard.dart';
 import 'package:chatbot/view/screens/terms_and_conditions.dart';
 import 'package:chatbot/view/widgets/custom_button.dart';
-import 'package:chatbot/view/widgets/custom_ink_well.dart';
 import 'package:chatbot/view/widgets/utils.dart';
 import 'package:flutter/material.dart';
 
 class SocioeconomicInformation extends StatefulWidget {
-  const SocioeconomicInformation({super.key});
+  const SocioeconomicInformation(
+      {super.key, this.infoSocioeconomicaRequest, this.edit = false});
+
+  final InfSocioeconomicaRequest? infoSocioeconomicaRequest;
+  final bool edit;
 
   @override
   State<SocioeconomicInformation> createState() =>
@@ -22,6 +28,19 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
   String? _selectedWorkStatus;
   String? _selectedBonus;
   final TextEditingController _occupationController = TextEditingController();
+
+  @override
+  void initState() {
+    if (widget.infoSocioeconomicaRequest != null) {
+      _selectedEducationLevel = widget.infoSocioeconomicaRequest!.instruccion;
+      _selectedIncome = widget.infoSocioeconomicaRequest!.ingresos;
+      _selectedWorkStatus = widget.infoSocioeconomicaRequest!.trabajoRemunerado;
+      _selectedBonus = widget.infoSocioeconomicaRequest!.recibeBono;
+      _occupationController.text =
+          widget.infoSocioeconomicaRequest!.ocupacion ?? "";
+    }
+    super.initState();
+  }
 
   final List<String> _educationLevels = [
     "NINGUNO",
@@ -57,8 +76,9 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
                 modalYesNoDialog(
                   context: context,
                   title: "¿Cancelar?",
-                  message:
-                      "¿Desea cancelar la creación de su cuenta? Se perderán todos los datos ingresados.",
+                  message: widget.edit
+                      ? "¿Desea cancelar la edición de su cuenta? Se perderán todos los datos ingresados."
+                      : "¿Desea cancelar la creación de su cuenta? Se perderán todos los datos ingresados.",
                   onYes: () => Navigator.of(context)
                     ..pop()
                     ..pop()
@@ -135,7 +155,7 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
                 });
               }, 'Elija una opción'),
               const SizedBox(height: 30),
-              Center(child: _buildButtons())
+              Center(child: _buildButtons(context))
             ],
           ),
         ),
@@ -143,7 +163,7 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
     );
   }
 
-  Widget _buildButtons() {
+  Widget _buildButtons(BuildContext context) {
     return Column(
       children: [
         CustomButton(
@@ -162,24 +182,33 @@ class _SocioeconomicInfoFormState extends State<SocioeconomicInformation> {
                 );
 
                 user.paciente.infoSocioeconomica = socioeconomica;
-              }
 
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => TermsAndConditions()));
+                if (widget.edit) {
+                  final doneLoading = modalLoadingDialog(context: context);
+
+                  PacienteService.update(context, user.paciente).then((value) {
+                    doneLoading();
+
+                    if (context.mounted && value) {
+                      Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  DashboardListener(wasOffline: false, child: Dashboard())),
+                          (route) => false);
+                    }
+                  });
+                } else {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => TermsAndConditions()));
+                }
+              }
             },
-            label: "Continuar"),
-        const SizedBox(height: 20),
-        CustomInkWell(
-            label: "En otro momento",
-            onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => TermsAndConditions()));
-            }, color: AllowedColors.red,)
+            label: widget.edit ? "Guardar" : "Continuar"),
       ],
     );
   }
+
 }
