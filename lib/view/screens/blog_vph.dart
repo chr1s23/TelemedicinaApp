@@ -26,10 +26,13 @@ class _BlogVPHPageState extends State<BlogVPHPage> with SingleTickerProviderStat
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Virus del Papiloma Humano (VPH)", style: TextStyle(color: Colors.white)),  
-        backgroundColor: const Color.fromARGB(255, 0, 40, 86),  
+        title: const Text(
+          "Virus del Papiloma Humano (VPH)",
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: const Color.fromARGB(255, 0, 40, 86),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),  
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -52,7 +55,7 @@ class _BlogVPHPageState extends State<BlogVPHPage> with SingleTickerProviderStat
         children: [
           Container(
             height: 250,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               image: DecorationImage(
                 image: AssetImage('assets/images/VPH.png'),
                 fit: BoxFit.cover,
@@ -98,15 +101,7 @@ Los tipos de alto riesgo, como el VPH 16 y 18, no causan síntomas visibles, per
 
 Por eso, la OPS y la OMS insisten en la importancia de los chequeos periódicos y la vacunación preventiva, ya que el VPH puede estar presente sin que la persona lo sepa.
 """),
-                _buildTabContent('Tratamiento y Vacunas', """
-Actualmente, no existe un tratamiento que elimine el VPH como virus, pero sí se pueden tratar las enfermedades que causa. Por ejemplo, las verrugas genitales pueden eliminarse con cremas, cirugía menor o láser. En el caso de lesiones precancerosas, como las del cuello uterino, se pueden tratar antes de que evolucionen a cáncer.
-
-La mejor herramienta contra el VPH es la vacuna. Según la OMS y la OPS, esta es segura y altamente eficaz, especialmente contra los tipos 16 y 18, que causan la mayoría de los cánceres relacionados con el VPH.
-
-Se recomienda vacunar a niñas y niños entre 9 y 14 años, antes del inicio de la vida sexual. Aunque no sustituye los chequeos médicos, la vacuna ayuda a reducir significativamente el riesgo de complicaciones graves.
-
-La prevención, a través de la vacunación y exámenes periódicos, es la clave para controlar esta infección.
-"""),
+                _buildTratamientoVacunasContent(),
               ],
             ),
           ),
@@ -114,6 +109,7 @@ La prevención, a través de la vacunación y exámenes periódicos, es la clave
       ),
     );
   }
+
 
   Widget _buildTabContent(String title, String content) {
     return SingleChildScrollView(
@@ -124,7 +120,7 @@ La prevención, a través de la vacunación y exámenes periódicos, es la clave
           children: [
             Text(
               title,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
@@ -133,12 +129,87 @@ La prevención, a través de la vacunación y exámenes periódicos, es la clave
             const SizedBox(height: 10),
             Text(
               content,
-              style: TextStyle(fontSize: 16, color: Colors.black),
-              textAlign: TextAlign.justify, 
+              style: const TextStyle(fontSize: 16, color: Colors.black),
+              textAlign: TextAlign.justify,
             ),
           ],
         ),
       ),
     );
   }
+  Widget _buildTratamientoVacunasContent() {
+  return SingleChildScrollView(
+    child: Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Tratamiento y Vacunas',
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+
+          // más espacio antes del aviso
+          const SizedBox(height: 16),
+
+          // Aviso en rojo con margen y padding
+          Container(
+            margin: const EdgeInsets.only(bottom: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            decoration: BoxDecoration(
+              color: Color(0xFFFFE5E5), // rojo muy claro de fondo
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Color(0xFFFF9A9A)),
+            ),
+            child: const Text(
+              "El Ministerio de Salud Pública aplica gratuitamente la vacuna contra el VPH a niñas de 9, 10 y 11 años, protegiéndolas del cáncer de cuello uterino.",
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: Colors.red,
+                height: 1.25, // mejora el interlineado
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+
+          // Párrafo 1
+          const Text(
+            "Actualmente, no existe un tratamiento que elimine el VPH como virus, pero sí se pueden tratar las enfermedades que causa. Por ejemplo, las verrugas genitales pueden eliminarse con cremas, cirugía menor o láser. En el caso de lesiones precancerosas, como las del cuello uterino, se pueden tratar antes de que evolucionen a cáncer.",
+            style: TextStyle(fontSize: 16, color: Colors.black, height: 1.35),
+            textAlign: TextAlign.justify,
+          ),
+          const SizedBox(height: 12),
+
+          // Párrafo 2
+          const Text(
+            "La mejor herramienta contra el VPH es la vacuna. Según la OMS y la OPS, esta es segura y altamente eficaz, especialmente contra los tipos 16 y 18, que causan la mayoría de los cánceres relacionados con el VPH.",
+            style: TextStyle(fontSize: 16, color: Colors.black, height: 1.35),
+            textAlign: TextAlign.justify,
+          ),
+          const SizedBox(height: 12),
+
+          // Texto indicado por ti (dos líneas)
+          const Text(
+            "Se recomienda vacunar a niñas y niños entre 9 y 14 años, antes del inicio de la vida sexual. Aunque no sustituye los chequeos médicos, la vacuna ayuda a reducir significativamente el riesgo de complicaciones graves.",
+            style: TextStyle(fontSize: 16, color: Colors.black, height: 1.35),
+            textAlign: TextAlign.justify,
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            "La prevención, a través de la vacunación y exámenes periódicos, es la clave para controlar esta infección.",
+            style: TextStyle(fontSize: 16, color: Colors.black, height: 1.35),
+            textAlign: TextAlign.justify,
+          ),
+          const SizedBox(height: 8),
+        ],
+      ),
+    ),
+  );
 }
+
+ }
